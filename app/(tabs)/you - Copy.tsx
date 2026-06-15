@@ -45,7 +45,7 @@ export default function YouScreen() {
   const handleSave = () => {
     const parts = dateInput.trim().split("/");
     if (parts.length !== 3) {
-      setError("Enter your birthday as MM/DD/YYYY");
+      setError("Enter your birthday as DD/MM/YYYY");
       return;
     }
     const [m, d, y] = parts.map(Number);
@@ -97,7 +97,7 @@ export default function YouScreen() {
             <TextInput
               value={dateInput}
               onChangeText={setDateInput}
-              placeholder="MM/DD/YYYY"
+              placeholder="DD/MM/YYYY"
               placeholderTextColor={colors.mutedForeground + "80"}
               style={[styles.input, { color: colors.foreground }]}
               keyboardType="numbers-and-punctuation"

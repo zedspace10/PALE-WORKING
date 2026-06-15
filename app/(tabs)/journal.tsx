@@ -32,7 +32,7 @@ const TYPE_COLORS: Record<EntryType, string> = {
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString("en-US", {
+  return d.toLocaleDateString("en-GB", {
     month: "long",
     day: "numeric",
     year: "numeric",
