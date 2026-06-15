@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "PALE",
+    "slug": "pale",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.stellara.pale",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight."
+      }
+    },
+    "android": {
+      "package": "com.stellara.pale",
+      "versionCode": 1,
+      "backgroundColor": "#000000",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://pale.space/"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "PALE uses your location to show you which stars are visible above you tonight."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
