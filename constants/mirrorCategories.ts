@@ -1,5 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 export interface MirrorCategory {
   id: string;
   triggers: string[];
@@ -157,49 +155,3 @@ export const UNIVERSAL_RESPONSES: string[] = [
   "The cosmic microwave background — the afterglow of the Big Bang — passes through this room right now. Through you. It has been travelling for 13.8 billion years. The beginning of the universe is still everywhere.",
   "Every 88 days, Mercury completes a full orbit of the Sun. It has done this approximately 25 billion times since the solar system formed. Steady. Consistent. Unnoticed. Still going.",
 ];
-
-export interface MirrorResponse {
-  truth: string;
-}
-
-export async function findResponse(input: string): Promise<string> {
-  const lower = input.toLowerCase();
-
-  let bestCategory: MirrorCategory | null = null;
-  let bestScore = 0;
-
-  for (const cat of MIRROR_CATEGORIES) {
-    let score = 0;
-    for (const trigger of cat.triggers) {
-      if (lower.includes(trigger)) score += 2;
-      const words = lower.split(" ");
-      for (const word of words) {
-        if (trigger.includes(word) && word.length > 3) score += 1;
-      }
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      bestCategory = cat;
-    }
-  }
-
-  const responses = bestCategory ? bestCategory.responses : UNIVERSAL_RESPONSES;
-  const storageKey = bestCategory
-    ? "mirror_idx_" + bestCategory.id
-    : "mirror_idx_universal";
-
-  let nextIdx = 0;
-  try {
-    const stored = await AsyncStorage.getItem(storageKey);
-    const lastIdx = stored ? parseInt(stored, 10) : -1;
-    nextIdx = (lastIdx + 1) % responses.length;
-  } catch {
-    nextIdx = 0;
-  }
-
-  try {
-    await AsyncStorage.setItem(storageKey, String(nextIdx));
-  } catch {}
-
-  return responses[nextIdx];
-}
