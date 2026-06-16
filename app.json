@@ -18,7 +18,8 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -27,7 +28,9 @@
       "backgroundColor": "#000000",
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -51,6 +54,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": "https://pale.space/"
+      },
+      "eas": {
+        "projectId": "99b48305-73b0-4be6-8d07-91537694e0e0"
+      }
+    },
+    "owner": "zedbs-organization"
   }
 }
