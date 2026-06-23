@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 20.3.0",
+    "version": ">= 20.1.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -12,7 +12,10 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EAS_BUILD_SKIP_LOCKFILE_CHECK": "1"
+      }
     }
   },
   "submit": {
