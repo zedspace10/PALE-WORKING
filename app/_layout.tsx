@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-global.Buffer = Buffer;
 import {
   Inter_400Regular,
   Inter_500Medium,
