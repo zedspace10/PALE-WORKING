@@ -49,6 +49,14 @@
         {
           "locationAlwaysAndWhenInUsePermission": "PALE uses your location to show you which stars are visible above you tonight."
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": false
+          }
+        }
       ]
     ],
     "experiments": {
