@@ -1250,7 +1250,7 @@ const styles = StyleSheet.create({
   timeText: {
     color: GOLD,
     fontSize: 28,
-    fontFamily: "Inter_300Light" in {} ? "Inter_300Light" : "Inter_400Regular",
+    fontFamily: "Inter_400Regular",
     letterSpacing: 4,
   },
   endText: {
