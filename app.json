@@ -46,6 +46,8 @@
       [
         "expo-location",
         {
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
           "locationWhenInUsePermission": "PALE uses your location to show you which stars are visible above you tonight."
         }
       ],
