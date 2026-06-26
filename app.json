@@ -17,7 +17,6 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "PALE uses your location to show you which stars are visible above you tonight.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -47,7 +46,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "PALE uses your location to show you which stars are visible above you tonight."
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "locationWhenInUsePermission": "PALE uses your location to show you which stars are visible above you tonight."
         }
       ],
       [

@@ -413,18 +413,22 @@ export default function StarScreen() {
   useEffect(() => {
     if (!star || !starData?.ra || starData?.dec === undefined) return;
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return;
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      const { latitude: lat, longitude: lng } = loc.coords;
-      const now = new Date();
-      const lst = getLocalSiderealTime(lng, now);
-      const alt = getAltitude(starData.ra!, starData.dec!, lat, lst);
-      const visible = alt > 10;
-      const direction = visible ? getDirection(starData.ra!, starData.dec!, lat, lst) : "";
-      const height = visible ? getHeightDesc(alt) : "";
-      const riseTime = !visible ? getRiseTimeStr(starData.ra!, starData.dec!, lat, now, lng) : "";
-      setVisibility({ checked: true, visible, direction, height, riseTime });
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") return;
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        const { latitude: lat, longitude: lng } = loc.coords;
+        const now = new Date();
+        const lst = getLocalSiderealTime(lng, now);
+        const alt = getAltitude(starData.ra!, starData.dec!, lat, lst);
+        const visible = alt > 10;
+        const direction = visible ? getDirection(starData.ra!, starData.dec!, lat, lst) : "";
+        const height = visible ? getHeightDesc(alt) : "";
+        const riseTime = !visible ? getRiseTimeStr(starData.ra!, starData.dec!, lat, now, lng) : "";
+        setVisibility({ checked: true, visible, direction, height, riseTime });
+      } catch {
+        setVisibility((current) => ({ ...current, checked: true }));
+      }
     })();
   }, [star?.name]);
 
