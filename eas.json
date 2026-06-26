@@ -12,10 +12,7 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EAS_BUILD_SKIP_LOCKFILE_CHECK": "1"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {

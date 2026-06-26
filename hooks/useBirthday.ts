@@ -9,10 +9,18 @@ export function useBirthday() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem(BIRTHDAY_KEY).then((val) => {
-      if (val) setBirthdayState(new Date(val));
-      setLoading(false);
-    });
+    AsyncStorage.getItem(BIRTHDAY_KEY)
+      .then((val) => {
+        if (val) {
+          const date = new Date(val);
+          if (!isNaN(date.getTime())) {
+            setBirthdayState(date);
+          }
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const saveBirthday = async (date: Date) => {
@@ -32,9 +40,15 @@ export function useShiftCount() {
   const [count, setCountState] = useState(0);
 
   useEffect(() => {
-    AsyncStorage.getItem(SHIFT_COUNT_KEY).then((val) => {
-      if (val) setCountState(parseInt(val, 10));
-    });
+    AsyncStorage.getItem(SHIFT_COUNT_KEY)
+      .then((val) => {
+        if (!val) return;
+        const parsed = parseInt(val, 10);
+        if (!isNaN(parsed)) {
+          setCountState(parsed);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const incrementCount = async () => {

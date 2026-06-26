@@ -48,7 +48,7 @@ export default function YouScreen() {
       setError("Enter your birthday as DD/MM/YYYY");
       return;
     }
-    const [m, d, y] = parts.map(Number);
+    const [d, m, y] = parts.map(Number);
     if (!m || !d || !y || y < 1900 || y > new Date().getFullYear()) {
       setError("Enter a valid date");
       return;
