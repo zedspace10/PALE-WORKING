@@ -1,8 +1,6 @@
-import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -97,10 +95,6 @@ export function MomentCard({ hour, openCount, onDismiss }: Props) {
       const delay = totalDelay;
 
       setTimeout(() => {
-        if (Platform.OS !== "web") {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-
         Animated.parallel([
           Animated.timing(lineAnims[idx].opacity, {
             toValue: 1,
