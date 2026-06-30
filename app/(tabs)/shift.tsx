@@ -20,7 +20,6 @@ import { useColors } from "@/hooks/useColors";
 
 const { width: SW } = Dimensions.get("window");
 
-// 6 stages: dot → Earth → Milky Way → Local Group → Observable Universe → "there is you"
 const STAGE_CIRCLE_SIZES = [6, 60, 150, 280, SW * 1.2, SW * 2.2];
 const STAGE_DURATION_MS = 8000;
 const FADE_MS = 900;
@@ -76,7 +75,6 @@ export default function ShiftScreen() {
     setCompleted(true);
     setCompletionPhase("contracting");
 
-    // 1. Contract circle back to pale blue dot
     Animated.timing(circleSize, {
       toValue: 6,
       duration: 3000,
@@ -85,28 +83,23 @@ export default function ShiftScreen() {
     }).start(() => {
       setCompletionPhase("welcomeBack");
 
-      // 2. "Welcome back." fades in
       Animated.timing(welcomeBackOpacity, {
         toValue: 1,
         duration: 1200,
         useNativeDriver: true,
       }).start(() => {
-        // 3. 2s pause
         setTimeout(() => {
           setCompletionPhase("welcomeSub");
 
-          // 4. "You were always here." fades in
           Animated.timing(welcomeSubOpacity, {
             toValue: 1,
             duration: 1000,
             useNativeDriver: true,
           }).start(() => {
-            // 5. Haptic pulse
             if (Platform.OS !== "web") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
 
-            // 6. 2.5s pause, then fade screen and return
             setTimeout(() => {
               setCompletionPhase("done");
               Animated.timing(screenFade, {
@@ -126,7 +119,6 @@ export default function ShiftScreen() {
   const runStage = useCallback(
     (idx: number) => {
       if (idx >= SHIFT_STAGES.length) {
-        // Fade out final stage text, then run return sequence
         Animated.timing(stageOpacity, {
           toValue: 0,
           duration: FADE_MS,
@@ -192,18 +184,15 @@ export default function ShiftScreen() {
   };
 
   const currentStage = SHIFT_STAGES[stage];
-  const isReturnStage = stage >= SHIFT_STAGES.length - 2;
 
   return (
     <View style={[styles.container, { backgroundColor: "#000000" }]}>
-      {/* Entry Screen */}
       <View
         style={[
           styles.entryContent,
           { paddingTop: topPad, paddingBottom: bottomPad + 80 },
         ]}
       >
-        {/* Pulsing Blue Dot */}
         <View style={styles.orbCenter}>
           <Animated.View
             style={[
@@ -266,7 +255,6 @@ export default function ShiftScreen() {
         </View>
       </View>
 
-      {/* Full-Screen Journey Modal */}
       <Modal
         visible={journeyActive}
         animationType="fade"
@@ -274,7 +262,21 @@ export default function ShiftScreen() {
         transparent
       >
         <Animated.View style={[styles.journeyContainer, { opacity: screenFade }]}>
-          {/* Star field — density grows as scale expands */}
+
+          {/* Always-visible back button */}
+          <TouchableOpacity
+            onPress={endJourney}
+            style={{
+              position: "absolute",
+              top: topPad + 12,
+              left: 24,
+              zIndex: 200,
+              padding: 12,
+            }}
+          >
+            <Text style={{ color: "#C8A96E", fontSize: 22 }}>←</Text>
+          </TouchableOpacity>
+
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             <StarField
               count={completed ? 80 : 60 + stage * 40}
@@ -282,7 +284,6 @@ export default function ShiftScreen() {
             />
           </View>
 
-          {/* Animated circle — color shifts per stage */}
           {(() => {
             const stageColor = completed
               ? "#B8D4E8"
@@ -308,7 +309,6 @@ export default function ShiftScreen() {
             );
           })()}
 
-          {/* Stage text — only while not completed */}
           {!completed && currentStage && (
             <Animated.View
               style={[styles.stageTextWrap, { opacity: stageOpacity }]}
@@ -334,7 +334,6 @@ export default function ShiftScreen() {
             </Animated.View>
           )}
 
-          {/* Return sequence — Welcome back */}
           {completed && (
             <View style={styles.completeWrap}>
               <Animated.Text
@@ -357,7 +356,6 @@ export default function ShiftScreen() {
             </View>
           )}
 
-          {/* Manual skip — only shown in "done" phase as fallback */}
           {completionPhase === "done" && (
             <TouchableOpacity
               onPress={endJourney}
@@ -366,15 +364,15 @@ export default function ShiftScreen() {
                 paddingVertical: 12,
                 paddingHorizontal: 32,
                 borderWidth: 1,
-                borderColor: 'rgba(200,170,100,0.25)',
+                borderColor: "rgba(200,170,100,0.25)",
                 borderRadius: 24,
               }}
             >
               <Text style={{
-                color: 'rgba(200,170,100,0.6)',
+                color: "rgba(200,170,100,0.6)",
                 fontSize: 11,
                 letterSpacing: 3,
-                fontFamily: 'Inter_400Regular',
+                fontFamily: "Inter_400Regular",
               }}>
                 RETURN
               </Text>
@@ -515,15 +513,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: "center",
     lineHeight: 26,
-  },
-  skipBtn: {
-    position: "absolute",
-    bottom: 60,
-    padding: 20,
-  },
-  skipText: {
-    fontSize: 24,
-    letterSpacing: 8,
   },
   universeLink: {
     position: "absolute",
