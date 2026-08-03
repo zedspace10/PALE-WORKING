@@ -20,16 +20,9 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function RootLayoutNav() {
-  const { todayCount, loaded } = useOpenCount();
-  const [showMoment, setShowMoment] = useState(false);
+function RootLayoutNav({ openCount }: { openCount: number }) {
+  const [dismissed, setDismissed] = useState(false);
   const hour = new Date().getHours();
-
-  useEffect(() => {
-    if (loaded) {
-      setShowMoment(true);
-    }
-  }, [loaded]);
 
   return (
     <>
@@ -75,11 +68,11 @@ function RootLayoutNav() {
         />
       </Stack>
 
-      {showMoment && (
+      {!dismissed && (
         <MomentCard
           hour={hour}
-          openCount={todayCount}
-          onDismiss={() => setShowMoment(false)}
+          openCount={openCount}
+          onDismiss={() => setDismissed(true)}
         />
       )}
     </>
@@ -94,20 +87,32 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, fontError]);
+  const { todayCount, loaded: countLoaded } = useOpenCount();
 
-  if (!fontsLoaded && !fontError) return null;
+  // Safety net: never let the splash screen stick forever.
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setTimedOut(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const fontsReady = fontsLoaded || fontError;
+  const ready = timedOut || (fontsReady && countLoaded);
+
+  useEffect(() => {
+    if (ready) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <RootLayoutNav />
+            <RootLayoutNav openCount={todayCount} />
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
