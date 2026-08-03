@@ -1,6 +1,8 @@
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -77,6 +79,7 @@ interface Props {
 export function MomentCard({ hour, openCount, onDismiss }: Props) {
   const lines = getMomentLines(hour, openCount);
   const [canDismiss, setCanDismiss] = useState(false);
+  const dismissing = useRef(false);
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const hintOpacity = useRef(new Animated.Value(0)).current;
 
@@ -88,42 +91,57 @@ export function MomentCard({ hour, openCount, onDismiss }: Props) {
   ).current;
 
   useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
     let totalDelay = 0;
 
     lines.forEach((line, idx) => {
       totalDelay += line.delay;
       const delay = totalDelay;
 
-      setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(lineAnims[idx].opacity, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(lineAnims[idx].translateY, {
-            toValue: 0,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ]).start();
+      timers.push(
+        setTimeout(() => {
+          if (Platform.OS !== "web") {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
 
-        if (idx === lines.length - 1) {
-          setTimeout(() => {
-            setCanDismiss(true);
-            Animated.timing(hintOpacity, {
+          Animated.parallel([
+            Animated.timing(lineAnims[idx].opacity, {
               toValue: 1,
-              duration: 800,
+              duration: 1000,
               useNativeDriver: true,
-            }).start();
-          }, 1400);
-        }
-      }, delay);
+            }),
+            Animated.timing(lineAnims[idx].translateY, {
+              toValue: 0,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+          ]).start();
+
+          if (idx === lines.length - 1) {
+            timers.push(
+              setTimeout(() => {
+                setCanDismiss(true);
+                Animated.timing(hintOpacity, {
+                  toValue: 1,
+                  duration: 800,
+                  useNativeDriver: true,
+                }).start();
+              }, 1400)
+            );
+          }
+        }, delay)
+      );
     });
+
+    // Clear any pending line animations if the card is dismissed early.
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   const handlePress = () => {
-    if (!canDismiss) return;
+    // Tappable at any point, not just once the lines have finished.
+    if (dismissing.current) return;
+    dismissing.current = true;
+
     Animated.timing(cardOpacity, {
       toValue: 0,
       duration: 700,
