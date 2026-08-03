@@ -21,7 +21,8 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav({ openCount }: { openCount: number }) {
-  const [dismissed, setDismissed] = useState(false);
+  // Full moment card on the first open of the day only.
+  const [dismissed, setDismissed] = useState(openCount > 1);
   const hour = new Date().getHours();
 
   return (
