@@ -6,8 +6,8 @@ export interface Star {
   type?: string;
 }
 
-// Complete catalog — every age 1-100 has a match within 2 light-years
-// All distances verified from astronomical databases (Hipparcos, Gaia)
+// Distances are in light-years, sourced from Gaia DR2/DR3 parallaxes.
+// Sorted by distance ascending.
 export const STAR_CATALOG: Star[] = [
   {
     name: "Proxima Centauri",
@@ -35,7 +35,7 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Leo",
     distance: 7.8,
     type: "M",
-    note: "One of the nearest stars to Earth — small, steady and ancient, burning with patient warmth.",
+    note: "One of the nearest stars to Earth — a small, young red dwarf that flares without warning, brightening for minutes at a time.",
   },
   {
     name: "Sirius",
@@ -49,14 +49,14 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Eridanus",
     distance: 10.5,
     type: "K",
-    note: "One of the nearest Sun-like stars — with its own planetary system. Carl Sagan chose it as the setting for Contact.",
+    note: "One of the nearest stars with a planet of its own. In 1960 it became one of the first two stars ever searched for signals from another civilisation.",
   },
   {
     name: "Lacaille 9352",
     constellation: "Piscis Austrinus",
     distance: 10.7,
     type: "M",
-    note: "A quiet red dwarf — one of the brightest M-class stars visible from Earth, steady and enduring.",
+    note: "One of the brightest red dwarfs in our sky, though still too faint for the naked eye. Two super-Earths were found orbiting it in 2020.",
   },
   {
     name: "Procyon",
@@ -70,7 +70,7 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Cetus",
     distance: 11.9,
     type: "G",
-    note: "Remarkably similar to our Sun with several planets. Scientists have listened to it for signals from other civilisations.",
+    note: "Remarkably similar to our Sun, with several candidate planets. Scientists have listened to it for signals from other civilisations.",
   },
   {
     name: "Luyten's Star",
@@ -87,18 +87,18 @@ export const STAR_CATALOG: Star[] = [
     note: "One of the oldest stars in our neighbourhood — ancient even by stellar standards, burning for over 11 billion years.",
   },
   {
-    name: "Gliese 1",
-    constellation: "Sculptor",
-    distance: 14.2,
-    type: "M",
-    note: "A modest red dwarf that has been burning steadily since before our solar system formed.",
-  },
-  {
     name: "Gliese 628",
     constellation: "Ophiuchus",
     distance: 14.1,
     type: "M",
     note: "A red dwarf with three planets — a small, ancient, persevering star in the Serpent Bearer constellation.",
+  },
+  {
+    name: "Gliese 1",
+    constellation: "Sculptor",
+    distance: 14.2,
+    type: "M",
+    note: "A modest red dwarf that has been burning steadily since before our solar system formed.",
   },
   {
     name: "Van Maanen's Star",
@@ -166,7 +166,7 @@ export const STAR_CATALOG: Star[] = [
   {
     name: "Gliese 570A",
     constellation: "Libra",
-    distance: 19.0,
+    distance: 19,
     type: "K",
     note: "An orange dwarf with a rich multi-star system — warm, steady and ancient in the constellation of the Scales.",
   },
@@ -187,21 +187,21 @@ export const STAR_CATALOG: Star[] = [
   {
     name: "Xi Bootis A",
     constellation: "Boötes",
-    distance: 22.0,
+    distance: 22,
     type: "G",
-    note: "A warm yellow star in the Herdsman constellation — part of a binary system, both stars remarkably Sun-like.",
+    note: "A warm yellow star in the Herdsman constellation — part of a binary system, circling a cooler orange companion.",
   },
   {
     name: "Gliese 667C",
     constellation: "Scorpius",
     distance: 23.6,
     type: "M",
-    note: "Part of a triple star system with at least two planets in the habitable zone — a remarkable neighbourhood.",
+    note: "Part of a triple star system with a confirmed planet in the habitable zone — a remarkable neighbourhood.",
   },
   {
     name: "Gliese 514",
     constellation: "Virgo",
-    distance: 25.0,
+    distance: 25,
     type: "M",
     note: "A red dwarf in Virgo — one of the many quiet nearby stars whose light has been travelling toward Earth your entire life.",
   },
@@ -234,11 +234,11 @@ export const STAR_CATALOG: Star[] = [
     note: "Also called Chara — a warm yellow star very similar to our Sun, shining steadily in the Hunting Dogs.",
   },
   {
-    name: "HD 149661",
-    constellation: "Ophiuchus",
-    distance: 27.7,
-    type: "K",
-    note: "A steady orange star that has been shining for longer than Earth has existed — patient and ancient.",
+    name: "Zeta Tucanae",
+    constellation: "Tucana",
+    distance: 28,
+    type: "F",
+    note: "A nearby yellow-white star in Tucana — one of the nearest stars similar to our Sun in the southern sky.",
   },
   {
     name: "Chi1 Orionis",
@@ -246,13 +246,6 @@ export const STAR_CATALOG: Star[] = [
     distance: 28.3,
     type: "G",
     note: "A yellow dwarf in Orion — remarkably Sun-like, sitting in one of the most ancient and recognised constellations.",
-  },
-  {
-    name: "Zeta Tucanae",
-    constellation: "Tucana",
-    distance: 28.0,
-    type: "F",
-    note: "A nearby yellow-white star in Tucana — one of the nearest stars similar to our Sun in the southern sky.",
   },
   {
     name: "Gamma Leporis",
@@ -271,7 +264,7 @@ export const STAR_CATALOG: Star[] = [
   {
     name: "HD 102365",
     constellation: "Centaurus",
-    distance: 30.0,
+    distance: 30,
     type: "G",
     note: "A Sun-like star in Centaurus with a planet — quietly hosting its own solar system in the southern sky.",
   },
@@ -281,6 +274,13 @@ export const STAR_CATALOG: Star[] = [
     distance: 31.1,
     type: "G",
     note: "A Sun-like star in the Great Bear — steady, warm and familiar, part of one of the most recognisable constellations.",
+  },
+  {
+    name: "HD 149661",
+    constellation: "Ophiuchus",
+    distance: 32.3,
+    type: "K",
+    note: "An orange dwarf in the Serpent Bearer — covered in starspots that shift its brightness as it turns.",
   },
   {
     name: "Pollux",
@@ -311,13 +311,6 @@ export const STAR_CATALOG: Star[] = [
     note: "A yellow star near the brilliant Arcturus — slightly evolved beyond our Sun, glowing with warm steady light.",
   },
   {
-    name: "HD 117618",
-    constellation: "Centaurus",
-    distance: 42.0,
-    type: "G",
-    note: "A Sun-like star in Centaurus with a planet — quietly hosting its own solar system in the southern sky.",
-  },
-  {
     name: "Capella",
     constellation: "Auriga",
     distance: 42.9,
@@ -325,18 +318,11 @@ export const STAR_CATALOG: Star[] = [
     note: "Actually two giant stars orbiting each other — together they form the sixth-brightest star in the sky.",
   },
   {
-    name: "HD 46375",
-    constellation: "Monoceros",
-    distance: 46.0,
-    type: "K",
-    note: "An orange dwarf in the Unicorn constellation with a close-orbiting planet — one of the warmer nearby planetary systems.",
-  },
-  {
     name: "HD 38858",
     constellation: "Orion",
-    distance: 50.0,
+    distance: 50,
     type: "G",
-    note: "A Sun-like star in Orion with a planet — one of many nearby stars quietly hosting worlds of their own.",
+    note: "A Sun-like star in Orion — near enough to see with the naked eye under a dark sky, ringed by a distant belt of comets.",
   },
   {
     name: "Castor",
@@ -350,21 +336,21 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Cassiopeia",
     distance: 54.7,
     type: "F",
-    note: "A star that pulses gently — its brightness rising and falling over a few days in a steady ancient rhythm.",
+    note: "A star that pulses gently — its brightness rising and falling every couple of hours in a steady ancient rhythm.",
   },
   {
     name: "HD 10647",
     constellation: "Eridanus",
-    distance: 57.0,
+    distance: 57,
     type: "F",
     note: "A yellow-white star in Eridanus with a Jupiter-like planet — one of the brighter nearby stars with a known planetary system.",
   },
   {
-    name: "HD 4208",
-    constellation: "Sculptor",
-    distance: 61.0,
-    type: "G",
-    note: "A Sun-like star in Sculptor with a planet — part of the growing catalogue of nearby stars hosting planetary systems.",
+    name: "HD 99492",
+    constellation: "Leo",
+    distance: 59.2,
+    type: "K",
+    note: "An orange dwarf in Leo with a planet — the fainter half of a wide double star, steady and warm.",
   },
   {
     name: "Aldebaran",
@@ -382,17 +368,10 @@ export const STAR_CATALOG: Star[] = [
   },
   {
     name: "HD 4308",
-    constellation: "Eridanus",
-    distance: 70.0,
+    constellation: "Tucana",
+    distance: 71.9,
     type: "G",
-    note: "A Sun-like star in Eridanus with a planet — one of many nearby stars quietly hosting worlds we are only beginning to discover.",
-  },
-  {
-    name: "HD 330075",
-    constellation: "Norma",
-    distance: 74.0,
-    type: "G",
-    note: "A Sun-like star in the southern constellation Norma with a close-orbiting planet — a quiet and steady presence in the southern sky.",
+    note: "A Sun-like star in the Toucan with a planet — one of the older stars nearby, turning for some ten billion years.",
   },
   {
     name: "Regulus",
@@ -411,14 +390,14 @@ export const STAR_CATALOG: Star[] = [
   {
     name: "Megrez",
     constellation: "Ursa Major",
-    distance: 81.0,
+    distance: 81,
     type: "A",
     note: "The hub of the Big Dipper — the quiet point where the handle meets the bowl.",
   },
   {
     name: "Mizar",
     constellation: "Ursa Major",
-    distance: 83.0,
+    distance: 83,
     type: "A",
     note: "One of the first binary stars ever observed — ancient peoples used its faint companion to test eyesight.",
   },
@@ -427,35 +406,21 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Ursa Major",
     distance: 83.6,
     type: "A",
-    note: "A member of the Ursa Major Moving Group — a family of stars born together billions of years ago, still travelling together.",
+    note: "A member of the Ursa Major Moving Group — a family of stars born together a few hundred million years ago, still travelling together.",
   },
   {
     name: "Gacrux",
     constellation: "Crux",
-    distance: 88.0,
+    distance: 88,
     type: "M",
     note: "The top of the Southern Cross — one of the most recognised star patterns in the southern hemisphere.",
   },
   {
-    name: "HD 92788",
-    constellation: "Leo",
-    distance: 92.0,
-    type: "G",
-    note: "A Sun-like star in Leo with a Jupiter-like planet — part of the rich planetary tapestry being mapped around nearby stars.",
-  },
-  {
-    name: "HD 108874",
-    constellation: "Coma Berenices",
-    distance: 95.0,
-    type: "G",
-    note: "A Sun-like star in Berenice's Hair with two planets — a quiet solar system in a quiet part of the sky.",
-  },
-  {
-    name: "HD 99492",
-    constellation: "Leo",
-    distance: 97.0,
+    name: "HD 46375",
+    constellation: "Monoceros",
+    distance: 96.5,
     type: "K",
-    note: "An orange dwarf in Leo with a planet — steady and warm, one of the many nearby stars with worlds of their own.",
+    note: "An orange dwarf in the Unicorn constellation with a close-orbiting planet — one of the warmer nearby planetary systems.",
   },
   {
     name: "Alkaid",
@@ -467,9 +432,44 @@ export const STAR_CATALOG: Star[] = [
   {
     name: "Cor Caroli",
     constellation: "Canes Venatici",
-    distance: 110.0,
+    distance: 110,
     type: "A",
-    note: "The brightest star in the Hunting Dogs — a white star named in honour of King Charles II of England.",
+    note: "The brightest star in the Hunting Dogs — a white star named in the 1600s for the heart of a king, though which King Charles is still argued over.",
+  },
+  {
+    name: "HD 4208",
+    constellation: "Sculptor",
+    distance: 111.2,
+    type: "G",
+    note: "A Sun-like star in Sculptor named Cocibolca, orbited by a distant gas giant — part of the growing catalogue of nearby stars hosting planetary systems.",
+  },
+  {
+    name: "HD 92788",
+    constellation: "Sextans",
+    distance: 113.1,
+    type: "G",
+    note: "A Sun-like star in the Sextant with a Jupiter-like planet — part of the rich planetary tapestry being mapped around nearby stars.",
+  },
+  {
+    name: "HD 117618",
+    constellation: "Centaurus",
+    distance: 122.9,
+    type: "G",
+    note: "A Sun-like star in Centaurus with a planet — named Dofida, quietly hosting its own solar system in the southern sky.",
+  },
+  {
+    name: "HD 330075",
+    constellation: "Norma",
+    distance: 147.9,
+    type: "G",
+    note: "A quiet yellow star in the southern constellation Norma — the first star where the HARPS instrument found a world of its own.",
+  },
+  {
+    name: "HD 108874",
+    constellation: "Coma Berenices",
+    distance: 194.5,
+    type: "G",
+    note: "A Sun-like star in Berenice's Hair with two planets — a quiet solar system in a quiet part of the sky.",
   },
 ];
 
