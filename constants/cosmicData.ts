@@ -37,20 +37,20 @@ export const SHIFT_STAGES = [
     circleColor: "#FFF3B0",
   },
   {
-    title: "Four hundred billion stars.",
+    title: "Hundreds of billions of stars.",
     subtitle: "Our Sun is one of them.\nLost in one arm.\nUnremarkable.\nEssential.",
     hint: "THE MILKY WAY",
     circleColor: "#9966FF",
   },
   {
-    title: "Fifty-four galaxies.",
-    subtitle: "Held together by gravity.\nDrifting as one\nthrough the cosmos.\nThe Milky Way is one\nof the smaller ones.",
+    title: "More than eighty galaxies.",
+    subtitle: "Held together by gravity.\nDrifting as one\nthrough the cosmos.\nThe Milky Way is one\nof the two largest.",
     hint: "LOCAL GROUP",
     circleColor: "#4488FF",
   },
   {
     title: "Everything we can see.",
-    subtitle: "Two trillion galaxies.\nNinety-three billion light-years\nin every direction.\nStill expanding.",
+    subtitle: "Two trillion galaxies.\nForty-six billion light-years\nin every direction.\nStill expanding.",
     hint: "THE OBSERVABLE UNIVERSE",
     circleColor: "#1A1A3E",
   },
@@ -67,7 +67,7 @@ export const DAILY_REFLECTIONS = [
   "The atoms in your body were forged inside ancient stars.",
   "The light entering your eyes tonight may have begun its journey millions of years ago.",
   "Your problems are real. But they are not the entire universe.",
-  "We are a way for the cosmos to know itself.",
+  "The universe made something that could turn around and look back at it.",
   "From the perspective of the cosmos, all of human history is a brief flicker.",
   "You are stardust, contemplating the stars that made you.",
 ];
@@ -102,7 +102,7 @@ export const LOCATIONS: Location[] = [
     distance: "1.2 billion km",
     distanceRaw: "70 light-minutes",
     reflection:
-      "The rings are made of ice and rock — remnants of moons torn apart by gravity. They will vanish in a hundred million years, as if they were never there.",
+      "The rings are made of ice and rock — remnants of moons torn apart by gravity. They will vanish in a few hundred million years, as if they were never there.",
     scale: "116,460 km across — nine Earths wide",
     gradientColors: ["#2A2510", "#4A4020"],
   },
@@ -125,7 +125,7 @@ export const LOCATIONS: Location[] = [
     distanceRaw: "2.5 million light-years",
     reflection:
       "The light you see from Andromeda tonight left before modern humans existed. In four billion years, it will collide with the Milky Way — a slow, magnificent merging.",
-    scale: "Twice the size of our galaxy — one trillion stars",
+    scale: "Half again as wide as our galaxy — a trillion stars",
     gradientColors: ["#0A1530", "#1A2D5A"],
   },
   {
@@ -135,8 +135,8 @@ export const LOCATIONS: Location[] = [
     distance: "6,500 light-years",
     distanceRaw: "6,500 light-years",
     reflection:
-      "These towering columns of gas and dust are stellar nurseries — the birthplaces of suns. Some may already be destroyed; we just haven't seen the light yet.",
-    scale: "5 light-years tall — 30 trillion km high",
+      "These towering columns of gas and dust are stellar nurseries — the birthplaces of suns. Some astronomers think a nearby supernova has already swept them away, and that we are still waiting on the light.",
+    scale: "5 light-years tall — 47 trillion km high",
     gradientColors: ["#0D1A25", "#143040"],
   },
   {
@@ -147,7 +147,7 @@ export const LOCATIONS: Location[] = [
     distanceRaw: "26,000 light-years",
     reflection:
       "Not even light escapes. Where matter crosses the event horizon, time itself slows to a stop — a place where the known laws of physics cease to hold.",
-    scale: "44 million km across — three times the Sun",
+    scale: "25 million km across — eighteen times the width of the Sun",
     gradientColors: ["#06060A", "#0F0F1E"],
   },
   {
@@ -163,6 +163,8 @@ export const LOCATIONS: Location[] = [
   },
 ];
 
+// Cosmic calendar: 13.8 billion years compressed into 365 days.
+// One day = 37.8 million years. Entries are ordered chronologically.
 export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   {
     id: "big-bang",
@@ -174,7 +176,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "milky-way",
-    date: "January 22",
+    date: "January 16",
     title: "The Milky Way forms",
     description:
       "Our home galaxy assembles from vast clouds of gas and dark matter, slowly spinning into the shape we know.",
@@ -182,7 +184,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "solar-system",
-    date: "March 16",
+    date: "September 1",
     title: "Our Solar System is born",
     description:
       "A cloud of gas and dust collapses under its own gravity. The Sun ignites, and the planets form from what remains.",
@@ -190,7 +192,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "earth",
-    date: "May 4",
+    date: "September 3",
     title: "Earth forms",
     description:
       "A rocky world takes shape — still molten, bombarded by debris, yet carrying the seeds of everything to come.",
@@ -198,7 +200,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "life",
-    date: "February 28",
+    date: "September 22",
     title: "First life appears",
     description:
       "Simple microbes emerge in ancient oceans. The universe becomes aware of itself, faintly, for the first time.",
@@ -206,7 +208,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "oxygen",
-    date: "July 9",
+    date: "October 26",
     title: "Oxygen fills the atmosphere",
     description:
       "Cyanobacteria transform the world. A catastrophe for most life at the time — and the birth of everything that follows.",
@@ -214,7 +216,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "multicellular",
-    date: "October 2",
+    date: "December 16",
     title: "Multicellular life emerges",
     description:
       "For the first time, many cells cooperate as one organism. Complexity becomes possible.",
@@ -222,7 +224,7 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "fish",
-    date: "November 19",
+    date: "December 17",
     title: "First vertebrates",
     description:
       "Life acquires backbones. The ancestors of every fish, bird, mammal, and human yet to come.",
@@ -230,15 +232,15 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "dinosaurs",
-    date: "December 13",
+    date: "December 25",
     title: "Age of Dinosaurs",
     description:
       "Reptiles dominate the land. They will reign for 165 million years — the longest dynasty in Earth's history.",
-    yearsAgo: "250 million years ago",
+    yearsAgo: "230 million years ago",
   },
   {
     id: "extinction",
-    date: "December 26",
+    date: "December 30",
     title: "The great extinction",
     description:
       "An asteroid ends the age of dinosaurs. Mammals survive in the darkness. Our chapter begins.",
@@ -246,18 +248,18 @@ export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = [
   },
   {
     id: "humans",
-    date: "Dec 31, 11:52 PM",
+    date: "Dec 31, 11:48 PM",
     title: "Modern humans appear",
     description:
       "Homo sapiens emerge. Tool-makers, storytellers, question-askers. The cosmos looks at itself and wonders.",
-    yearsAgo: "200,000 years ago",
+    yearsAgo: "300,000 years ago",
   },
   {
     id: "civilization",
-    date: "Dec 31, 11:59:46 PM",
+    date: "Dec 31, 11:59:33 PM",
     title: "Civilization begins",
     description:
-      "Cities, writing, agriculture. In the final 14 seconds of the year, all of recorded human history unfolds.",
+      "Cities, writing, agriculture. In the final 27 seconds of the year, all of settled human history unfolds.",
     yearsAgo: "12,000 years ago",
   },
 ];
@@ -290,8 +292,8 @@ export const COSMIC_EVENTS: CosmicEvent[] = [
   },
   {
     year: 1995,
-    title: "First exoplanet confirmed",
-    description: "Other stars have worlds too.",
+    title: "First planet found around a Sun-like star",
+    description: "51 Pegasi b. Other stars have worlds too.",
   },
   {
     year: 2004,
@@ -299,7 +301,7 @@ export const COSMIC_EVENTS: CosmicEvent[] = [
     description: "We walked another planet's surface, by proxy.",
   },
   {
-    year: 2016,
+    year: 2015,
     title: "Gravitational waves detected",
     description: "We heard two black holes collide, a billion years ago.",
   },
@@ -315,7 +317,7 @@ export const COSMIC_EVENTS: CosmicEvent[] = [
   },
   {
     year: 2023,
-    title: "Water detected on an exoplanet",
-    description: "The ingredients for life, found elsewhere.",
+    title: "Webb reads the air of distant worlds",
+    description: "Water and carbon chemistry, measured light-years away.",
   },
 ];
