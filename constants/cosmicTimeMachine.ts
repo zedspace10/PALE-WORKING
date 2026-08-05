@@ -21,7 +21,6 @@ export interface TimeMachineEvent {
 }
 
 export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
-  // ─── DISTANT PAST ───
   {
     id: "big-bang",
     era: "distant-past",
@@ -73,7 +72,7 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
   {
     id: "first-galaxies",
     era: "stars",
-    when: "13 billion years ago",
+    when: "13.4 billion years ago",
     title: "The First Galaxies",
     description:
       "Gravity gathers stars into the first galaxies. They are small, irregular, and turbulent — nothing like the grand spirals we see today. They collide, merge, and grow over billions of years into the structure of the cosmic web.",
@@ -91,7 +90,7 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     description:
       "A cloud of gas and dust — perhaps triggered by a nearby supernova — collapses under gravity. At its center, pressure and temperature become high enough to ignite nuclear fusion. Our Sun begins to shine. Around it, the remaining disk of material will become the planets.",
     perspective:
-      "Our Sun is a second or third generation star. The solar system we live in is built from the recycled remains of stars that lived and died before our Sun was born. We live inside a stellar inheritance.",
+      "Our Sun is built from the ashes of stars that came before it. We live inside a stellar inheritance.",
     color: "#FFD700",
     icon: "sun",
   },
@@ -176,7 +175,7 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     description:
       "In a geological instant — about 20 million years — most of the major animal body plans appear in the fossil record. Eyes, legs, shells, predators. The ocean fills with complex life. The arms race of evolution accelerates.",
     perspective:
-      "The body plan you inhabit — bilateral symmetry, a central nervous system, eyes facing forward — is a Cambrian design. You are driving a vehicle whose basic architecture is 540 million years old.",
+      "The body plan you inhabit — bilateral symmetry, a central nervous system, a head with eyes on it — is a Cambrian design. You are driving a vehicle whose basic architecture is 540 million years old.",
     color: "#A0B890",
     icon: "eye",
   },
@@ -198,7 +197,7 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     when: "230 million years ago",
     title: "The Age of Dinosaurs",
     description:
-      "After the Permian mass extinction wipes out 96% of marine species, dinosaurs emerge and come to dominate. They rule Earth for 165 million years — more than 30 times longer than our genus has existed.",
+      "After the Permian mass extinction wipes out around 80% of marine species, dinosaurs emerge and come to dominate. They rule Earth for 165 million years — some 27 times longer than our own lineage has existed.",
     perspective:
       "Dinosaurs existed for 165 million years. Our entire human lineage has existed for perhaps 6 million years. We are newcomers, not successors.",
     color: "#8DA060",
@@ -259,7 +258,7 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     when: "300,000 years ago",
     title: "Homo Sapiens Appears",
     description:
-      "Anatomically modern humans appear in Africa. They are genetically identical to us. They paint caves, create jewelry, bury their dead with ceremony, and begin to speak complex language. They are us.",
+      "Anatomically modern humans appear in Africa. Their bodies and brains are ours. The rest arrives slowly: shell beads by 100,000 years ago, ceremonial burial around the same time, painted caves only in the last 45,000 years.",
     perspective:
       "Humans identical to you existed 300,000 years ago — with the same capacity for love, fear, curiosity, and grief. They lived and died without knowing what electricity was, without writing, without any of the structures we call civilization. The same person; a different world.",
     color: "#C8A96E",
@@ -271,21 +270,21 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     when: "70,000 years ago",
     title: "The Great Migration",
     description:
-      "A small group of humans — perhaps just a few thousand — leaves Africa and begins to spread across the world. Over tens of thousands of years, they reach Asia, Europe, and eventually the Americas and Australia. Every human alive today descends from these migrants.",
+      "A small group of humans — perhaps just a few thousand — leaves Africa and begins to spread across the world. Over tens of thousands of years, they reach Asia, Europe, and eventually the Americas and Australia. Every human outside Africa descends from these migrants.",
     perspective:
-      "Every person alive today is descended from the same small group of African humans who left 70,000 years ago. Your family tree, if you go back far enough, includes everyone. Every human is a cousin.",
+      "Everyone living outside Africa descends from the same small group who left 70,000 years ago. Go back far enough and every family tree meets in Africa. Every human is a cousin.",
     color: "#B89060",
     icon: "map",
   },
   {
     id: "civilization",
     era: "humanity",
-    when: "10,000 years ago",
+    when: "12,000 years ago",
     title: "Civilization Begins",
     description:
-      "Humans domesticate plants and animals and begin to build permanent settlements. Writing, mathematics, cities, laws, and trade emerge. What we call 'history' begins — though humanity had existed for 290,000 years before anyone wrote anything down.",
+      "Humans domesticate plants and animals and begin to build permanent settlements. Cities follow, then writing, some 7,000 years later still. What we call 'history' begins — though humanity had existed for 295,000 years before anyone wrote anything down.",
     perspective:
-      "Everything we call 'civilization' — cities, writing, philosophy, science, art, religion — is 10,000 years old in a 4.5-billion-year-old world. The entire recorded human story fits in the last 0.0002% of Earth's existence.",
+      "Everything we call 'civilization' — cities, writing, philosophy, science, art, religion — is 12,000 years old in a 4.5-billion-year-old world. The entire settled human story fits in the last 0.0003% of Earth's existence.",
     color: "#C8A060",
     icon: "book",
   },
@@ -296,7 +295,7 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     when: "Right now",
     title: "This Moment",
     description:
-      "You are here. A being made of atoms forged in stellar explosions, assembled by 3.8 billion years of evolution, speaking a language that emerged in the last geological eyeblink, reading these words on a device that is 70 years old.",
+      "You are here. A being made of atoms forged in stellar explosions, assembled by 3.8 billion years of evolution, speaking a language that emerged in the last geological eyeblink, reading these words on a device younger than most of the people using it.",
     perspective:
       "You exist at a vanishingly unlikely intersection of time, chemistry, evolution, and chance. The probability of this exact moment — you, reading this, on this world — is so small it cannot be calculated. And yet here it is.",
     color: "#C8A96E",
@@ -316,6 +315,18 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
     icon: "arrow-up",
   },
   {
+    id: "milky-way-merger",
+    era: "future",
+    when: "4 billion years from now",
+    title: "Andromeda Collision",
+    description:
+      "The Andromeda galaxy, currently 2.5 million light years away, is falling toward us at 110 kilometers per second. In about 4 billion years, the two galaxies are expected to begin merging, though recent measurements make the collision less certain than it once looked. If it happens, they will combine over billions of years into a new elliptical galaxy.",
+    perspective:
+      "Two galaxies containing hundreds of billions of stars will pass through each other, and almost no stars will collide — the distances between them are too vast. The merger is a collision of gravity, not of objects. Size changes everything.",
+    color: "#9088C0",
+    icon: "shuffle",
+  },
+  {
     id: "red-giant",
     era: "future",
     when: "5 billion years from now",
@@ -326,18 +337,6 @@ export const TIME_MACHINE_EVENTS: TimeMachineEvent[] = [
       "Our Sun, this star that has powered all life on Earth for 4.5 billion years, will one day consume the world we live on. Nothing in the solar system is permanent. All things pass.",
     color: "#FF6B35",
     icon: "sun",
-  },
-  {
-    id: "milky-way-merger",
-    era: "future",
-    when: "4 billion years from now",
-    title: "Andromeda Collision",
-    description:
-      "The Andromeda galaxy, currently 2.5 million light years away, is falling toward us at 110 kilometers per second. In about 4 billion years, the two galaxies will begin to merge. Over billions of years, they will combine into a new elliptical galaxy.",
-    perspective:
-      "Two galaxies containing hundreds of billions of stars will pass through each other, and almost no stars will collide — the distances between them are too vast. The merger is a collision of gravity, not of objects. Size changes everything.",
-    color: "#9088C0",
-    icon: "shuffle",
   },
   {
     id: "last-stars",
