@@ -136,7 +136,7 @@ export const LOCATIONS: Location[] = [
     distanceRaw: "6,500 light-years",
     reflection:
       "These towering columns of gas and dust are stellar nurseries — the birthplaces of suns. Some astronomers think a nearby supernova has already swept them away, and that we are still waiting on the light.",
-    scale: "5 light-years tall — 47 trillion km high",
+    scale: "About 4 light-years tall — some 38 trillion km high",
     gradientColors: ["#0D1A25", "#143040"],
   },
   {
