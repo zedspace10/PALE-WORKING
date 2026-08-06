@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
 import { StarField } from "@/components/StarField";
 import { COSMIC_EVENTS } from "@/constants/cosmicData";
 import { findStarByAge, formatLargeInt } from "@/constants/starCatalog";
@@ -333,6 +334,8 @@ export default function YouScreen() {
           </View>
         )}
 
+        <NightlyReminderToggle />
+
         <TouchableOpacity
           onPress={() => {
             clearBirthday();
@@ -521,3 +524,4 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
+
