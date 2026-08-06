@@ -30,14 +30,13 @@ const { height: SCREEN_H } = Dimensions.get("window");
 const easeInOut = (t: number) =>
   t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-const todaysEntry = getTodaysEntry();
-
 function formatBig(n: number): string {
   return Math.floor(n).toLocaleString("en-US");
 }
 
 export default function HomeScreen() {
   const colors = useColors();
+  const todaysEntry = getTodaysEntry();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { birthday } = useBirthday();
