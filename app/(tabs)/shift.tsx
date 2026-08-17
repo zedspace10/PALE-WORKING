@@ -16,6 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StarField } from "@/components/StarField";
 import { SHIFT_STAGES } from "@/constants/cosmicData";
 import { getTonightsEvent } from "@/constants/skyEvents";
+import {
+  isShiftMuted,
+  playShiftSound,
+  prepareShiftSounds,
+  releaseShiftSounds,
+  setShiftMuted,
+} from "@/constants/shiftSound";
 import { useShiftCount } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 
@@ -62,6 +69,11 @@ export default function ShiftScreen() {
   // journey so it cannot change while the sequence is running. Null on an
   // ordinary night, which is most of them.
   const [tonight, setTonight] = useState<string | null>(null);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    isShiftMuted().then(setMuted).catch(() => {});
+  }, []);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const stageOpacity = useRef(new Animated.Value(0)).current;
@@ -107,6 +119,7 @@ export default function ShiftScreen() {
   const runReturnSequence = useCallback(() => {
     setCompleted(true);
     setCompletionPhase("contracting");
+    playShiftSound("contract");
 
     Animated.timing(circleSize, {
       toValue: 6,
@@ -132,6 +145,7 @@ export default function ShiftScreen() {
             if (Platform.OS !== "web") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
+            playShiftSound("arrive");
 
             // Hold here. The journey ends when the person decides it does,
             // not on a timer they cannot see.
@@ -178,6 +192,7 @@ export default function ShiftScreen() {
       ]).start(() => {
         setStage(idx);
         stageRef.current = idx;
+        playShiftSound("stage");
         Animated.timing(stageOpacity, {
           toValue: 1,
           duration: FADE_MS,
@@ -206,6 +221,9 @@ export default function ShiftScreen() {
     clearStageTimer();
     stageRef.current = 0;
     setTonight(readTonight());
+    prepareShiftSounds()
+      .then(() => playShiftSound("begin"))
+      .catch(() => {});
     stageOpacity.setValue(0);
     circleSize.setValue(24);
     welcomeBackOpacity.setValue(0);
@@ -221,6 +239,7 @@ export default function ShiftScreen() {
 
   const endJourney = () => {
     clearStageTimer();
+    releaseShiftSounds().catch(() => {});
     stageRef.current = 0;
     setJourneyActive(false);
     setCompleted(false);
@@ -359,6 +378,18 @@ export default function ShiftScreen() {
               />
             );
           })()}
+
+          <TouchableOpacity
+            onPress={() => {
+              const next = !muted;
+              setMuted(next);
+              setShiftMuted(next).catch(() => {});
+            }}
+            style={styles.muteBtn}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Text style={styles.skipText}>{muted ? "SOUND OFF" : "SOUND ON"}</Text>
+          </TouchableOpacity>
 
           {!completed && count > 0 && (
             <TouchableOpacity
@@ -568,6 +599,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: "center",
     lineHeight: 26,
+  },
+  muteBtn: {
+    position: "absolute",
+    bottom: 56,
+    left: 28,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    zIndex: 200,
   },
   skipBtn: {
     position: "absolute",

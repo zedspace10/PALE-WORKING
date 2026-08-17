@@ -28,6 +28,12 @@ import { findStarByAge } from "@/constants/starCatalog";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 
+import {
+  formatLightTime,
+  getPlanetPosition,
+  PlanetId,
+} from "@/constants/planets";
+
 const { width: SW } = Dimensions.get("window");
 const GOLD = "#C8A96E";
 const WARM_WHITE = "#F5F0E8";
@@ -39,6 +45,7 @@ interface NightObject {
   id: string;
   name: string;
   type: NightObjectType;
+  /** Stars and deep sky objects only. Planets are computed, see PLANET_IDS. */
   ra?: number;
   dec?: number;
   color: string;
@@ -64,46 +71,38 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
   {
     id: "venus",
     name: "Venus",
-    ra: 95,
-    dec: 23,
     type: "planet",
     color: "#FFF8DC",
     truth:
       "Venus is the brightest object in the night sky after the Moon. It is so bright it can cast shadows. Ancient civilisations thought it was two different stars — the morning star and the evening star.",
     wonder:
-      "What you're seeing is sunlight that left the Sun 6 minutes ago, bounced off Venus, and just arrived at your eyes.",
+      "What you are seeing is sunlight that bounced off Venus and carried on to your eyes.",
     instruction: "Look for the brightest point of light in the sky. That's Venus.",
   },
   {
     id: "jupiter",
     name: "Jupiter",
-    ra: 68,
-    dec: 22,
     type: "planet",
     color: "#C88B3A",
     truth:
       "Jupiter is so massive that it does not orbit the Sun. Both Jupiter and the Sun orbit a point called the barycentre — a point that lies just outside the Sun's surface.",
     wonder:
-      "The light you're seeing left Jupiter 43 minutes ago. You are seeing Jupiter as it was 43 minutes in the past.",
+      "You are not seeing Jupiter as it is. You are seeing it as it was when the light set off.",
     instruction: "Find the bright steady point that doesn't twinkle. That's Jupiter.",
   },
   {
     id: "saturn",
     name: "Saturn",
-    ra: 350,
-    dec: -7,
     type: "planet",
     color: "#E4D191",
     truth:
       "Saturn's rings are 282,000 kilometres wide but only about 10 metres thick. If Saturn were the size of a basketball, its rings would be thinner than a sheet of paper.",
-    wonder: "The light reaching you from Saturn left it over an hour ago.",
+    wonder: "The light reaching you from Saturn set off while you were doing something else entirely.",
     instruction: "Saturn doesn't twinkle. It shines with a steady golden light.",
   },
   {
     id: "mars",
     name: "Mars",
-    ra: 130,
-    dec: 18,
     type: "planet",
     color: "#C1440E",
     truth:
@@ -487,6 +486,25 @@ function computeVisibleObjects(
 
   for (const obj of NIGHT_OBJECTS) {
     if (obj.id === "moon") continue;
+
+    // Planets move, so their position is computed for this moment rather
+    // than stored. Their light travel time changes with it.
+    if (obj.type === "planet") {
+      const pos = getPlanetPosition(obj.id as PlanetId, date);
+      const { alt, az } = getAltAz(pos.ra, pos.dec, lat, lst);
+      if (alt > 10) {
+        visible.push({
+          ...obj,
+          alt,
+          az,
+          wonder: `${obj.wonder} Right now its light takes ${formatLightTime(
+            pos.lightMinutes
+          )} to reach you.`,
+        });
+      }
+      continue;
+    }
+
     if (!obj.ra || obj.dec === undefined) continue;
     const { alt, az } = getAltAz(obj.ra, obj.dec, lat, lst);
     if (alt > 10) {
