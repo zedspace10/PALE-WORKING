@@ -65,14 +65,18 @@ export function SkyStateIcon({ state, size = 128 }: SkyStateIconProps) {
           </G>
         ) : (
           <G>
+            <Path
+              d="M18 76 C40 66 88 66 110 76 L110 96 L18 96Z"
+              fill={colors.primary}
+              opacity={0.09}
+            />
             <Circle
               cx={64}
-              cy={66}
-              r={21}
+              cy={63}
+              r={19}
               fill={colors.primaryStrong}
               opacity={0.9}
             />
-            <Path d="M18 66H110V96H18Z" fill={colors.background} />
             <Path
               d="M20 78 C42 67 86 67 108 78"
               stroke={colors.primaryStrong}

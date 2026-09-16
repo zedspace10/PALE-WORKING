@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarField } from "@/components/StarField";
+import { MagicalAction } from "@/components/MagicalSurface";
 import { formatJournalUniverseAge } from "@/constants/journal";
 import { useColors } from "@/hooks/useColors";
 import { EntryType, JournalEntry, useJournal } from "@/hooks/useJournal";
@@ -55,7 +56,7 @@ function EntryCard({
     <View
       style={[
         styles.entryCard,
-        { backgroundColor: colors.card, borderColor: colors.border },
+        { backgroundColor: colors.glass, borderColor: colors.luminousBorder },
       ]}
     >
       <View style={styles.entryMeta}>
@@ -282,8 +283,8 @@ export default function JournalScreen() {
               styles.textArea,
               {
                 color: colors.foreground,
-                backgroundColor: colors.card,
-                borderColor: colors.border,
+                backgroundColor: colors.glassStrong,
+                borderColor: colors.luminousBorder,
               },
             ]}
             multiline
@@ -312,27 +313,18 @@ export default function JournalScreen() {
                 Cancel
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            <MagicalAction
               onPress={handleSave}
               disabled={saving || !write.text.trim()}
-              style={[
-                styles.saveBtn,
-                {
-                  backgroundColor: write.text.trim()
-                    ? colors.primary
-                    : colors.primary + "50",
-                },
-              ]}
+              accessibilityRole="button"
+              wrapperStyle={styles.saveBtnWrap}
+              style={styles.saveBtnFrame}
+              contentStyle={styles.saveBtn}
             >
-              <Text
-                style={[
-                  styles.saveBtnText,
-                  { color: colors.primaryForeground },
-                ]}
-              >
+              <Text style={[styles.saveBtnText, { color: colors.foreground }]}>
                 {saving ? "Saving…" : "Save"}
               </Text>
-            </TouchableOpacity>
+            </MagicalAction>
           </View>
         </ScrollView>
       ) : (
@@ -691,11 +683,12 @@ const styles = StyleSheet.create({
   },
   cancelText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   saveBtn: {
-    flex: 1,
-    borderRadius: 12,
+    width: "100%",
     paddingVertical: 14,
     alignItems: "center",
   },
+  saveBtnWrap: { flex: 1 },
+  saveBtnFrame: { borderRadius: 12, width: "100%" },
   saveBtnText: {
     fontSize: 14,
     fontFamily: "Inter_600SemiBold",

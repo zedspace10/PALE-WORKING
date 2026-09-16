@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
+import { MagicalAction } from "@/components/MagicalSurface";
 import { StarField } from "@/components/StarField";
 import { COSMIC_EVENTS } from "@/constants/cosmicData";
 import {
@@ -90,7 +91,10 @@ export default function YouScreen() {
           <View
             style={[
               styles.inputWrap,
-              { borderColor: colors.border, backgroundColor: colors.card },
+              {
+                borderColor: colors.luminousBorder,
+                backgroundColor: colors.glassStrong,
+              },
             ]}
           >
             <TextInput
@@ -126,17 +130,15 @@ export default function YouScreen() {
               {storageError}
             </Text>
           ) : null}
-          <TouchableOpacity
+          <MagicalAction
             onPress={handleSave}
-            style={[styles.saveBtn, { backgroundColor: colors.primary }]}
-            activeOpacity={0.8}
+            accessibilityRole="button"
+            contentStyle={styles.saveBtn}
           >
-            <Text
-              style={[styles.saveBtnText, { color: colors.primaryForeground }]}
-            >
+            <Text style={[styles.saveBtnText, { color: colors.foreground }]}>
               REVEAL MY PLACE
             </Text>
-          </TouchableOpacity>
+          </MagicalAction>
         </ScrollView>
       </View>
     );
@@ -174,7 +176,10 @@ export default function YouScreen() {
         <View
           style={[
             styles.bigCard,
-            { backgroundColor: colors.card, borderColor: colors.border },
+            {
+              backgroundColor: colors.glassStrong,
+              borderColor: colors.luminousBorder,
+            },
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
@@ -196,7 +201,10 @@ export default function YouScreen() {
         <View
           style={[
             styles.bigCard,
-            { backgroundColor: colors.card, borderColor: colors.border },
+            {
+              backgroundColor: colors.glassStrong,
+              borderColor: colors.violet + "88",
+            },
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
@@ -372,7 +380,7 @@ const styles = StyleSheet.create({
   },
   inputWrap: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
@@ -382,9 +390,10 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   saveBtn: {
-    borderRadius: 12,
     paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: "center",
+    width: "100%",
   },
   saveBtnText: {
     fontSize: 12,
@@ -392,7 +401,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2.5,
   },
   bigCard: {
-    borderRadius: 16,
+    borderRadius: 24,
     borderWidth: 1,
     padding: 22,
     gap: 6,
@@ -422,7 +431,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 12 },
   halfCard: {
     flex: 1,
-    borderRadius: 14,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 18,
     gap: 5,
@@ -438,7 +447,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   quoteCard: {
-    borderRadius: 14,
+    borderRadius: 20,
     borderWidth: 1,
     borderLeftWidth: 2,
     padding: 18,
@@ -455,7 +464,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   orbitCard: {
-    borderRadius: 14,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 18,
     gap: 12,

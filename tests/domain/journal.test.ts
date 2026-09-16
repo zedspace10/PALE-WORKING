@@ -117,7 +117,7 @@ describe("journal repository integrity", () => {
         ...entry("legacy", new Date()),
         universeAge: 13_797_002_345.123,
       }),
-    ).toBe("approximately 13.8 billion years (legacy entry)");
+    ).toBe("Approximately 13.8 billion years (legacy entry)");
   });
 });
 
@@ -187,6 +187,18 @@ describe("journal UI contract", () => {
     );
     expect(compatibilityRoute).toContain(
       'export { default } from "./(tabs)/journal"',
+    );
+  });
+
+  it("gives the Save action an equal-width wrapper", () => {
+    const screen = fs.readFileSync(
+      path.resolve(process.cwd(), "app/(tabs)/journal.tsx"),
+      "utf8",
+    );
+    expect(screen).toContain("wrapperStyle={styles.saveBtnWrap}");
+    expect(screen).toContain("saveBtnWrap: { flex: 1 }");
+    expect(screen).toContain(
+      'saveBtnFrame: { borderRadius: 12, width: "100%" }',
     );
   });
 });

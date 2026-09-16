@@ -18,7 +18,15 @@ export function DeepTimeCard({ event, isLast = false }: Props) {
           <View style={[styles.line, { backgroundColor: colors.border }]} />
         )}
       </View>
-      <View style={[styles.card, { borderColor: colors.border }]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.glass,
+            borderColor: colors.luminousBorder,
+          },
+        ]}
+      >
         <Text style={[styles.date, { color: colors.mutedForeground }]}>
           {event.date}
         </Text>
@@ -61,9 +69,11 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    paddingBottom: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 18,
     gap: 5,
-    borderBottomWidth: 0,
   },
   date: {
     fontSize: 10,

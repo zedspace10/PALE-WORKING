@@ -4,6 +4,7 @@ import { Animated, Platform, Pressable, StyleSheet, View } from "react-native";
 
 import { getMomentLines } from "@/constants/momentContent";
 import { SolarState } from "@/constants/solar";
+import { useColors } from "@/hooks/useColors";
 import { StarField } from "./StarField";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
+  const colors = useColors();
   const lines = useMemo(
     () => getMomentLines(hour, openCount, solarState),
     [hour, openCount, solarState],
@@ -90,7 +92,12 @@ export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
   };
 
   return (
-    <Animated.View style={[styles.container, { opacity: cardOpacity }]}>
+    <Animated.View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, opacity: cardOpacity },
+      ]}
+    >
       {/* Tap-to-dismiss covers everything */}
       <Pressable onPress={handlePress} style={StyleSheet.absoluteFill} />
 
@@ -108,6 +115,10 @@ export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
               styles.line,
               line.style === "primary" ? styles.primary : styles.muted,
               {
+                color:
+                  line.style === "primary"
+                    ? colors.foreground
+                    : colors.mutedForeground,
                 opacity: lineAnims[idx].opacity,
                 transform: [{ translateY: lineAnims[idx].translateY }],
               },
@@ -120,7 +131,10 @@ export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
 
       {/* Hint */}
       <Animated.Text
-        style={[styles.hint, { opacity: hintOpacity }]}
+        style={[
+          styles.hint,
+          { color: colors.primary + "88", opacity: hintOpacity },
+        ]}
         pointerEvents="none"
       >
         tap anywhere to continue
@@ -132,7 +146,6 @@ export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#000000",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 9999,
@@ -149,13 +162,11 @@ const styles = StyleSheet.create({
   primary: {
     fontSize: 20,
     fontFamily: "Inter_400Regular",
-    color: "#F5F0E8",
     letterSpacing: 0.3,
   },
   muted: {
     fontSize: 16,
     fontFamily: "Inter_400Regular",
-    color: "#6B6B7E",
     letterSpacing: 0.2,
   },
   hint: {
@@ -163,7 +174,6 @@ const styles = StyleSheet.create({
     bottom: 60,
     fontSize: 10,
     fontFamily: "Inter_400Regular",
-    color: "#3A3A4A",
     letterSpacing: 2.5,
   },
 });

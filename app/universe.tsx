@@ -30,13 +30,8 @@ import {
 import { PinchGestureHandler, State } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IllustrationDisclosure } from "@/components/IllustrationDisclosure";
-import { SourceDisclosure } from "@/components/SourceDisclosure";
 import { useColors } from "@/hooks/useColors";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import {
-  CONTENT_REVIEWED_AT,
-  scientificMeta,
-} from "@/constants/scientificContent";
 
 // ─── Screen dimensions ────────────────────────────────────────────────────────
 
@@ -205,30 +200,6 @@ const TRANSITION_MSG: Record<string, string> = {
 };
 
 const STAR_OP_BY_LEVEL: Record<number, number> = { 1: 0.6, 2: 0.25, 3: 0.1 };
-
-const VISUAL_SCIENCE = {
-  1: scientificMeta({
-    classification: "estimate",
-    reviewedAt: CONTENT_REVIEWED_AT,
-    sourceIds: ["nasaSolarSystem"],
-    precisionNote:
-      "The illustration uses separate artistic scales for size, distance, and speed.",
-  }),
-  2: scientificMeta({
-    classification: "estimate",
-    reviewedAt: CONTENT_REVIEWED_AT,
-    sourceIds: ["nasaMilkyWay"],
-    precisionNote:
-      "Galaxy structure and star counts are estimates; plotted points are decorative.",
-  }),
-  3: scientificMeta({
-    classification: "model-dependent",
-    reviewedAt: CONTENT_REVIEWED_AT,
-    sourceIds: ["nasaUniverseOverview"],
-    precisionNote:
-      "Galaxy counts depend on survey limits and models; layout positions are artistic.",
-  }),
-} as const;
 
 const MW_FACTS = [
   "The Milky Way is approximately 100,000 light-years across.",
@@ -960,13 +931,13 @@ export default function UniverseScreen() {
 
       {/* You are here */}
       <G filter="url(#bloom)">
-        <Circle cx={YOU_X} cy={YOU_Y} r={12} fill="#A995FF" opacity={0.18} />
+        <Circle cx={YOU_X} cy={YOU_Y} r={12} fill="#8DEBFF" opacity={0.18} />
       </G>
-      <Circle cx={YOU_X} cy={YOU_Y} r={3.5} fill="#A995FF" opacity={0.9} />
+      <Circle cx={YOU_X} cy={YOU_Y} r={3.5} fill="#8DEBFF" opacity={0.9} />
       <SvgText
         x={YOU_X}
         y={YOU_Y + 14}
-        fill="#A995FF"
+        fill="#8DEBFF"
         fontSize={8}
         textAnchor="middle"
         opacity={0.7}
@@ -1027,14 +998,14 @@ export default function UniverseScreen() {
             cx={c.px}
             cy={c.py}
             r={c.size * 2}
-            fill={c.you ? "#A995FF" : "#ffffff"}
+            fill={c.you ? "#8DEBFF" : "#ffffff"}
             opacity={0.5}
           />
           <Circle
             cx={c.px}
             cy={c.py}
             r={c.size}
-            fill={c.you ? "#A995FF" : "#ffffff"}
+            fill={c.you ? "#8DEBFF" : "#ffffff"}
             opacity={0.9}
           />
         </G>
@@ -1254,7 +1225,6 @@ export default function UniverseScreen() {
                 : "Named clusters use layout positions; sizes and connecting lines are decorative, not measured relative coordinates."
           }
         />
-        <SourceDisclosure science={VISUAL_SCIENCE[zoomLevel]} />
       </View>
 
       {/* ── Bottom controls ── */}
@@ -1328,7 +1298,7 @@ export default function UniverseScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#06050B" },
+  container: { flex: 1, backgroundColor: "#05070C" },
   topBar: {
     position: "absolute",
     top: 0,
@@ -1347,9 +1317,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  navArrow: { color: "#A995FF", fontSize: 20, opacity: 0.9 },
+  navArrow: { color: "#8DEBFF", fontSize: 20, opacity: 0.9 },
   levelLabel: {
-    color: "#A995FF",
+    color: "#8DEBFF",
     fontSize: 10,
     letterSpacing: 4,
     fontFamily: "Inter_600SemiBold",
@@ -1367,15 +1337,15 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   zoomBtn: { padding: 16 },
-  zoomArrow: { color: "#A995FF", fontSize: 16, opacity: 0.85 },
+  zoomArrow: { color: "#8DEBFF", fontSize: 16, opacity: 0.85 },
   dimmed: { opacity: 0.18 },
   dots: { flexDirection: "row", gap: 8, alignItems: "center" },
-  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: "#222232" },
+  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: "#1D3040" },
   dotActive: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#A995FF",
+    backgroundColor: "#8DEBFF",
   },
   overlay: {
     position: "absolute",
@@ -1389,7 +1359,7 @@ const styles = StyleSheet.create({
     zIndex: 30,
   },
   overlayTitle: {
-    color: "#A995FF",
+    color: "#8DEBFF",
     fontSize: 22,
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.3,
@@ -1397,7 +1367,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   overlaySub: {
-    color: "#F7F4FF",
+    color: "#F5FAFF",
     fontSize: 16,
     fontFamily: "Inter_400Regular",
     textAlign: "center",
@@ -1405,7 +1375,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   transText: {
-    color: "#A995FF",
+    color: "#8DEBFF",
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     letterSpacing: 2,
@@ -1413,7 +1383,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   pbTitle: {
-    color: "#A995FF",
+    color: "#8DEBFF",
     fontSize: 24,
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.5,
@@ -1421,7 +1391,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   pbLine: {
-    color: "#F7F4FF",
+    color: "#F5FAFF",
     fontSize: 18,
     fontFamily: "Inter_400Regular",
     textAlign: "center",
@@ -1442,22 +1412,22 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0,0,0,0.9)",
+    backgroundColor: "rgba(5,7,12,0.94)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
+    borderTopColor: "rgba(141,235,255,0.18)",
     paddingHorizontal: 28,
     paddingTop: 22,
     zIndex: 20,
   },
   infoPlanetName: {
-    color: "#A995FF",
+    color: "#8DEBFF",
     fontSize: 11,
     fontFamily: "Inter_500Medium",
     letterSpacing: 3,
     marginBottom: 10,
   },
   infoPlanetFact: {
-    color: "#F7F4FF",
+    color: "#F5FAFF",
     fontSize: 16,
     fontFamily: "Inter_400Regular",
     lineHeight: 28,

@@ -12,7 +12,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarField } from "@/components/StarField";
-import { SourceDisclosure } from "@/components/SourceDisclosure";
 import {
   ERA_LABELS,
   ERA_ORDER,
@@ -50,8 +49,8 @@ function EventCard({
         style={[
           styles.eventCard,
           {
-            backgroundColor: colors.card,
-            borderColor: expanded ? event.color + "40" : colors.border,
+            backgroundColor: colors.glass,
+            borderColor: expanded ? event.color + "70" : colors.luminousBorder,
           },
         ]}
       >
@@ -88,7 +87,6 @@ function EventCard({
                 {event.perspective}
               </Text>
             </View>
-            <SourceDisclosure science={event.science} />
           </View>
         )}
       </TouchableOpacity>
@@ -155,7 +153,10 @@ export default function TimeMachineScreen() {
         <View
           style={[
             styles.banner,
-            { backgroundColor: colors.card, borderColor: colors.border },
+            {
+              backgroundColor: colors.glassStrong,
+              borderColor: colors.luminousBorder,
+            },
           ]}
         >
           <Text style={[styles.bannerText, { color: colors.foreground }]}>
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   banner: {
-    borderRadius: 14,
+    borderRadius: 20,
     borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 14,

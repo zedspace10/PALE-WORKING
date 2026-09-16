@@ -44,7 +44,6 @@ interface ShiftStageBase {
   title: string;
   subtitle: string;
   hint: string;
-  circleColor: string;
 }
 
 export interface ShiftStage extends ShiftStageBase, ScientificItem {}
@@ -55,41 +54,35 @@ const SHIFT_STAGES_BASE: ShiftStageBase[] = [
     subtitle:
       "A pale blue dot.\nOrbiting an ordinary star.\nIn one arm of one galaxy.",
     hint: "EARTH",
-    circleColor: "#B8D4E8",
   },
   {
     title: "Our neighbourhood.",
     subtitle:
-      "Eight planets.\nOne star.\nEveryone you have ever met\nlives within this circle.",
+      "Eight planets.\nOne star.\nEveryone you have ever met\nlives in this small neighbourhood.",
     hint: "SOLAR SYSTEM",
-    circleColor: "#C4B8FF",
   },
   {
     title: "Hundreds of billions of stars.",
     subtitle:
       "Our Sun is one of them.\nLost in one arm.\nUnremarkable.\nEssential.",
     hint: "THE MILKY WAY",
-    circleColor: "#9966FF",
   },
   {
     title: "A gathering of nearby galaxies.",
     subtitle:
       "Held together by gravity.\nDrifting as one\nthrough the cosmos.\nThe Milky Way is one\nof the two largest.",
     hint: "LOCAL GROUP",
-    circleColor: "#4488FF",
   },
   {
     title: "Everything we can see.",
     subtitle:
       "Hundreds of billions of galaxies, perhaps more.\nAbout forty-six billion light-years\nin every direction.\nStill expanding.",
     hint: "THE OBSERVABLE UNIVERSE",
-    circleColor: "#1A1A3E",
   },
   {
     title: "Somewhere in all of this…",
     subtitle: "…there is you.",
     hint: "",
-    circleColor: "transparent",
   },
 ];
 
@@ -213,7 +206,7 @@ export const SHIFT_STAGES: ShiftStage[] = SHIFT_STAGES_BASE.map(
       reviewedAt: CONTENT_REVIEWED_AT,
       sourceIds: ["nasaUniverseOverview"],
       precisionNote:
-        "The circle animation is an illustrative perspective device; distances and sizes are not on one physical scale.",
+        "The sphere animation is an illustrative perspective device; distances and sizes are not on one physical scale.",
     }),
   }),
 );

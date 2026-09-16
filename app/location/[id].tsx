@@ -14,7 +14,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { StarField } from "@/components/StarField";
-import { SourceDisclosure } from "@/components/SourceDisclosure";
 import { LOCATIONS } from "@/constants/cosmicData";
 import { EXPLORE_ARTWORK } from "@/constants/exploreArtworkAssets";
 
@@ -75,8 +74,8 @@ export default function LocationScreen() {
           ) : null}
           <LinearGradient
             colors={[
-              "rgba(6,5,11,0.08)",
-              "rgba(6,5,11,0.48)",
+              "rgba(5,7,12,0.08)",
+              "rgba(5,7,12,0.56)",
               colors.background,
             ]}
             locations={[0, 0.54, 1]}
@@ -110,7 +109,10 @@ export default function LocationScreen() {
           <View
             style={[
               styles.card,
-              { backgroundColor: colors.card, borderColor: colors.border },
+              {
+                backgroundColor: colors.glass,
+                borderColor: colors.luminousBorder,
+              },
             ]}
           >
             <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
@@ -124,7 +126,10 @@ export default function LocationScreen() {
           <View
             style={[
               styles.card,
-              { backgroundColor: colors.card, borderColor: colors.border },
+              {
+                backgroundColor: colors.glass,
+                borderColor: colors.violet + "66",
+              },
             ]}
           >
             <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
@@ -133,7 +138,6 @@ export default function LocationScreen() {
             <Text style={[styles.scaleText, { color: colors.foreground }]}>
               {location.scale}
             </Text>
-            <SourceDisclosure science={location.science} />
           </View>
         </View>
       </ScrollView>
@@ -211,7 +215,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   card: {
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     padding: 20,
     gap: 10,

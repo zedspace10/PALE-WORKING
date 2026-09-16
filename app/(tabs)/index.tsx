@@ -13,18 +13,19 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CalmPressable } from "@/components/CalmPressable";
+import { CardArtwork } from "@/components/CardArtwork";
+import { HomeHeroStars, HomeLocationSphere } from "@/components/HomeHeroScene";
+import { MagicalAction } from "@/components/MagicalSurface";
 import { StarField } from "@/components/StarField";
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
-import { SourceDisclosure } from "@/components/SourceDisclosure";
 import { getTodaysEntry } from "@/constants/observatory";
 import { formatUniverseAgeEstimate } from "@/constants/personalInsights";
 import { calmSpace, calmSurface, calmTypography } from "@/constants/ui";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
+import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
-
-const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
 function formatBig(n: number): string {
   return Math.floor(n).toLocaleString("en-US");
@@ -37,6 +38,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { birthday } = useBirthday();
   const reduceMotion = useReducedMotion();
+  const ambientMotionActive = useHomeHeroMotionActive(reduceMotion);
   const scrollRef = useRef<ScrollView>(null);
   useResetScrollOnFocus(scrollRef);
 
@@ -49,101 +51,50 @@ export default function HomeScreen() {
     : null;
 
   // Animations
-  const dotScale = useRef(new Animated.Value(1)).current;
-  const dotOpacity = useRef(new Animated.Value(0.6)).current;
   const youAreHereOpacity = useRef(new Animated.Value(0)).current;
   const counterOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (reduceMotion) {
-      dotScale.setValue(1);
-      dotOpacity.setValue(0.9);
       youAreHereOpacity.setValue(1);
       counterOpacity.setValue(1);
       return;
     }
 
-    // Dot pulse loop
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(dotScale, {
-            toValue: 1.3,
-            duration: 3000,
-            easing: easeInOut,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity, {
-            toValue: 1.0,
-            duration: 3000,
-            easing: easeInOut,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(dotScale, {
-            toValue: 1.0,
-            duration: 3000,
-            easing: easeInOut,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity, {
-            toValue: 0.6,
-            duration: 3000,
-            easing: easeInOut,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]),
-    );
-    pulse.start();
-
     // "You are here." fades in after 1s
     const fadeIn = Animated.sequence([
-      Animated.delay(1000),
+      Animated.delay(250),
       Animated.timing(youAreHereOpacity, {
         toValue: 1,
-        duration: 1800,
+        duration: 700,
         useNativeDriver: true,
       }),
-      Animated.delay(400),
+      Animated.delay(120),
       Animated.timing(counterOpacity, {
         toValue: 1,
-        duration: 1400,
+        duration: 800,
         useNativeDriver: true,
       }),
     ]);
     fadeIn.start();
 
-    return () => {
-      pulse.stop();
-      fadeIn.stop();
-    };
-  }, [counterOpacity, dotOpacity, dotScale, reduceMotion, youAreHereOpacity]);
+    return () => fadeIn.stop();
+  }, [counterOpacity, reduceMotion, youAreHereOpacity]);
 
   const universeDisplay = formatUniverseAgeEstimate();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StarField count={80} containerOpacity={0.35} />
+      <StarField count={58} containerOpacity={0.3} drift={10} />
 
       {/* ── Hero: Pale Blue Dot ── */}
       <View style={[styles.hero, { paddingTop: topPad + 34 }]}>
         {/* The Dot */}
-        <View style={styles.dotWrap}>
-          <Animated.View
-            style={[
-              styles.dotGlow,
-              { transform: [{ scale: dotScale }], opacity: dotOpacity },
-            ]}
-          />
-          <Animated.View
-            style={[
-              styles.dot,
-              { transform: [{ scale: dotScale }], opacity: dotOpacity },
-            ]}
-          />
-        </View>
+        <HomeHeroStars active={ambientMotionActive} />
+        <HomeLocationSphere
+          active={ambientMotionActive}
+          testID="home-location-sphere"
+        />
 
         {/* "You are here." */}
         <Animated.Text
@@ -223,6 +174,7 @@ export default function HomeScreen() {
             },
           ]}
         >
+          <CardArtwork name="observatory" />
           <View style={styles.obsHeader}>
             <View style={styles.obsHeaderLeft}>
               <Text
@@ -239,7 +191,7 @@ export default function HomeScreen() {
             </View>
             <View style={[styles.obsLive, { backgroundColor: colors.glow }]}>
               <Feather
-                name={obsExpanded ? "chevron-up" : "radio"}
+                name={obsExpanded ? "chevron-up" : "chevron-down"}
                 size={15}
                 color={colors.primaryStrong}
               />
@@ -265,8 +217,6 @@ export default function HomeScreen() {
                 </Text>
               </View>
 
-              <SourceDisclosure science={todaysEntry.science} />
-
               <NightlyReminderToggle variant="row" />
             </View>
           )}
@@ -274,73 +224,53 @@ export default function HomeScreen() {
 
         {/* Nav Cards */}
         <View style={styles.navRow}>
-          <CalmPressable
+          <MagicalAction
             onPress={() => router.push("/(tabs)/shift")}
             accessibilityRole="button"
-            style={[
-              styles.navCard,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                flex: 1,
-              },
-            ]}
+            variant="secondary"
+            wrapperStyle={styles.navCardWrap}
+            style={styles.navCardFrame}
+            contentStyle={styles.navCard}
           >
-            <View style={[styles.navIcon, { backgroundColor: colors.glow }]}>
-              <Feather
-                name="maximize-2"
-                size={18}
-                color={colors.primaryStrong}
-              />
+            <CardArtwork name="shift" />
+            <View style={styles.navCardCopy}>
+              <Text style={[styles.navLabel, { color: colors.foreground }]}>
+                Shift
+              </Text>
+              <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
+                perspective journey
+              </Text>
             </View>
-            <Text style={[styles.navLabel, { color: colors.foreground }]}>
-              Shift
-            </Text>
-            <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
-              perspective journey
-            </Text>
-          </CalmPressable>
+          </MagicalAction>
 
-          <CalmPressable
+          <MagicalAction
             onPress={() => router.push("/(tabs)/deeptime")}
             accessibilityRole="button"
-            style={[
-              styles.navCard,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                flex: 1,
-              },
-            ]}
+            variant="quiet"
+            wrapperStyle={styles.navCardWrap}
+            style={styles.navCardFrame}
+            contentStyle={styles.navCard}
           >
-            <View style={[styles.navIcon, { backgroundColor: colors.glow }]}>
-              <Feather name="clock" size={18} color={colors.primaryStrong} />
+            <CardArtwork name="timeMachine" />
+            <View style={styles.navCardCopy}>
+              <Text style={[styles.navLabel, { color: colors.foreground }]}>
+                Time Machine
+              </Text>
+              <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
+                13.8 billion years
+              </Text>
             </View>
-            <Text style={[styles.navLabel, { color: colors.foreground }]}>
-              Time Machine
-            </Text>
-            <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
-              13.8 billion years
-            </Text>
-          </CalmPressable>
+          </MagicalAction>
         </View>
 
-        <CalmPressable
+        <MagicalAction
           onPress={() => router.push("/tonight-sky")}
           accessibilityRole="button"
-          style={[
-            styles.navCard,
-            styles.universeCard,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-            },
-          ]}
+          style={styles.navCardFrame}
+          contentStyle={[styles.navCard, styles.universeCard]}
         >
-          <View style={[styles.navIcon, { backgroundColor: colors.glow }]}>
-            <Feather name="star" size={18} color={colors.primaryStrong} />
-          </View>
-          <View style={{ flex: 1 }}>
+          <CardArtwork name="tonightsSky" />
+          <View style={styles.universeCopy}>
             <Text style={[styles.navLabel, { color: colors.foreground }]}>
               Tonight's Sky
             </Text>
@@ -348,7 +278,7 @@ export default function HomeScreen() {
               Location-aware, condition-qualified guidance
             </Text>
           </View>
-        </CalmPressable>
+        </MagicalAction>
       </ScrollView>
     </View>
   );
@@ -361,30 +291,11 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: "center",
     gap: 10,
+    overflow: "hidden",
     paddingBottom: 30,
     paddingHorizontal: 24,
+    position: "relative",
     width: "100%",
-  },
-  dotWrap: {
-    width: 56,
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dot: {
-    position: "absolute",
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: "#B8D4E8",
-  },
-  dotGlow: {
-    position: "absolute",
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#B8D4E8",
-    opacity: 0.15,
   },
   youAreHere: {
     fontSize: 12,
@@ -392,12 +303,14 @@ const styles = StyleSheet.create({
     letterSpacing: 3.2,
     textAlign: "center",
     color: "#F7F4FF",
+    zIndex: 1,
   },
   counters: {
     alignItems: "center",
     alignSelf: "stretch",
     gap: 5,
     marginTop: 7,
+    zIndex: 1,
   },
   counterMain: {
     fontSize: 28,
@@ -451,11 +364,14 @@ const styles = StyleSheet.create({
     ...calmSurface,
     padding: 20,
     gap: 0,
+    position: "relative",
   },
   obsHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
+    position: "relative",
+    zIndex: 1,
   },
   obsHeaderLeft: { flex: 1, gap: 4 },
   cardLabel: {
@@ -477,7 +393,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     width: calmSpace.touchTarget,
   },
-  obsBody: { gap: 12, marginTop: 16 },
+  obsBody: { gap: 12, marginTop: 16, position: "relative", zIndex: 1 },
   obsDivider: { height: 1, opacity: 0.4 },
   obsText: {
     fontSize: 15,
@@ -502,26 +418,31 @@ const styles = StyleSheet.create({
 
   // Nav cards
   navRow: { flexDirection: "row", gap: 14 },
+  navCardWrap: { flex: 1 },
+  navCardFrame: {
+    borderRadius: calmSpace.radius.large,
+  },
   navCard: {
-    ...calmSurface,
+    alignItems: "flex-start",
+    justifyContent: "flex-end",
     padding: 18,
-    gap: 6,
-    minHeight: 132,
-    justifyContent: "flex-start",
+    minHeight: 142,
   },
   universeCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    minHeight: 92,
+    alignItems: "flex-start",
+    justifyContent: "flex-end",
+    minHeight: 108,
   },
-  navIcon: {
-    alignItems: "center",
-    borderRadius: calmSpace.radius.small,
-    height: 38,
-    justifyContent: "center",
-    marginBottom: 7,
-    width: 38,
+  navCardCopy: {
+    gap: 4,
+    position: "relative",
+    zIndex: 1,
+  },
+  universeCopy: {
+    gap: 3,
+    maxWidth: "78%",
+    position: "relative",
+    zIndex: 1,
   },
   navLabel: {
     ...calmTypography.cardTitle,

@@ -1,7 +1,7 @@
 import { CosmicEvent } from "@/constants/cosmicData";
 
 export const MINIMUM_BIRTH_YEAR = 1900;
-export const UNIVERSE_AGE_ESTIMATE = "approximately 13.8 billion years";
+export const UNIVERSE_AGE_ESTIMATE = "Approximately 13.8 billion years";
 const AVERAGE_EARTH_ORBITAL_SPEED_KM_S = 29.78;
 
 export type BirthdayValidation =

@@ -25,7 +25,6 @@ import { useRouter } from "expo-router";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SkyStateIcon } from "@/components/SkyStateIcon";
-import { SourceDisclosure } from "@/components/SourceDisclosure";
 import { StarField } from "@/components/StarField";
 import {
   CONTENT_REVIEWED_AT,
@@ -71,9 +70,9 @@ import {
 } from "@/constants/visibility";
 
 const { width: SW } = Dimensions.get("window");
-const GOLD = "#A995FF";
-const WARM_WHITE = "#F7F4FF";
-const BLUE_GREY = "#AAA4BE";
+const GOLD = "#8DEBFF";
+const WARM_WHITE = "#F5FAFF";
+const BLUE_GREY = "#A7B6C6";
 
 type NightObjectType =
   "moon" | "planet" | "star" | "constellation" | "galaxy" | "satellite";
@@ -629,36 +628,56 @@ function CompassIndicator({
   color: string;
 }) {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  const activeDir = Math.round(az / 45) % 8;
+  const activeDir = ((Math.round(az / 45) % 8) + 8) % 8;
+  const directionLabel = dirs[activeDir];
+  const heightLabel = altToLabel(alt);
+
   return (
-    <View style={styles.compassRow}>
-      <View style={styles.compassDirs}>
-        {dirs.map((d, i) => (
-          <Text
-            key={d}
+    <View
+      accessible
+      accessibilityLabel={`Estimated direction ${directionLabel}, ${heightLabel}`}
+      style={styles.compassPanel}
+      testID="sky-compass-indicator"
+    >
+      <View style={styles.compassHeader}>
+        <Text style={styles.compassCaption}>DIRECTION</Text>
+        <Text style={styles.compassReadout}>
+          {directionLabel} · {heightLabel}
+        </Text>
+      </View>
+      <View style={styles.compassRow}>
+        <View style={styles.compassDirs}>
+          {dirs.map((direction, index) => (
+            <Text
+              key={direction}
+              style={[
+                styles.compassDir,
+                index === activeDir && styles.compassDirActive,
+                {
+                  backgroundColor:
+                    index === activeDir ? color + "18" : "transparent",
+                  color: index === activeDir ? color : "rgba(167,182,198,0.35)",
+                  fontFamily:
+                    index === activeDir ? "Inter_700Bold" : "Inter_400Regular",
+                },
+              ]}
+            >
+              {direction}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.elevBar}>
+          <View
             style={[
-              styles.compassDir,
+              styles.elevDot,
               {
-                color: i === activeDir ? GOLD : "rgba(169,149,255,0.25)",
-                fontFamily:
-                  i === activeDir ? "Inter_600SemiBold" : "Inter_400Regular",
+                bottom:
+                  `${Math.min(90, Math.max(0, alt))}%` as unknown as number,
+                backgroundColor: color,
               },
             ]}
-          >
-            {d}
-          </Text>
-        ))}
-      </View>
-      <View style={styles.elevBar}>
-        <View
-          style={[
-            styles.elevDot,
-            {
-              bottom: `${Math.min(90, Math.max(0, alt))}%` as unknown as number,
-              backgroundColor: GOLD,
-            },
-          ]}
-        />
+          />
+        </View>
       </View>
     </View>
   );
@@ -799,6 +818,7 @@ function ObjectVisual({
 }
 
 interface CardProps {
+  bottomPadding: number;
   obj: VisibleObject;
   moonPhase: number;
   moonIllumination: number;
@@ -808,6 +828,7 @@ interface CardProps {
 }
 
 function ObjectCard({
+  bottomPadding,
   obj,
   moonPhase,
   moonIllumination,
@@ -833,7 +854,17 @@ function ObjectCard({
   const isTimeless = obj.type === "star" || obj.type === "constellation";
 
   return (
-    <Animated.View style={[styles.card, { opacity: fadeAnim, width: SW }]}>
+    <Animated.ScrollView
+      bounces={false}
+      contentContainerStyle={[
+        styles.card,
+        { paddingBottom: bottomPadding + 82 },
+      ]}
+      nestedScrollEnabled
+      overScrollMode="never"
+      showsVerticalScrollIndicator={false}
+      style={[styles.cardPage, { opacity: fadeAnim, width: SW }]}
+    >
       {obj.isPersonalStar && (
         <View style={styles.personalBadge}>
           <Text style={styles.personalBadgeText}>
@@ -865,7 +896,6 @@ function ObjectCard({
         )}
         <Text style={styles.truth}>{obj.truth}</Text>
         <Text style={styles.wonder}>{obj.wonder}</Text>
-        <SourceDisclosure science={obj.science} />
       </View>
 
       <View style={styles.inviteSection}>
@@ -898,17 +928,22 @@ function ObjectCard({
           </Text>
         )}
       </View>
-    </Animated.View>
+    </Animated.ScrollView>
   );
 }
 
-function EndCard() {
+function EndCard({ bottomPadding }: { bottomPadding: number }) {
   return (
-    <View
-      style={[
+    <ScrollView
+      bounces={false}
+      contentContainerStyle={[
         styles.card,
-        { width: SW, justifyContent: "center", paddingHorizontal: 32 },
+        styles.endCard,
+        { paddingBottom: bottomPadding + 82 },
       ]}
+      overScrollMode="never"
+      showsVerticalScrollIndicator={false}
+      style={[styles.cardPage, { width: SW }]}
     >
       <Text style={styles.endText}>And behind all of this —</Text>
       <Text style={styles.endText}>
@@ -921,7 +956,7 @@ function EndCard() {
         The sky you're looking at tonight is the smallest possible fraction of
         what exists.
       </Text>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -1380,17 +1415,18 @@ export default function TonightSkyScreen() {
           }}
           horizontal
           pagingEnabled
+          directionalLockEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => {
             const idx = Math.round(e.nativeEvent.contentOffset.x / SW);
             setPage(idx);
           }}
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: bottomPad + 60 }}
         >
           {allCards.map((obj) => (
             <ObjectCard
               key={obj.id}
+              bottomPadding={bottomPad}
               obj={obj}
               moonPhase={state.moonPhase}
               moonIllumination={state.moonIllumination}
@@ -1399,7 +1435,7 @@ export default function TonightSkyScreen() {
               isNewMoon={isNewMoon}
             />
           ))}
-          <EndCard />
+          <EndCard bottomPadding={bottomPad} />
         </ScrollView>
 
         <View style={[styles.dots, { bottom: bottomPad + 20 }]}>
@@ -1409,7 +1445,7 @@ export default function TonightSkyScreen() {
               style={[
                 styles.dot,
                 {
-                  backgroundColor: i === page ? GOLD : "rgba(169,149,255,0.3)",
+                  backgroundColor: i === page ? GOLD : "rgba(141,235,255,0.3)",
                   width: i === page ? 16 : 4,
                 },
               ]}
@@ -1438,39 +1474,74 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
   },
   screenTitle: {
-    color: GOLD,
-    fontSize: 11,
-    letterSpacing: 4,
-    fontFamily: "Inter_600SemiBold",
+    color: WARM_WHITE,
+    fontSize: 22,
+    letterSpacing: 1.6,
+    fontFamily: "Inter_700Bold",
   },
   guidanceStatus: {
-    color: "rgba(245,240,232,0.65)",
+    color: "rgba(245,250,255,0.65)",
     fontSize: 11,
     fontFamily: "Inter_400Regular",
   },
   twilightNote: {
-    color: "rgba(169,149,255,0.7)",
-    fontSize: 10,
-    lineHeight: 15,
+    color: "rgba(167,182,198,0.78)",
+    fontSize: 11,
+    lineHeight: 17,
     fontFamily: "Inter_400Regular",
+  },
+  compassPanel: {
+    backgroundColor: "rgba(11,18,28,0.72)",
+    borderColor: "rgba(53,99,122,0.58)",
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 8,
+    marginTop: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  compassHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  compassCaption: {
+    color: "rgba(167,182,198,0.62)",
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 8,
+    letterSpacing: 1.8,
+  },
+  compassReadout: {
+    color: WARM_WHITE,
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
   },
   compassRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    justifyContent: "space-between",
   },
   compassDirs: {
+    alignItems: "center",
     flexDirection: "row",
-    gap: 6,
+    flex: 1,
+    justifyContent: "space-between",
   },
   compassDir: {
-    fontSize: 10,
-    letterSpacing: 1,
+    borderRadius: 6,
+    fontSize: 9,
+    letterSpacing: 0.5,
+    minWidth: 24,
+    paddingVertical: 3,
+    textAlign: "center",
+  },
+  compassDirActive: {
+    overflow: "hidden",
   },
   elevBar: {
     width: 2,
     height: 20,
-    backgroundColor: "rgba(169,149,255,0.2)",
+    backgroundColor: "rgba(141,235,255,0.2)",
     borderRadius: 1,
     position: "relative",
   },
@@ -1481,11 +1552,18 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     left: -1,
   },
-  card: {
+  cardPage: {
     flex: 1,
+  },
+  card: {
+    flexGrow: 1,
     paddingHorizontal: 28,
     paddingTop: 12,
     gap: 0,
+  },
+  endCard: {
+    justifyContent: "center",
+    paddingHorizontal: 32,
   },
   visualSection: {
     alignItems: "center",
@@ -1499,7 +1577,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   moonNote: {
-    color: "rgba(169,149,255,0.6)",
+    color: "rgba(141,235,255,0.6)",
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     letterSpacing: 1,
@@ -1523,7 +1601,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   wonder: {
-    color: "rgba(245,240,232,0.55)",
+    color: "rgba(245,250,255,0.55)",
     fontSize: 13,
     lineHeight: 22,
     fontFamily: "Inter_400Regular",
@@ -1536,23 +1614,23 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "rgba(169,149,255,0.15)",
+    backgroundColor: "rgba(141,235,255,0.15)",
     marginBottom: 4,
   },
   direction: {
-    color: "rgba(169,149,255,0.7)",
+    color: "rgba(141,235,255,0.7)",
     fontSize: 12,
     letterSpacing: 2,
     fontFamily: "Inter_500Medium",
   },
   instruction: {
-    color: "rgba(245,240,232,0.65)",
+    color: "rgba(245,250,255,0.65)",
     fontSize: 14,
     lineHeight: 22,
     fontFamily: "Inter_400Regular",
   },
   conditionNote: {
-    color: "rgba(245,240,232,0.5)",
+    color: "rgba(245,250,255,0.5)",
     fontSize: 11,
     lineHeight: 17,
     fontFamily: "Inter_400Regular",
@@ -1572,7 +1650,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   eternityLine: {
-    color: "rgba(169,149,255,0.45)",
+    color: "rgba(169,149,255,0.52)",
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     fontStyle: "italic",
@@ -1608,7 +1686,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   loadingText: {
-    color: "rgba(169,149,255,0.5)",
+    color: "rgba(141,235,255,0.5)",
     fontSize: 13,
     letterSpacing: 2,
     fontFamily: "Inter_400Regular",
@@ -1637,7 +1715,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   deniedSub: {
-    color: "rgba(245,240,232,0.55)",
+    color: "rgba(245,250,255,0.55)",
     fontSize: 14,
     lineHeight: 24,
     fontFamily: "Inter_400Regular",
@@ -1671,7 +1749,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   endSub: {
-    color: "rgba(245,240,232,0.5)",
+    color: "rgba(245,250,255,0.5)",
     fontSize: 14,
     lineHeight: 24,
     fontFamily: "Inter_400Regular",

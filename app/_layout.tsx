@@ -68,6 +68,7 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="journal" options={{ headerShown: false }} />
         <Stack.Screen
           name="shift"
           options={{

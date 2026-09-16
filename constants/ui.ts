@@ -2,9 +2,9 @@ import type { TextStyle, ViewStyle } from "react-native";
 
 export const calmSpace = {
   radius: {
-    small: 12,
-    medium: 18,
-    large: 24,
+    small: 14,
+    medium: 20,
+    large: 28,
     pill: 999,
   },
   spacing: {
@@ -25,32 +25,32 @@ export const calmSpace = {
 export const calmTypography = {
   display: {
     fontFamily: "Inter_700Bold",
-    fontSize: 34,
-    lineHeight: 39,
-    letterSpacing: -1.1,
+    fontSize: 38,
+    lineHeight: 42,
+    letterSpacing: -1.45,
   } satisfies TextStyle,
   title: {
     fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    lineHeight: 30,
-    letterSpacing: -0.6,
+    fontSize: 26,
+    lineHeight: 32,
+    letterSpacing: -0.8,
   } satisfies TextStyle,
   cardTitle: {
     fontFamily: "Inter_700Bold",
-    fontSize: 17,
-    lineHeight: 22,
-    letterSpacing: -0.3,
+    fontSize: 18,
+    lineHeight: 23,
+    letterSpacing: -0.45,
   } satisfies TextStyle,
   body: {
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 15,
+    lineHeight: 23,
   } satisfies TextStyle,
   button: {
     fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    lineHeight: 18,
-    letterSpacing: 0.3,
+    fontSize: 14,
+    lineHeight: 19,
+    letterSpacing: 0.15,
   } satisfies TextStyle,
   meta: {
     fontFamily: "Inter_600SemiBold",

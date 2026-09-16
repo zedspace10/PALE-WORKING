@@ -114,25 +114,36 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.mutedForeground + "88",
+        tabBarActiveBackgroundColor: colors.glow,
         headerShown: false,
         tabBarShowLabel: true,
         tabBarLabelStyle: {
           fontSize: 10,
           fontFamily: "Inter_600SemiBold",
+          lineHeight: 14,
           letterSpacing: 0.3,
-          marginTop: -2,
+          marginTop: 0,
         },
+        tabBarIconStyle: { marginTop: 0 },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : colors.background,
+          backgroundColor: isIOS ? "transparent" : colors.glass,
           borderTopWidth: 1,
-          borderTopColor: colors.border,
+          borderTopColor: colors.luminousBorder + "88",
           elevation: 0,
+          height: 58,
+          paddingBottom: 0,
+          paddingTop: 0,
+        },
+        tabBarItemStyle: {
+          borderRadius: 0,
+          marginHorizontal: 0,
+          marginVertical: 0,
         },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
-              intensity={55}
+              intensity={72}
               tint="dark"
               style={StyleSheet.absoluteFill}
             />
@@ -140,7 +151,7 @@ export default function TabLayout() {
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: colors.background },
+                { backgroundColor: colors.glass },
               ]}
             />
           ),

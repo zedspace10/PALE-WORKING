@@ -91,7 +91,7 @@ describe("honest personal metrics", () => {
 
   it("labels calendar progress and keeps universe age rounded", () => {
     expect(formatUniverseAgeEstimate(13_797_002_345)).toBe(
-      "approximately 13.8 billion years",
+      "Approximately 13.8 billion years",
     );
     const source = fs.readFileSync(
       path.resolve(process.cwd(), "app/(tabs)/index.tsx"),

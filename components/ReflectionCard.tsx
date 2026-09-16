@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
+import { LuminousSurface } from "@/components/MagicalSurface";
 import { useColors } from "@/hooks/useColors";
 import { DAILY_REFLECTIONS } from "@/constants/cosmicData";
 
@@ -10,26 +11,19 @@ export function ReflectionCard() {
   const reflection = DAILY_REFLECTIONS[index];
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colors.card, borderColor: colors.border },
-      ]}
-    >
+    <LuminousSurface contentStyle={styles.container} tone="violet">
       <Text style={[styles.label, { color: colors.mutedForeground }]}>
         TODAY · POETIC REFLECTION
       </Text>
       <Text style={[styles.text, { color: colors.foreground }]}>
         {reflection}
       </Text>
-    </View>
+    </LuminousSurface>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
-    borderWidth: 1,
     paddingHorizontal: 22,
     paddingVertical: 20,
     gap: 10,

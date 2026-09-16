@@ -19,15 +19,15 @@ describe("honest scientific presentation", () => {
     expect(universe).toContain("zoomLevel === 1");
     expect(universe).toContain("zoomLevel === 2");
     expect(universe).toContain("connecting lines are decorative");
-    expect(universe).toContain("SourceDisclosure");
+    expect(universe).not.toContain("SourceDisclosure");
     expect(universe).not.toMatch(/two trillion|approximately 2 trillion/i);
     expect(universe).toMatch(/hundreds of billions of galaxies, perhaps more/i);
   });
 
-  it("labels Shift's animated scale and exposes provenance", () => {
+  it("labels Shift's animated scale without a source disclosure panel", () => {
     const shift = read("app/(tabs)/shift.tsx");
     expect(shift).toContain("IllustrationDisclosure");
-    expect(shift).toContain("SourceDisclosure");
+    expect(shift).not.toContain("SourceDisclosure");
     expect(shift).toMatch(/not one physical scale/i);
   });
 

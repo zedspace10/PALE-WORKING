@@ -32,8 +32,9 @@ function contrast(foreground: string, background: string): number {
 }
 
 describe("calm-space visual foundation", () => {
-  it("uses a violet accent and readable semantic text colours", () => {
-    expect(colors.dark.primary).toBe("#A995FF");
+  it("uses cyan illumination, a violet accent, and readable text", () => {
+    expect(colors.dark.primary).toBe("#8DEBFF");
+    expect(colors.dark.violet).toBe("#A995FF");
     expect(colors.dark.primary).not.toBe("#C8A96E");
     expect(
       contrast(colors.dark.foreground, colors.dark.background),
@@ -97,14 +98,21 @@ describe("Explore artwork coverage", () => {
 });
 
 describe("refreshed screen contracts", () => {
-  it("keeps compact visual qualification and expandable source access", () => {
+  it("keeps compact visual qualification and removes source panels", () => {
     const illustration = read("components/IllustrationDisclosure.tsx");
-    const sources = read("components/SourceDisclosure.tsx");
     expect(illustration).toContain("accessibilityLabel");
     expect(illustration).not.toContain("borderWidth");
-    expect(sources).toContain("Sources & methods");
-    expect(sources).toContain("science.reviewedAt");
-    expect(sources).toContain("source.url");
+
+    for (const screen of [
+      "app/(tabs)/index.tsx",
+      "app/(tabs)/shift.tsx",
+      "app/(tabs)/deeptime.tsx",
+      "app/location/[id].tsx",
+      "app/universe.tsx",
+      "app/tonight-sky.tsx",
+    ]) {
+      expect(read(screen)).not.toContain("SourceDisclosure");
+    }
   });
 
   it("registers an explicit discovery icon for Explore", () => {
@@ -120,6 +128,15 @@ describe("refreshed screen contracts", () => {
     expect(icon).toContain("Deep twilight at the horizon");
     expect(icon).toContain("Moon and stars in a dark sky");
     expect(read("app/tonight-sky.tsx")).toContain("<SkyStateIcon");
+  });
+
+  it("keeps Tonight's Sky direction-aware and vertically scrollable", () => {
+    const tonight = read("app/tonight-sky.tsx");
+    expect(tonight).toContain('testID="sky-compass-indicator"');
+    expect(tonight).toContain("Math.round(az / 45)");
+    expect(tonight).toContain("<Animated.ScrollView");
+    expect(tonight).toContain("nestedScrollEnabled");
+    expect(tonight).toContain('fontFamily: "Inter_700Bold"');
   });
 
   it("keeps both Home hero states centered and content-driven", () => {
