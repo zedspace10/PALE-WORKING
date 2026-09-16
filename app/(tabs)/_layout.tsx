@@ -11,7 +11,15 @@ function DotIcon({ color }: { color: string }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
       <Circle cx={11} cy={11} r={3} fill={color} />
-      <Circle cx={11} cy={11} r={6} stroke={color} strokeWidth={0.8} fill="none" opacity={0.4} />
+      <Circle
+        cx={11}
+        cy={11}
+        r={6}
+        stroke={color}
+        strokeWidth={0.8}
+        fill="none"
+        opacity={0.4}
+      />
     </Svg>
   );
 }
@@ -20,8 +28,24 @@ function ExpandCircleIcon({ color }: { color: string }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
       <Circle cx={11} cy={11} r={2.5} fill={color} />
-      <Circle cx={11} cy={11} r={5.5} stroke={color} strokeWidth={1} fill="none" opacity={0.7} />
-      <Circle cx={11} cy={11} r={9} stroke={color} strokeWidth={0.7} fill="none" opacity={0.35} />
+      <Circle
+        cx={11}
+        cy={11}
+        r={5.5}
+        stroke={color}
+        strokeWidth={1}
+        fill="none"
+        opacity={0.7}
+      />
+      <Circle
+        cx={11}
+        cy={11}
+        r={9}
+        stroke={color}
+        strokeWidth={0.7}
+        fill="none"
+        opacity={0.35}
+      />
     </Svg>
   );
 }
@@ -29,7 +53,14 @@ function ExpandCircleIcon({ color }: { color: string }) {
 function PersonStarsIcon({ color }: { color: string }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
-      <Circle cx={11} cy={7} r={3} stroke={color} strokeWidth={1.2} fill="none" />
+      <Circle
+        cx={11}
+        cy={7}
+        r={3}
+        stroke={color}
+        strokeWidth={1.2}
+        fill="none"
+      />
       <Path
         d="M4 19 C4 14.6 7.1 11 11 11 C14.9 11 18 14.6 18 19"
         stroke={color}
@@ -56,6 +87,24 @@ function MoonIcon({ color }: { color: string }) {
   );
 }
 
+function ExploreIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 22 22">
+      <Circle
+        cx={11}
+        cy={11}
+        r={8}
+        stroke={color}
+        strokeWidth={1.2}
+        fill="none"
+        opacity={0.9}
+      />
+      <Path d="M13.8 8.2 12.2 12.2 8.2 13.8 9.8 9.8 13.8 8.2Z" fill={color} />
+      <Circle cx={17.5} cy={4.5} r={1} fill={color} opacity={0.65} />
+    </Svg>
+  );
+}
+
 export default function TabLayout() {
   const colors = useColors();
   const isIOS = Platform.OS === "ios";
@@ -64,20 +113,20 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: "#4A4A5A",
+        tabBarInactiveTintColor: colors.mutedForeground + "88",
         headerShown: false,
         tabBarShowLabel: true,
         tabBarLabelStyle: {
           fontSize: 10,
-          fontFamily: "Inter_400Regular",
+          fontFamily: "Inter_600SemiBold",
           letterSpacing: 0.3,
           marginTop: -2,
         },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : "#000000",
+          backgroundColor: isIOS ? "transparent" : colors.background,
           borderTopWidth: 1,
-          borderTopColor: "#1A1A2A",
+          borderTopColor: colors.border,
           elevation: 0,
         },
         tabBarBackground: () =>
@@ -89,7 +138,10 @@ export default function TabLayout() {
             />
           ) : (
             <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: "#000000" }]}
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: colors.background },
+              ]}
             />
           ),
       }}
@@ -120,6 +172,13 @@ export default function TabLayout() {
         options={{
           title: "Journal",
           tabBarIcon: ({ color }) => <MoonIcon color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Explore",
+          tabBarIcon: ({ color }) => <ExploreIcon color={color} />,
         }}
       />
       {/* Reached from the home screen rather than the tab bar */}

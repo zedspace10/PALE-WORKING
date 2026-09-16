@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from "react";
 import { Animated, Dimensions, StyleSheet, View } from "react-native";
 
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
 const { width: W, height: H } = Dimensions.get("window");
 
 interface Star {
@@ -25,13 +27,22 @@ interface StarFieldProps {
   containerOpacity?: number;
 }
 
-export function StarField({ count = 100, containerOpacity = 1 }: StarFieldProps) {
+export function StarField({
+  count = 100,
+  containerOpacity = 1,
+}: StarFieldProps) {
+  const reduceMotion = useReducedMotion();
   const starsRef = useRef<Star[]>(generateStars(count));
   const twinkleAnims = useRef(
-    starsRef.current.map(() => new Animated.Value(1))
+    starsRef.current.map(() => new Animated.Value(1)),
   ).current;
 
   useEffect(() => {
+    if (reduceMotion) {
+      twinkleAnims.forEach((animation) => animation.setValue(1));
+      return;
+    }
+
     const animations = twinkleAnims.map((anim) => {
       const duration = 2500 + Math.random() * 4000;
       return Animated.loop(
@@ -46,12 +57,12 @@ export function StarField({ count = 100, containerOpacity = 1 }: StarFieldProps)
             duration: duration / 2,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       );
     });
     animations.forEach((a) => a.start());
     return () => animations.forEach((a) => a.stop());
-  }, [twinkleAnims]);
+  }, [reduceMotion, twinkleAnims]);
 
   return (
     <View

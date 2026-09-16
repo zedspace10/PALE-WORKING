@@ -1,84 +1,24 @@
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Platform, Pressable, StyleSheet, View } from "react-native";
 
+import { getMomentLines } from "@/constants/momentContent";
+import { SolarState } from "@/constants/solar";
 import { StarField } from "./StarField";
-
-interface MomentLine {
-  text: string;
-  delay: number;
-  style?: "primary" | "muted";
-}
-
-function getMomentLines(hour: number, openCount: number): MomentLine[] {
-  if (openCount >= 2) {
-    return [
-      { text: "You came back.", delay: 1200, style: "primary" },
-      { text: "The universe noticed.", delay: 3000, style: "muted" },
-    ];
-  }
-
-  if (hour >= 21 || hour <= 4) {
-    return [
-      { text: "You're still awake.", delay: 1400, style: "primary" },
-      { text: "The universe has been awake", delay: 3200, style: "muted" },
-      { text: "for 13.8 billion years.", delay: 900, style: "muted" },
-      { text: "You're in good company.", delay: 1200, style: "primary" },
-    ];
-  }
-
-  if (hour >= 5 && hour <= 8) {
-    return [
-      { text: "The Sun rose this morning.", delay: 1400, style: "primary" },
-      { text: "As it has every morning", delay: 2800, style: "muted" },
-      { text: "for 4.6 billion years.", delay: 900, style: "muted" },
-      { text: "This one is yours.", delay: 1400, style: "primary" },
-    ];
-  }
-
-  if (hour >= 11 && hour <= 14) {
-    return [
-      { text: "Eight minutes and twenty seconds ago", delay: 1200, style: "muted" },
-      { text: "a photon left the Sun.", delay: 1000, style: "primary" },
-      { text: "It just arrived.", delay: 1800, style: "primary" },
-      { text: "The one on your skin right now", delay: 2200, style: "muted" },
-      { text: "has been travelling since before", delay: 800, style: "muted" },
-      { text: "you had this thought.", delay: 800, style: "muted" },
-    ];
-  }
-
-  if (hour >= 17 && hour <= 20) {
-    return [
-      { text: "The stars are becoming visible.", delay: 1400, style: "primary" },
-      { text: "They were there last night too.", delay: 2600, style: "muted" },
-      { text: "And every night before that.", delay: 900, style: "muted" },
-      { text: "For every human life ever lived.", delay: 1000, style: "primary" },
-    ];
-  }
-
-  return [
-    { text: "Right now", delay: 1200, style: "muted" },
-    { text: "the universe is 13.8 billion years old.", delay: 1000, style: "primary" },
-    { text: "You are here.", delay: 2000, style: "primary" },
-  ];
-}
 
 interface Props {
   hour: number;
   openCount: number;
+  solarState: SolarState | null;
   onDismiss: () => void;
 }
 
-export function MomentCard({ hour, openCount, onDismiss }: Props) {
-  const lines = getMomentLines(hour, openCount);
-  const [canDismiss, setCanDismiss] = useState(false);
+export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
+  const lines = useMemo(
+    () => getMomentLines(hour, openCount, solarState),
+    [hour, openCount, solarState],
+  );
+  const [, setCanDismiss] = useState(false);
   const dismissing = useRef(false);
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const hintOpacity = useRef(new Animated.Value(0)).current;
@@ -87,7 +27,7 @@ export function MomentCard({ hour, openCount, onDismiss }: Props) {
     lines.map(() => ({
       opacity: new Animated.Value(0),
       translateY: new Animated.Value(12),
-    }))
+    })),
   ).current;
 
   useEffect(() => {
@@ -126,16 +66,16 @@ export function MomentCard({ hour, openCount, onDismiss }: Props) {
                   duration: 800,
                   useNativeDriver: true,
                 }).start();
-              }, 1400)
+              }, 1400),
             );
           }
-        }, delay)
+        }, delay),
       );
     });
 
     // Clear any pending line animations if the card is dismissed early.
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [hintOpacity, lineAnims, lines]);
 
   const handlePress = () => {
     // Tappable at any point, not just once the lines have finished.

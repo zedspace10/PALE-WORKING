@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Platform,
   ScrollView,
@@ -13,59 +13,56 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
 import { StarField } from "@/components/StarField";
 import { COSMIC_EVENTS } from "@/constants/cosmicData";
-import { formatLargeInt } from "@/constants/starCatalog";
+import {
+  formatApproximateDistance,
+  getEventsAfterBirth,
+  getPersonalTravelMetrics,
+  parseBirthdayInput,
+} from "@/constants/personalInsights";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
-
-const EARTH_SPEED_KM_S = 107_000 / 3600;
-const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
-const MS_PER_SECOND = 1000;
-
-function getDayOfYear(date: Date): number {
-  const start = new Date(date.getFullYear(), 0, 0);
-  return Math.floor((date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-}
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
 export default function YouScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { birthday, loading, saveBirthday, clearBirthday } = useBirthday();
+  const {
+    birthday,
+    loading,
+    error: storageError,
+    saveBirthday,
+    clearBirthday,
+  } = useBirthday();
   const [dateInput, setDateInput] = useState("");
   const [error, setError] = useState("");
+  const scrollRef = useRef<ScrollView>(null);
+  useResetScrollOnFocus(scrollRef);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = Platform.OS === "web" ? 0 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
 
-  const handleSave = () => {
-    const parts = dateInput.trim().split("/");
-    if (parts.length !== 3) {
-      setError("Enter your birthday as DD/MM/YYYY");
-      return;
-    }
-    const [d, m, y] = parts.map(Number);
-    if (!m || !d || !y || y < 1900 || y > new Date().getFullYear()) {
-      setError("Enter a valid date");
-      return;
-    }
-    const date = new Date(y, m - 1, d);
-    if (isNaN(date.getTime()) || date >= new Date()) {
-      setError("Enter a valid past date");
+  const handleSave = async () => {
+    const result = parseBirthdayInput(dateInput, new Date());
+    if (!result.ok) {
+      setError(result.message);
       return;
     }
     setError("");
-    saveBirthday(date);
+    await saveBirthday(result.date).catch(() => undefined);
   };
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]} />
+      <View
+        style={[styles.container, { backgroundColor: colors.background }]}
+      />
     );
   }
 
@@ -74,8 +71,9 @@ export default function YouScreen() {
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <StarField count={50} containerOpacity={0.3} />
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={{
-            paddingTop: topPad + 60,
+            paddingTop: topPad + 20,
             paddingBottom: bottomPad + 100,
             paddingHorizontal: 28,
             gap: 20,
@@ -85,9 +83,9 @@ export default function YouScreen() {
             Your Place
           </Text>
           <Text style={[styles.onboardText, { color: colors.mutedForeground }]}>
-            Enter your birthday to see how far you have travelled through
-            space since you arrived, and which cosmic milestones have happened
-            in your lifetime.
+            Enter your birthday to see how far you have travelled through space
+            since you arrived, and which cosmic milestones have happened in your
+            lifetime.
           </Text>
           <View
             style={[
@@ -107,8 +105,25 @@ export default function YouScreen() {
             />
           </View>
           {error ? (
-            <Text style={{ color: colors.destructive, fontSize: 13, fontFamily: "Inter_400Regular" }}>
+            <Text
+              style={{
+                color: colors.destructive,
+                fontSize: 13,
+                fontFamily: "Inter_400Regular",
+              }}
+            >
               {error}
+            </Text>
+          ) : null}
+          {storageError ? (
+            <Text
+              style={{
+                color: colors.destructive,
+                fontSize: 13,
+                fontFamily: "Inter_400Regular",
+              }}
+            >
+              {storageError}
             </Text>
           ) : null}
           <TouchableOpacity
@@ -116,7 +131,9 @@ export default function YouScreen() {
             style={[styles.saveBtn, { backgroundColor: colors.primary }]}
             activeOpacity={0.8}
           >
-            <Text style={[styles.saveBtnText, { color: colors.primaryForeground }]}>
+            <Text
+              style={[styles.saveBtnText, { color: colors.primaryForeground }]}
+            >
               REVEAL MY PLACE
             </Text>
           </TouchableOpacity>
@@ -125,21 +142,15 @@ export default function YouScreen() {
     );
   }
 
-  const ageMs = now.getTime() - birthday.getTime();
-  const ageSeconds = ageMs / 1000;
-  const ageDays = ageMs / (1000 * 60 * 60 * 24);
-  const ageYears = ageDays / 365.25;
-  const ageHours = ageDays * 24;
-  const distanceKm = ageSeconds * EARTH_SPEED_KM_S;
-  const birthYear = birthday.getFullYear();
-  const dayOfYear = getDayOfYear(now);
-  const orbitPercent = Math.round((dayOfYear / 365) * 100);
-  const myEvents = COSMIC_EVENTS.filter((e) => e.year > birthYear);
+  const metrics = getPersonalTravelMetrics(birthday, now);
+  const orbitPercent = Math.round(metrics.calendarYearProgressPercent);
+  const myEvents = getEventsAfterBirth(COSMIC_EVENTS, birthday);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StarField count={50} containerOpacity={0.25} />
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={[
           styles.listContent,
           {
@@ -167,16 +178,17 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            DISTANCE TRAVELLED SINCE BIRTH
+            ESTIMATED PATH ALONG EARTH'S SOLAR ORBIT
           </Text>
           <Text style={[styles.bigNumber, { color: colors.primary }]}>
-            {formatLargeInt(distanceKm)}
+            {formatApproximateDistance(metrics.approximateOrbitDistanceKm)}
           </Text>
           <Text style={[styles.bigUnit, { color: colors.foreground }]}>
-            kilometres through space
+            kilometres carried along Earth's orbit
           </Text>
           <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
-            Earth moves at 107,000 km/h — updates every second
+            Rounded from Earth's average orbital speed; it is not your total
+            path through the galaxy.
           </Text>
         </View>
 
@@ -191,10 +203,11 @@ export default function YouScreen() {
             ORBITS AROUND THE SUN
           </Text>
           <Text style={[styles.bigNumber, { color: colors.primary }]}>
-            {ageYears.toFixed(1)}
+            {metrics.completedSolarOrbits}
           </Text>
           <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
-            completed since you first arrived
+            whole solar orbits completed · {metrics.daysSinceLastBirthday} days
+            into the current year of your life
           </Text>
         </View>
 
@@ -207,11 +220,9 @@ export default function YouScreen() {
             ]}
           >
             <Text style={[styles.statNum, { color: colors.foreground }]}>
-              {Math.round(ageDays).toLocaleString()}
+              {Math.round(metrics.ageDays).toLocaleString()}
             </Text>
-            <Text
-              style={[styles.statLabel, { color: colors.mutedForeground }]}
-            >
+            <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
               days
             </Text>
           </View>
@@ -222,11 +233,9 @@ export default function YouScreen() {
             ]}
           >
             <Text style={[styles.statNum, { color: colors.foreground }]}>
-              {Math.round(ageHours).toLocaleString()}
+              {Math.round(metrics.ageHours).toLocaleString()}
             </Text>
-            <Text
-              style={[styles.statLabel, { color: colors.mutedForeground }]}
-            >
+            <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
               hours awake and asleep
             </Text>
           </View>
@@ -236,15 +245,20 @@ export default function YouScreen() {
         <View
           style={[
             styles.quoteCard,
-            { backgroundColor: colors.card, borderColor: colors.border, borderLeftColor: colors.primary + "60" },
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+              borderLeftColor: colors.primary + "60",
+            },
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
             ATOMIC AGE
           </Text>
           <Text style={[styles.quoteText, { color: colors.foreground }]}>
-            The hydrogen atoms in your body formed 13.8 billion years ago —
-            before Earth, before the Sun, before the Milky Way existed.
+            Most hydrogen nuclei in your body trace back to the early universe.
+            Many heavier elements formed later in stars and stellar explosions;
+            those atoms have been recycled through many forms.
           </Text>
           <Text style={[styles.quoteNote, { color: colors.primary }]}>
             You are ancient.
@@ -259,7 +273,7 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            EARTH'S CURRENT ORBIT PROGRESS
+            CURRENT CALENDAR-YEAR PROGRESS
           </Text>
           <View
             style={[styles.progressTrack, { backgroundColor: colors.border }]}
@@ -267,12 +281,15 @@ export default function YouScreen() {
             <View
               style={[
                 styles.progressFill,
-                { width: `${orbitPercent}%` as any, backgroundColor: colors.primary },
+                {
+                  width: `${orbitPercent}%` as any,
+                  backgroundColor: colors.primary,
+                },
               ]}
             />
           </View>
           <Text style={[styles.orbitPct, { color: colors.primary }]}>
-            {orbitPercent}% of this orbit completed
+            {orbitPercent}% of the calendar year elapsed
           </Text>
         </View>
 
@@ -299,7 +316,10 @@ export default function YouScreen() {
                     {event.title}
                   </Text>
                   <Text
-                    style={[styles.eventDesc, { color: colors.mutedForeground }]}
+                    style={[
+                      styles.eventDesc,
+                      { color: colors.mutedForeground },
+                    ]}
                   >
                     {event.description}
                   </Text>
@@ -312,9 +332,13 @@ export default function YouScreen() {
         <NightlyReminderToggle />
 
         <TouchableOpacity
-          onPress={() => {
-            clearBirthday();
-            setDateInput("");
+          onPress={async () => {
+            try {
+              await clearBirthday();
+              setDateInput("");
+            } catch {
+              // The hook exposes a recoverable storage error beside the form.
+            }
           }}
           style={styles.resetBtn}
         >

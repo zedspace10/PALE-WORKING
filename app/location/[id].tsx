@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import {
+  Image,
   View,
   Text,
   StyleSheet,
@@ -13,7 +14,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { StarField } from "@/components/StarField";
+import { SourceDisclosure } from "@/components/SourceDisclosure";
 import { LOCATIONS } from "@/constants/cosmicData";
+import { EXPLORE_ARTWORK } from "@/constants/exploreArtworkAssets";
 
 export default function LocationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,8 +24,9 @@ export default function LocationScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = Platform.OS === "web" ? 0 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const [imageFailed, setImageFailed] = useState(false);
 
   const location = LOCATIONS.find((l) => l.id === id);
 
@@ -47,34 +51,59 @@ export default function LocationScreen() {
       <StarField count={80} />
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: bottomPad + 40 }}
+        style={[styles.scroll, { backgroundColor: colors.background }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            backgroundColor: colors.background,
+            paddingBottom: bottomPad + 40,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
       >
-        {/* Hero gradient header */}
-        <LinearGradient
-          colors={location.gradientColors}
-          style={[
-            styles.hero,
-            { paddingTop: topPad + 56, paddingBottom: 40 },
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Text
-            style={[styles.heroLabel, { color: colors.mutedForeground }]}
+        <View style={[styles.hero, { backgroundColor: colors.card }]}>
+          {!imageFailed ? (
+            <Image
+              source={EXPLORE_ARTWORK[location.artworkKey]}
+              style={styles.heroArtwork}
+              resizeMode="cover"
+              onError={() => setImageFailed(true)}
+              accessible={false}
+            />
+          ) : null}
+          <LinearGradient
+            colors={[
+              "rgba(6,5,11,0.08)",
+              "rgba(6,5,11,0.48)",
+              colors.background,
+            ]}
+            locations={[0, 0.54, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              styles.heroContent,
+              { paddingTop: topPad + 96, paddingBottom: 42 },
+            ]}
           >
-            {location.subtitle.toUpperCase()}
-          </Text>
-          <Text style={[styles.heroName, { color: colors.foreground }]}>
-            {location.name}
-          </Text>
-          <Text style={[styles.heroDistance, { color: colors.primary }]}>
-            {location.distance}
-          </Text>
-          <Text style={[styles.heroRaw, { color: colors.mutedForeground }]}>
-            {location.distanceRaw} from Earth
-          </Text>
-        </LinearGradient>
+            <Text style={[styles.heroLabel, { color: colors.primaryStrong }]}>
+              {location.subtitle.toUpperCase()}
+            </Text>
+            <Text style={[styles.heroName, { color: colors.foreground }]}>
+              {location.name}
+            </Text>
+            <Text
+              style={[styles.heroDistance, { color: colors.primaryStrong }]}
+            >
+              {location.distance}
+            </Text>
+            <Text style={[styles.heroRaw, { color: colors.mutedForeground }]}>
+              {location.distanceRaw} from Earth
+            </Text>
+          </View>
+        </View>
 
         {/* Detail cards */}
         <View style={styles.details}>
@@ -84,9 +113,7 @@ export default function LocationScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <Text
-              style={[styles.cardLabel, { color: colors.mutedForeground }]}
-            >
+            <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
               REFLECTION
             </Text>
             <Text style={[styles.reflection, { color: colors.foreground }]}>
@@ -100,14 +127,13 @@ export default function LocationScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            <Text
-              style={[styles.cardLabel, { color: colors.mutedForeground }]}
-            >
+            <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
               SCALE
             </Text>
             <Text style={[styles.scaleText, { color: colors.foreground }]}>
               {location.scale}
             </Text>
+            <SourceDisclosure science={location.science} />
           </View>
         </View>
       </ScrollView>
@@ -123,6 +149,8 @@ export default function LocationScreen() {
           },
         ]}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel="Back to Explore"
       >
         <Feather name="arrow-left" size={20} color={colors.foreground} />
       </TouchableOpacity>
@@ -133,7 +161,22 @@ export default function LocationScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { alignItems: "center", justifyContent: "center" },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   hero: {
+    minHeight: 410,
+    overflow: "hidden",
+    justifyContent: "flex-end",
+  },
+  heroArtwork: {
+    ...StyleSheet.absoluteFillObject,
+    height: "100%",
+    width: "100%",
+  },
+  heroContent: {
+    alignSelf: "center",
+    maxWidth: 760,
+    width: "100%",
     paddingHorizontal: 28,
     gap: 8,
   },
@@ -160,7 +203,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   details: {
-    padding: 20,
+    alignSelf: "center",
+    maxWidth: 760,
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingTop: 22,
     gap: 14,
   },
   card: {

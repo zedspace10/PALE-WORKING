@@ -1,20 +1,30 @@
-export interface Star {
+import {
+  CONTENT_REVIEWED_AT,
+  scientificMeta,
+  ScientificItem,
+} from "@/constants/scientificContent";
+
+interface StarBase {
   name: string;
   constellation: string;
   distance: number; // light-years
   note: string;
   type?: string;
+  /** Visual apparent magnitude. Omitted where this catalogue has not reviewed it. */
+  apparentMagnitude?: number;
 }
+
+export interface Star extends StarBase, ScientificItem {}
 
 // Distances are in light-years, sourced from Gaia DR2/DR3 parallaxes.
 // Sorted by distance ascending.
-export const STAR_CATALOG: Star[] = [
+const STAR_CATALOG_BASE: StarBase[] = [
   {
     name: "Proxima Centauri",
     constellation: "Centaurus",
     distance: 4.2,
     type: "M",
-    note: "The nearest star to our Sun. A quiet red dwarf burning steadily at the edge of our solar neighbourhood.",
+    note: "The nearest known star to our Sun. It is an active red dwarf whose flares can change its brightness dramatically.",
   },
   {
     name: "Alpha Centauri A",
@@ -28,7 +38,7 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Ophiuchus",
     distance: 5.9,
     type: "M",
-    note: "The fastest-moving star in the sky — a red dwarf drifting quietly but steadily through our neighbourhood.",
+    note: "A nearby red dwarf with the highest measured proper motion against the background sky. It is too faint to see unaided.",
   },
   {
     name: "Wolf 359",
@@ -336,7 +346,7 @@ export const STAR_CATALOG: Star[] = [
     constellation: "Cassiopeia",
     distance: 54.7,
     type: "F",
-    note: "A star that pulses gently — its brightness rising and falling every couple of hours in a steady ancient rhythm.",
+    note: "A variable star whose brightness changes on a cycle of a few hours.",
   },
   {
     name: "HD 10647",
@@ -473,6 +483,71 @@ export const STAR_CATALOG: Star[] = [
   },
 ];
 
+const STAR_CATALOG_SCIENCE = scientificMeta({
+  classification: "estimate",
+  reviewedAt: CONTENT_REVIEWED_AT,
+  sourceIds: ["esaGaia"],
+  precisionNote:
+    "Distances are rounded from catalogue measurements and can change as astrometry improves.",
+});
+
+const REVIEWED_APPARENT_MAGNITUDES: Record<string, number> = {
+  "Proxima Centauri": 11.13,
+  "Alpha Centauri A": -0.01,
+  "Barnard's Star": 9.54,
+  Sirius: -1.46,
+  Procyon: 0.34,
+  Altair: 0.77,
+  Vega: 0.03,
+  Fomalhaut: 1.16,
+  Arcturus: -0.05,
+  Capella: 0.08,
+  Castor: 1.58,
+  Deneb: 1.25,
+  Rigel: 0.13,
+  Betelgeuse: 0.5,
+  Aldebaran: 0.86,
+  Spica: 0.97,
+  Antares: 1.06,
+  Regulus: 1.35,
+  Canopus: -0.74,
+  Polaris: 1.98,
+};
+
+function getCatalogNote(star: StarBase): string {
+  const typeDescription =
+    star.type === "D"
+      ? "white dwarf"
+      : `${star.type ?? "unclassified"}-type star`;
+  return `${star.name} is catalogued here as a ${typeDescription} in ${star.constellation}, roughly ${star.distance} light-years from Earth. The distance is rounded and may be refined by later astrometry.`;
+}
+
+export const STAR_CATALOG: Star[] = STAR_CATALOG_BASE.map((star) => ({
+  ...star,
+  note: getCatalogNote(star),
+  apparentMagnitude: REVIEWED_APPARENT_MAGNITUDES[star.name],
+  id: star.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, ""),
+  science:
+    star.name === "Proxima Centauri"
+      ? scientificMeta({
+          classification: "fact",
+          reviewedAt: CONTENT_REVIEWED_AT,
+          sourceIds: ["nasaProxima", "esaGaia"],
+          conditions: ["Not visible to the unaided eye"],
+        })
+      : star.name === "Barnard's Star"
+        ? scientificMeta({
+            classification: "fact",
+            reviewedAt: CONTENT_REVIEWED_AT,
+            sourceIds: ["nasaBarnard", "esaGaia"],
+            conditions: ["Not visible to the unaided eye"],
+          })
+        : STAR_CATALOG_SCIENCE,
+}));
+
 export function findStarByAge(ageYears: number): Star {
   let closest = STAR_CATALOG[0];
   let minDiff = Math.abs(STAR_CATALOG[0].distance - ageYears);
@@ -496,7 +571,7 @@ export function getMoonPhase(date: Date): string {
   const refNewMoon = new Date("2000-01-06T18:14:00Z").getTime();
   const synodic = 29.53059 * 24 * 60 * 60 * 1000;
   const elapsed =
-    ((date.getTime() - refNewMoon) % synodic + synodic) % synodic;
+    (((date.getTime() - refNewMoon) % synodic) + synodic) % synodic;
   const day = elapsed / (24 * 60 * 60 * 1000);
 
   if (day < 1.85) return "New Moon";
@@ -507,14 +582,6 @@ export function getMoonPhase(date: Date): string {
   if (day < 22.15) return "Waning Gibbous";
   if (day < 23.99) return "Last Quarter";
   return "Waning Crescent";
-}
-
-const UNIVERSE_REF_MS = new Date("2024-01-01").getTime();
-const UNIVERSE_REF_YEARS = 13_797_000_000;
-const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
-
-export function getUniverseAgeYears(): number {
-  return UNIVERSE_REF_YEARS + (Date.now() - UNIVERSE_REF_MS) / MS_PER_YEAR;
 }
 
 export function formatLargeInt(n: number): string {

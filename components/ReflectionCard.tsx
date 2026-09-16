@@ -17,7 +17,7 @@ export function ReflectionCard() {
       ]}
     >
       <Text style={[styles.label, { color: colors.mutedForeground }]}>
-        TODAY
+        TODAY · POETIC REFLECTION
       </Text>
       <Text style={[styles.text, { color: colors.foreground }]}>
         {reflection}

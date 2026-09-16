@@ -1,0 +1,9 @@
+.agents
+.kilo
+.expo
+coverage
+dist
+node_modules
+openspec
+static-build
+package-lock.json

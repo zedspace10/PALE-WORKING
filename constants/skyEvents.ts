@@ -1,39 +1,31 @@
-import { getMoonPhase } from "@/constants/starCatalog";
-
-/**
- * What is worth going outside for tonight.
- *
- * Everything here is computed on device from the date. No network, no new
- * permissions. Meteor showers recur on near identical dates every year, so a
- * static table stays accurate; peak nights drift by a day at most.
- *
- * Peak dates and ZHR figures are from the International Meteor Organization
- * and the American Meteor Society.
- */
+import { getMoonPhaseFraction } from "@/constants/astronomy";
 
 export type SkyEventKind = "shower" | "moon" | "season";
+
+export interface Estimate<T> {
+  value: T;
+  accuracy: "approximate" | "typical-window" | "sourced-instant";
+  note: string;
+}
 
 export type SkyEvent = {
   id: string;
   kind: SkyEventKind;
   title: string;
-  /** One line, written to be read on a lock screen or at the end of Shift. */
   line: string;
-  /** Higher wins when several land on the same night. */
   weight: number;
+  estimate: Estimate<Date | string>;
 };
 
-type Shower = {
+export type Shower = {
   id: string;
   name: string;
-  /** Peak night, as [month (1 to 12), day]. The night of this date into the next. */
+  /** Typical annual peak date, not a year-specific prediction. */
   peak: [number, number];
-  /** Nights either side of the peak still worth mentioning. */
   window: number;
-  /** Zenithal hourly rate at peak, under dark skies. */
+  /** Ideal-condition zenithal hourly rate, not a personal viewing forecast. */
   zhr: number;
   parent: string;
-  /** True where the radiant strongly favours one hemisphere. */
   favours?: "north" | "south";
 };
 
@@ -127,123 +119,228 @@ export const SHOWERS: Shower[] = [
   },
 ];
 
-/** Solstices and equinoxes fall within a day of these dates every year. */
-const SEASON_MARKERS: { id: string; month: number; day: number; name: string }[] =
-  [
-    { id: "mar-equinox", month: 3, day: 20, name: "the March equinox" },
-    { id: "jun-solstice", month: 6, day: 21, name: "the June solstice" },
-    { id: "sep-equinox", month: 9, day: 22, name: "the September equinox" },
-    { id: "dec-solstice", month: 12, day: 21, name: "the December solstice" },
-  ];
+const SEASONAL_INSTANTS_UTC: Record<number, Record<string, string>> = {
+  2025: {
+    "mar-equinox": "2025-03-20T09:01:00Z",
+    "jun-solstice": "2025-06-21T02:42:00Z",
+    "sep-equinox": "2025-09-22T18:19:00Z",
+    "dec-solstice": "2025-12-21T15:03:00Z",
+  },
+  2026: {
+    "mar-equinox": "2026-03-20T14:46:00Z",
+    "jun-solstice": "2026-06-21T08:24:00Z",
+    "sep-equinox": "2026-09-23T00:05:00Z",
+    "dec-solstice": "2026-12-21T20:50:00Z",
+  },
+  2027: {
+    "mar-equinox": "2027-03-20T20:25:00Z",
+    "jun-solstice": "2027-06-21T14:11:00Z",
+    "sep-equinox": "2027-09-23T06:02:00Z",
+    "dec-solstice": "2027-12-22T02:42:00Z",
+  },
+  2028: {
+    "mar-equinox": "2028-03-20T02:17:00Z",
+    "jun-solstice": "2028-06-20T20:02:00Z",
+    "sep-equinox": "2028-09-22T11:45:00Z",
+    "dec-solstice": "2028-12-21T08:20:00Z",
+  },
+  2029: {
+    "mar-equinox": "2029-03-20T08:01:00Z",
+    "jun-solstice": "2029-06-21T01:48:00Z",
+    "sep-equinox": "2029-09-22T17:37:00Z",
+    "dec-solstice": "2029-12-21T14:14:00Z",
+  },
+  2030: {
+    "mar-equinox": "2030-03-20T13:51:00Z",
+    "jun-solstice": "2030-06-21T07:31:00Z",
+    "sep-equinox": "2030-09-22T23:27:00Z",
+    "dec-solstice": "2030-12-21T20:09:00Z",
+  },
+};
 
-function daysBetween(a: Date, b: Date): number {
-  const d1 = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
-  const d2 = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
-  return Math.round((d1 - d2) / 86_400_000);
-}
+export const SEASONAL_DATA_REVIEW_BY = "2030-12-31";
 
-/** Signed day offset from a month/day in whichever year is nearest. */
-function offsetFrom(date: Date, month: number, day: number): number {
-  const candidates = [-1, 0, 1].map(
-    (y) => new Date(date.getFullYear() + y, month - 1, day)
+const SEASON_NAMES: Record<string, string> = {
+  "mar-equinox": "the March equinox",
+  "jun-solstice": "the June solstice",
+  "sep-equinox": "the September equinox",
+  "dec-solstice": "the December solstice",
+};
+
+function localCalendarDay(date: Date): number {
+  return (
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000
   );
-  let best = daysBetween(date, candidates[0]);
-  for (const c of candidates) {
-    const d = daysBetween(date, c);
-    if (Math.abs(d) < Math.abs(best)) best = d;
-  }
-  return best;
 }
 
-function showerLine(s: Shower, offset: number, lat: number): string {
-  const wrongSide =
-    (s.favours === "north" && lat < -20) || (s.favours === "south" && lat > 20);
-
-  if (offset === 0) {
-    const rate =
-      s.zhr >= 100
-        ? "up to a hundred an hour"
-        : s.zhr >= 50
-          ? "up to fifty an hour"
-          : s.zhr >= 20
-            ? "perhaps twenty an hour"
-            : "a handful an hour";
-    const base = `${s.name} peak tonight, ${rate} under a dark sky. Dust from ${s.parent}, burning up sixty miles above you.`;
-    return wrongSide ? `${base} Rates are lower from your latitude.` : base;
-  }
-
-  if (offset < 0) {
-    const n = Math.abs(offset);
-    return `${s.name} build toward their peak ${n === 1 ? "tomorrow night" : `in ${n} nights`}. Worth a look already.`;
-  }
-
-  return `${s.name} are past their peak but still falling. Fewer now, and still worth the cold.`;
+function daysBetweenLocalDates(a: Date, b: Date): number {
+  return Math.round(localCalendarDay(a) - localCalendarDay(b));
 }
 
-/**
- * Everything notable tonight, best first. Empty on an ordinary night, which is
- * most of them: callers should treat nothing as a normal outcome.
- *
- * `lat` only adjusts wording for hemisphere. Pass 0 if unknown.
- */
-export function getSkyEvents(date: Date = new Date(), lat = 0): SkyEvent[] {
+function offsetFromRecurringDate(
+  date: Date,
+  month: number,
+  day: number,
+): number {
+  const candidates = [-1, 0, 1].map(
+    (yearOffset) =>
+      new Date(date.getFullYear() + yearOffset, month - 1, day, 12),
+  );
+  return candidates
+    .map((candidate) => daysBetweenLocalDates(date, candidate))
+    .sort((a, b) => Math.abs(a) - Math.abs(b))[0];
+}
+
+function idealRate(zhr: number): string {
+  if (zhr >= 100) return "up to roughly one hundred meteors an hour";
+  if (zhr >= 50) return "up to roughly fifty meteors an hour";
+  if (zhr >= 20) return "up to roughly twenty meteors an hour";
+  return "up to roughly ten meteors an hour";
+}
+
+function showerLine(shower: Shower, offset: number, lat?: number): string {
+  const lessFavourable =
+    typeof lat === "number" &&
+    ((shower.favours === "north" && lat < -20) ||
+      (shower.favours === "south" && lat > 20));
+  const timing =
+    offset === 0
+      ? "is near its typical annual peak window"
+      : offset < 0
+        ? `is approaching its typical peak window in ${Math.abs(offset)} ${Math.abs(offset) === 1 ? "night" : "nights"}`
+        : "is just past its typical annual peak window";
+  const latitude = lessFavourable
+    ? " Your latitude is less favourable for this shower."
+    : "";
+  return `${shower.name} ${timing}. Published zenithal rates reach ${idealRate(shower.zhr)} under ideal dark-sky conditions; your actual rate may be much lower.${latitude} Its meteors come from debris associated with ${shower.parent}.`;
+}
+
+export interface ApproximateMoonPhase {
+  fraction: number;
+  illumination: number;
+  label:
+    | "near new Moon"
+    | "crescent Moon"
+    | "near quarter Moon"
+    | "gibbous Moon"
+    | "appears nearly full";
+}
+
+export function getApproximateMoonPhase(date: Date): ApproximateMoonPhase {
+  const fraction = getMoonPhaseFraction(date);
+  const illumination = 0.5 * (1 - Math.cos(2 * Math.PI * fraction));
+  const distanceFromNew = Math.min(fraction, 1 - fraction);
+  const distanceFromFull = Math.abs(fraction - 0.5);
+  const distanceFromQuarter = Math.min(
+    Math.abs(fraction - 0.25),
+    Math.abs(fraction - 0.75),
+  );
+  const label =
+    distanceFromNew <= 1.5 / 29.53059
+      ? "near new Moon"
+      : distanceFromFull <= 1.5 / 29.53059
+        ? "appears nearly full"
+        : distanceFromQuarter <= 1.25 / 29.53059
+          ? "near quarter Moon"
+          : illumination < 0.5
+            ? "crescent Moon"
+            : "gibbous Moon";
+  return { fraction, illumination, label };
+}
+
+export function validateSeasonalData(now: Date): string[] {
+  if (now.getTime() > Date.parse(`${SEASONAL_DATA_REVIEW_BY}T23:59:59Z`)) {
+    return [`seasonal-instants expired on ${SEASONAL_DATA_REVIEW_BY}`];
+  }
+  return [];
+}
+
+function getSeasonalEvents(date: Date, lat?: number): SkyEvent[] {
+  const yearData = SEASONAL_INSTANTS_UTC[date.getFullYear()];
+  if (!yearData) return [];
+  return Object.entries(yearData).flatMap(([id, iso]) => {
+    const instant = new Date(iso);
+    if (Math.abs(date.getTime() - instant.getTime()) > 24 * 60 * 60 * 1000)
+      return [];
+    const southern = typeof lat === "number" ? lat < 0 : null;
+    const isEquinox = id.includes("equinox");
+    const northernLongest = id === "jun-solstice";
+    const localLongest =
+      southern === null ? null : southern ? !northernLongest : northernLongest;
+    const detail = isEquinox
+      ? "Around an equinox, day and night are close in length but not exactly equal everywhere."
+      : localLongest === null
+        ? "This is a seasonal turning point; its daylight effect depends on your hemisphere and latitude."
+        : `This marks the ${localLongest ? "longest" : "shortest"} daylight period of the year for your hemisphere.`;
+    return [
+      {
+        id,
+        kind: "season" as const,
+        title: SEASON_NAMES[id],
+        line: `${SEASON_NAMES[id]} occurs around ${instant.toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}. ${detail}`,
+        weight: 50,
+        estimate: {
+          value: instant,
+          accuracy: "sourced-instant" as const,
+          note: "Year-specific UTC instant; displayed in the device time zone.",
+        },
+      },
+    ];
+  });
+}
+
+export function getSkyEvents(
+  date: Date = new Date(),
+  lat?: number,
+): SkyEvent[] {
   const events: SkyEvent[] = [];
-
-  for (const s of SHOWERS) {
-    const offset = offsetFrom(date, s.peak[0], s.peak[1]);
-    if (Math.abs(offset) > s.window) continue;
+  for (const shower of SHOWERS) {
+    const offset = offsetFromRecurringDate(
+      date,
+      shower.peak[0],
+      shower.peak[1],
+    );
+    if (Math.abs(offset) > shower.window) continue;
     events.push({
-      id: s.id,
+      id: shower.id,
       kind: "shower",
-      title: s.name,
-      line: showerLine(s, offset, lat),
-      // Peak night of a strong shower outranks everything else.
-      weight: (offset === 0 ? 100 : 40) + s.zhr / 10,
+      title: shower.name,
+      line: showerLine(shower, offset, lat),
+      weight: (offset === 0 ? 100 : 40) + shower.zhr / 10,
+      estimate: {
+        value: `${shower.peak[0]}-${shower.peak[1]}`,
+        accuracy: "typical-window",
+        note: "Recurring typical window, not a year-specific peak forecast.",
+      },
     });
   }
 
-  const phase = getMoonPhase(date);
-  if (phase === "Full Moon") {
+  const moon = getApproximateMoonPhase(date);
+  if (moon.label === "appears nearly full" || moon.label === "near new Moon") {
+    const nearNew = moon.label === "near new Moon";
     events.push({
-      id: "full-moon",
+      id: nearNew ? "near-new-moon" : "near-full-moon",
       kind: "moon",
-      title: "Full moon",
-      line: "The Moon is full tonight, lit by a Sun that set for you hours ago. It will wash out the faintest stars, and it is worth looking at anyway.",
-      weight: 30,
-    });
-  } else if (phase === "New Moon") {
-    events.push({
-      id: "new-moon",
-      kind: "moon",
-      title: "New moon",
-      line: "No Moon tonight. This is as dark as your sky gets, and the best week of the month for faint things.",
-      weight: 35,
-    });
-  }
-
-  for (const m of SEASON_MARKERS) {
-    if (offsetFrom(date, m.month, m.day) !== 0) continue;
-    const southern = lat < 0;
-    const longest = m.id === "jun-solstice" ? !southern : southern;
-    const line = m.id.includes("equinox")
-      ? `Today is ${m.name}. Day and night are near enough equal everywhere on Earth, and the planet is side on to the Sun.`
-      : `Today is ${m.name}, your ${longest ? "longest" : "shortest"} day of the year. From tonight the balance turns back the other way.`;
-    events.push({
-      id: m.id,
-      kind: "season",
-      title: m.name,
-      line,
-      weight: 50,
+      title: nearNew ? "Near new Moon" : "Nearly full Moon",
+      line: nearNew
+        ? "The Moon is near its new phase. It may spend much of the night below the horizon, but local timing and twilight still affect darkness."
+        : "The Moon appears nearly full and can wash out fainter stars while it is above the horizon.",
+      weight: nearNew ? 35 : 30,
+      estimate: {
+        value: moon.label,
+        accuracy: "approximate",
+        note: "Approximate phase window from a mean synodic month, not an exact ephemeris.",
+      },
     });
   }
 
+  events.push(...getSeasonalEvents(date, lat));
   return events.sort((a, b) => b.weight - a.weight);
 }
 
-/** The single most notable thing tonight, or null on an ordinary night. */
 export function getTonightsEvent(
   date: Date = new Date(),
-  lat = 0
+  lat?: number,
 ): SkyEvent | null {
   return getSkyEvents(date, lat)[0] ?? null;
 }

@@ -8,7 +8,10 @@ export function KeyboardAwareScrollViewCompat({
   ...props
 }: Props) {
   return (
-    <ScrollView keyboardShouldPersistTaps={keyboardShouldPersistTaps} {...props}>
+    <ScrollView
+      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      {...props}
+    >
       {children}
     </ScrollView>
   );

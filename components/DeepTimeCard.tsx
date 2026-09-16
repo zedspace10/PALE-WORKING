@@ -13,9 +13,7 @@ export function DeepTimeCard({ event, isLast = false }: Props) {
   return (
     <View style={styles.row}>
       <View style={styles.timeline}>
-        <View
-          style={[styles.dot, { backgroundColor: colors.primary }]}
-        />
+        <View style={[styles.dot, { backgroundColor: colors.primary }]} />
         {!isLast && (
           <View style={[styles.line, { backgroundColor: colors.border }]} />
         )}

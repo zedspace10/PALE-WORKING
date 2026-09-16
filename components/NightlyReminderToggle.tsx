@@ -6,6 +6,7 @@ import {
   areNotificationsEnabled,
   setNotificationsEnabled,
 } from "@/constants/notifications";
+import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
 import { useColors } from "@/hooks/useColors";
 
 type Props = {
@@ -37,27 +38,36 @@ export function NightlyReminderToggle({ variant = "card" }: Props) {
 
   async function locationNote(): Promise<string | null> {
     try {
-      const raw = await AsyncStorage.getItem("pale_location_cache");
-      return raw
+      const raw = await AsyncStorage.getItem(LOCATION_CACHE_KEY);
+      return parseCachedLocation(raw, Date.now()).ok
         ? null
-        : "Open Tonight's Sky once so PALE knows when it gets dark where you are.";
+        : "Open Tonight's Sky to refresh your location before scheduling astronomical-darkness reminders.";
     } catch {
-      return null;
+      return "PALE could not read the saved location. Open Tonight's Sky and try again.";
     }
   }
 
   async function handleToggle(next: boolean) {
     setBusy(true);
     setNote(null);
-    const reached = await setNotificationsEnabled(next);
-    setOn(reached);
-
-    if (next && !reached) {
-      setNote("Notifications are turned off for PALE in your device settings.");
-    } else if (reached) {
-      setNote(await locationNote());
+    try {
+      const reached = await setNotificationsEnabled(next);
+      setOn(reached);
+      if (next && !reached) {
+        setNote(
+          "Notifications are turned off for PALE in your device settings.",
+        );
+      } else if (reached) {
+        setNote(await locationNote());
+      }
+    } catch {
+      setOn(await areNotificationsEnabled());
+      setNote(
+        "The reminder could not be updated. Check your settings and try again.",
+      );
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   const body = (
@@ -68,7 +78,7 @@ export function NightlyReminderToggle({ variant = "card" }: Props) {
             Observatory reminder
           </Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            tonight's entry, when the sky gets dark
+            tonight's entry, near astronomical darkness
           </Text>
         </View>
         <Switch

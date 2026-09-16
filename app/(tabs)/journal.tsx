@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   Platform,
@@ -13,8 +13,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarField } from "@/components/StarField";
+import { formatJournalUniverseAge } from "@/constants/journal";
 import { useColors } from "@/hooks/useColors";
 import { EntryType, JournalEntry, useJournal } from "@/hooks/useJournal";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
 const TYPE_LABELS: Record<EntryType, string> = {
   worry: "WORRY",
@@ -24,7 +26,7 @@ const TYPE_LABELS: Record<EntryType, string> = {
 };
 
 const TYPE_COLORS: Record<EntryType, string> = {
-  worry: "#C8A96E",
+  worry: "#A995FF",
   reflection: "#8B9BB4",
   goal: "#90D4B0",
   thought: "#D4A8C8",
@@ -71,9 +73,7 @@ function EntryCard({
           {formatDate(entry.date)}
         </Text>
         {entry.moonPhase ? (
-          <Text
-            style={[styles.moonPhase, { color: colors.mutedForeground }]}
-          >
+          <Text style={[styles.moonPhase, { color: colors.mutedForeground }]}>
             {entry.moonPhase}
           </Text>
         ) : null}
@@ -88,35 +88,46 @@ function EntryCard({
       <Text style={[styles.entryText, { color: colors.foreground }]}>
         {entry.text}
       </Text>
-      {entry.universeAge ? (
+      {entry.universeAge || entry.universeAgeEstimate ? (
         <Text style={[styles.universeAge, { color: colors.mutedForeground }]}>
-          Universe age at this moment:{" "}
-          {Math.floor(entry.universeAge).toLocaleString()} years
+          Universe age estimate: {formatJournalUniverseAge(entry)}
         </Text>
       ) : null}
     </View>
   );
 }
 
-type WriteState = { active: false } | { active: true; type: EntryType; text: string };
+type WriteState =
+  { active: false } | { active: true; type: EntryType; text: string };
 
 export default function JournalScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { entries, loading, addEntry, deleteEntry, onThisDay } = useJournal();
+  const {
+    entries,
+    loading,
+    saving,
+    error,
+    addEntry,
+    deleteEntry,
+    retryLoad,
+    onThisDay,
+  } = useJournal();
+  const scrollRef = useRef<ScrollView>(null);
+  useResetScrollOnFocus(scrollRef);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = Platform.OS === "web" ? 0 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [write, setWrite] = useState<WriteState>({ active: false });
-  const [saving, setSaving] = useState(false);
-
   const handleSave = async () => {
     if (!write.active || !write.text.trim()) return;
-    setSaving(true);
-    await addEntry({ type: write.type, text: write.text.trim() });
-    setSaving(false);
-    setWrite({ active: false });
+    try {
+      await addEntry({ type: write.type, text: write.text.trim() });
+      setWrite({ active: false });
+    } catch {
+      // The hook exposes the retryable error and the draft stays in `write`.
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -125,15 +136,48 @@ export default function JournalScreen() {
       "This cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => deleteEntry(id) },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteEntry(id).catch(() => undefined),
+        },
       ],
-      { userInterfaceStyle: "dark" }
+      { userInterfaceStyle: "dark" },
     );
   };
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]} />
+      <View
+        style={[styles.container, { backgroundColor: colors.background }]}
+      />
+    );
+  }
+
+  if (error?.operation === "load") {
+    return (
+      <View
+        style={[
+          styles.container,
+          styles.loadError,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
+          Journal unavailable
+        </Text>
+        <Text style={[styles.emptyBody, { color: colors.mutedForeground }]}>
+          {error.message}
+        </Text>
+        <TouchableOpacity
+          onPress={retryLoad}
+          style={[styles.firstEntryBtn, { borderColor: colors.primary }]}
+        >
+          <Text style={[styles.firstEntryText, { color: colors.primary }]}>
+            Try again
+          </Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
@@ -156,12 +200,14 @@ export default function JournalScreen() {
             Journal
           </Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-            private perspective
+            stored locally · unencrypted
           </Text>
         </View>
         {!write.active && (
           <TouchableOpacity
-            onPress={() => setWrite({ active: true, type: "reflection", text: "" })}
+            onPress={() =>
+              setWrite({ active: true, type: "reflection", text: "" })
+            }
             style={[
               styles.newBtn,
               {
@@ -178,6 +224,7 @@ export default function JournalScreen() {
       {/* Write mode */}
       {write.active ? (
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[
             styles.writeContent,
             { paddingHorizontal: 24, paddingBottom: bottomPad + 40 },
@@ -187,6 +234,11 @@ export default function JournalScreen() {
           <Text style={[styles.writePrompt, { color: colors.mutedForeground }]}>
             What's on your mind?
           </Text>
+          <Text style={[styles.privacyText, { color: colors.mutedForeground }]}>
+            Entries stay in unencrypted app storage on this device and are not
+            sent to a PALE service. Device backups or anyone with device access
+            may still expose them.
+          </Text>
 
           <View style={styles.typeRow}>
             {(Object.keys(TYPE_LABELS) as EntryType[]).map((t) => {
@@ -195,7 +247,9 @@ export default function JournalScreen() {
               return (
                 <TouchableOpacity
                   key={t}
-                  onPress={() => setWrite((w) => (w.active ? { ...w, type: t } : w))}
+                  onPress={() =>
+                    setWrite((w) => (w.active ? { ...w, type: t } : w))
+                  }
                   style={[
                     styles.typeChip,
                     {
@@ -219,8 +273,10 @@ export default function JournalScreen() {
 
           <TextInput
             value={write.text}
-            onChangeText={(text) => setWrite((w) => (w.active ? { ...w, text } : w))}
-            placeholder="Write freely. This is private."
+            onChangeText={(text) =>
+              setWrite((w) => (w.active ? { ...w, text } : w))
+            }
+            placeholder="Write freely. Stored locally on this device."
             placeholderTextColor={colors.mutedForeground + "60"}
             style={[
               styles.textArea,
@@ -235,12 +291,24 @@ export default function JournalScreen() {
             textAlignVertical="top"
           />
 
+          {error?.operation === "save" && (
+            <View
+              style={[styles.errorBanner, { borderColor: colors.destructive }]}
+            >
+              <Text style={[styles.errorText, { color: colors.destructive }]}>
+                {error.message}
+              </Text>
+            </View>
+          )}
+
           <View style={styles.writeActions}>
             <TouchableOpacity
               onPress={() => setWrite({ active: false })}
               style={[styles.cancelBtn, { borderColor: colors.border }]}
             >
-              <Text style={[styles.cancelText, { color: colors.mutedForeground }]}>
+              <Text
+                style={[styles.cancelText, { color: colors.mutedForeground }]}
+              >
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -256,7 +324,12 @@ export default function JournalScreen() {
                 },
               ]}
             >
-              <Text style={[styles.saveBtnText, { color: colors.primaryForeground }]}>
+              <Text
+                style={[
+                  styles.saveBtnText,
+                  { color: colors.primaryForeground },
+                ]}
+              >
                 {saving ? "Saving…" : "Save"}
               </Text>
             </TouchableOpacity>
@@ -264,6 +337,7 @@ export default function JournalScreen() {
         </ScrollView>
       ) : (
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[
             styles.listContent,
             {
@@ -280,11 +354,19 @@ export default function JournalScreen() {
                 <View
                   style={[
                     styles.onThisDayPill,
-                    { backgroundColor: colors.secondary + "15", borderColor: colors.secondary + "35" },
+                    {
+                      backgroundColor: colors.secondary + "15",
+                      borderColor: colors.secondary + "35",
+                    },
                   ]}
                 >
-                  <Text style={[styles.onThisDayPillText, { color: colors.secondary }]}>
-                    ON THIS DAY
+                  <Text
+                    style={[
+                      styles.onThisDayPillText,
+                      { color: colors.secondary },
+                    ]}
+                  >
+                    {onThisDay.exact ? "ON THIS DAY" : "LOOKING BACK"}
                   </Text>
                 </View>
                 <Text style={[styles.sectionLabel, { color: colors.primary }]}>
@@ -292,7 +374,10 @@ export default function JournalScreen() {
                 </Text>
               </View>
               <Text
-                style={[styles.lookingBackNote, { color: colors.mutedForeground }]}
+                style={[
+                  styles.lookingBackNote,
+                  { color: colors.mutedForeground },
+                ]}
               >
                 {onThisDay.note}
               </Text>
@@ -304,14 +389,26 @@ export default function JournalScreen() {
                 />
               ))}
               <View
-                style={[styles.reflectionPrompt, { borderColor: colors.border, backgroundColor: colors.card }]}
+                style={[
+                  styles.reflectionPrompt,
+                  { borderColor: colors.border, backgroundColor: colors.card },
+                ]}
               >
-                <Text style={[styles.reflectionPromptText, { color: colors.mutedForeground }]}>
-                  How do you feel about this now? Worries are rarely as permanent as they feel in the moment.
+                <Text
+                  style={[
+                    styles.reflectionPromptText,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
+                  How do you feel about this now? Worries are rarely as
+                  permanent as they feel in the moment.
                 </Text>
               </View>
               <View
-                style={[styles.sectionDivider, { backgroundColor: colors.border }]}
+                style={[
+                  styles.sectionDivider,
+                  { backgroundColor: colors.border },
+                ]}
               />
             </View>
           )}
@@ -330,11 +427,19 @@ export default function JournalScreen() {
               <Text
                 style={[styles.emptyMoon, { color: colors.mutedForeground }]}
               >
-                Each entry records the moon phase and the age of the universe
-                at the exact moment you write.
+                Each entry records the moon phase and the age of the universe as
+                approximate context, not an exact astronomical snapshot.
+              </Text>
+              <Text
+                style={[styles.emptyMoon, { color: colors.mutedForeground }]}
+              >
+                Entries are stored locally in unencrypted app storage and are
+                not sent to a PALE service.
               </Text>
               <TouchableOpacity
-                onPress={() => setWrite({ active: true, type: "reflection", text: "" })}
+                onPress={() =>
+                  setWrite({ active: true, type: "reflection", text: "" })
+                }
                 style={[
                   styles.firstEntryBtn,
                   {
@@ -352,6 +457,20 @@ export default function JournalScreen() {
             </View>
           ) : (
             <View style={styles.entriesList}>
+              {error?.operation === "delete" && (
+                <View
+                  style={[
+                    styles.errorBanner,
+                    { borderColor: colors.destructive },
+                  ]}
+                >
+                  <Text
+                    style={[styles.errorText, { color: colors.destructive }]}
+                  >
+                    {error.message}
+                  </Text>
+                </View>
+              )}
               {entries.map((e) => (
                 <EntryCard
                   key={e.id}
@@ -369,6 +488,12 @@ export default function JournalScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  loadError: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 28,
+  },
   header: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -461,7 +586,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   entryDate: { fontSize: 12, fontFamily: "Inter_400Regular", flex: 1 },
-  moonPhase: { fontSize: 11, fontFamily: "Inter_400Regular", fontStyle: "italic" },
+  moonPhase: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    fontStyle: "italic",
+  },
   deleteBtn: { padding: 2 },
   entryText: {
     fontSize: 15,
@@ -474,7 +603,12 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 4,
   },
-  emptyState: { marginTop: 60, alignItems: "center", gap: 16, paddingHorizontal: 8 },
+  emptyState: {
+    marginTop: 60,
+    alignItems: "center",
+    gap: 16,
+    paddingHorizontal: 8,
+  },
   emptyTitle: {
     fontSize: 20,
     fontFamily: "Inter_600SemiBold",
@@ -510,6 +644,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 2,
+  },
+  privacyText: {
+    fontSize: 12,
+    lineHeight: 19,
+    fontFamily: "Inter_400Regular",
+  },
+  errorBanner: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+  },
+  errorText: {
+    fontSize: 12,
+    lineHeight: 18,
+    fontFamily: "Inter_500Medium",
   },
   typeRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   typeChip: {

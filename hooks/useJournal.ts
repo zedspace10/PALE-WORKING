@@ -1,131 +1,111 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getMoonPhase, getUniverseAgeYears } from "@/constants/starCatalog";
+import {
+  createJournalRepository,
+  getJournalRetrospective,
+  JournalEntry,
+  LookingBackBucket,
+} from "@/constants/journal";
 
-const STORAGE_KEY = "@pale_journal";
+export type {
+  EntryType,
+  JournalEntry,
+  LookingBackBucket,
+} from "@/constants/journal";
 
-export type EntryType = "worry" | "reflection" | "goal" | "thought";
+export type JournalErrorOperation = "load" | "save" | "delete";
 
-export interface JournalEntry {
-  id: string;
-  date: string;
-  type: EntryType;
-  text: string;
-  moonPhase?: string;
-  universeAge?: number;
-}
-
-export interface LookingBackBucket {
-  label: string;
-  note: string;
-  entries: JournalEntry[];
-}
-
-function getDaysAgo(iso: string): number {
-  return (Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24);
+export interface JournalError {
+  operation: JournalErrorOperation;
+  message: string;
 }
 
 export function useJournal() {
+  const repository = useRef(createJournalRepository(AsyncStorage)).current;
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deletingIds, setDeletingIds] = useState<string[]>([]);
+  const [error, setError] = useState<JournalError | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setEntries(await repository.load());
+      setError(null);
+    } catch {
+      setError({
+        operation: "load",
+        message: "Your locally stored journal could not be loaded.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [repository]);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
-      if (raw) {
-        try {
-          setEntries(JSON.parse(raw));
-        } catch {}
-      }
-      setLoading(false);
-    });
-  }, []);
-
-  const persist = useCallback(async (updated: JournalEntry[]) => {
-    setEntries(updated);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  }, []);
+    load();
+  }, [load]);
 
   const addEntry = useCallback(
     async (entry: Pick<JournalEntry, "type" | "text">) => {
-      const now = new Date();
-      const newEntry: JournalEntry = {
-        id: Date.now().toString(),
-        date: now.toISOString(),
-        moonPhase: getMoonPhase(now),
-        universeAge: getUniverseAgeYears(),
-        ...entry,
-      };
-      const updated = [newEntry, ...entries];
-      await persist(updated);
-      return newEntry;
+      setSaving(true);
+      try {
+        const added = await repository.add(entry);
+        setEntries([...repository.getCurrent()]);
+        setError(null);
+        return added;
+      } catch {
+        setError({
+          operation: "save",
+          message:
+            "This entry was not saved. Your draft is still here; please retry.",
+        });
+        throw new Error("Journal save failed");
+      } finally {
+        setSaving(false);
+      }
     },
-    [entries, persist]
+    [repository],
   );
 
   const deleteEntry = useCallback(
     async (id: string) => {
-      await persist(entries.filter((e) => e.id !== id));
+      setDeletingIds((current) => [...current, id]);
+      try {
+        setEntries(await repository.delete(id));
+        setError(null);
+      } catch {
+        setError({
+          operation: "delete",
+          message:
+            "That entry could not be deleted. It remains on this device.",
+        });
+        throw new Error("Journal delete failed");
+      } finally {
+        setDeletingIds((current) =>
+          current.filter((entryId) => entryId !== id),
+        );
+      }
     },
-    [entries, persist]
+    [repository],
   );
 
-  // Legacy — kept for backwards compat
-  const lookingBack = entries.filter((e) => {
-    const days = getDaysAgo(e.date);
-    return days >= 320 && days <= 410;
-  });
+  const onThisDay: LookingBackBucket | null = getJournalRetrospective(
+    entries,
+    new Date(),
+  );
 
-  // On This Day — multiple time buckets, most recent non-empty wins
-  const onThisDay: LookingBackBucket | null = (() => {
-    const buckets: Array<{ min: number; max: number; label: string; note: string }> = [
-      {
-        min: 355,
-        max: 380,
-        label: "ONE YEAR AGO",
-        note: "A year ago today, you wrote:",
-      },
-      {
-        min: 175,
-        max: 195,
-        label: "SIX MONTHS AGO",
-        note: "Six months ago, you wrote:",
-      },
-      {
-        min: 85,
-        max: 100,
-        label: "THREE MONTHS AGO",
-        note: "Three months ago, you wrote:",
-      },
-      {
-        min: 28,
-        max: 36,
-        label: "ONE MONTH AGO",
-        note: "A month ago, you wrote:",
-      },
-      {
-        min: 6,
-        max: 9,
-        label: "ONE WEEK AGO",
-        note: "A week ago, you wrote:",
-      },
-    ];
-
-    for (const bucket of buckets) {
-      const found = entries.filter((e) => {
-        const d = getDaysAgo(e.date);
-        return d >= bucket.min && d <= bucket.max;
-      });
-      if (found.length > 0) {
-        return {
-          label: bucket.label,
-          note: bucket.note,
-          entries: found.slice(0, 2), // max 2 per bucket
-        };
-      }
-    }
-    return null;
-  })();
-
-  return { entries, loading, addEntry, deleteEntry, lookingBack, onThisDay };
+  return {
+    entries,
+    loading,
+    saving,
+    deletingIds,
+    error,
+    addEntry,
+    deleteEntry,
+    retryLoad: load,
+    onThisDay,
+  };
 }

@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Platform,
   ScrollView,
@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarField } from "@/components/StarField";
+import { SourceDisclosure } from "@/components/SourceDisclosure";
 import {
   ERA_LABELS,
   ERA_ORDER,
@@ -20,6 +21,7 @@ import {
   TimeMachineEvent,
 } from "@/constants/cosmicTimeMachine";
 import { useColors } from "@/hooks/useColors";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
 function EventCard({
   event,
@@ -54,15 +56,10 @@ function EventCard({
         ]}
       >
         <View style={styles.eventHeader}>
-          <Text style={[styles.eventWhen, { color: event.color + "CC" }]}>
+          <Text style={[styles.eventWhen, { color: colors.primaryStrong }]}>
             {event.when}
           </Text>
-          <Text
-            style={[
-              styles.chevron,
-              { color: colors.mutedForeground },
-            ]}
-          >
+          <Text style={[styles.chevron, { color: colors.mutedForeground }]}>
             {expanded ? "−" : "+"}
           </Text>
         </View>
@@ -75,9 +72,7 @@ function EventCard({
             <View
               style={[styles.divider, { backgroundColor: event.color + "30" }]}
             />
-            <Text
-              style={[styles.eventDesc, { color: colors.mutedForeground }]}
-            >
+            <Text style={[styles.eventDesc, { color: colors.mutedForeground }]}>
               {event.description}
             </Text>
             <View
@@ -86,17 +81,14 @@ function EventCard({
                 { borderLeftColor: event.color + "60" },
               ]}
             >
-              <Text
-                style={[styles.perspLabel, { color: event.color + "90" }]}
-              >
-                PERSPECTIVE
+              <Text style={[styles.perspLabel, { color: colors.primary }]}>
+                POETIC REFLECTION
               </Text>
-              <Text
-                style={[styles.perspText, { color: colors.foreground }]}
-              >
+              <Text style={[styles.perspText, { color: colors.foreground }]}>
                 {event.perspective}
               </Text>
             </View>
+            <SourceDisclosure science={event.science} />
           </View>
         )}
       </TouchableOpacity>
@@ -108,6 +100,8 @@ export default function TimeMachineScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
+  useResetScrollOnFocus(scrollRef);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -123,6 +117,7 @@ export default function TimeMachineScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StarField count={60} containerOpacity={0.35} />
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={[
           styles.content,
           {
@@ -164,8 +159,8 @@ export default function TimeMachineScreen() {
           ]}
         >
           <Text style={[styles.bannerText, { color: colors.foreground }]}>
-            13.8 billion years of cosmic history — and everything that came
-            after. Tap any moment to travel there.
+            About 13.8 billion years of cosmic history — and everything that
+            came after. Tap any moment to travel there.
           </Text>
         </View>
 
@@ -188,9 +183,7 @@ export default function TimeMachineScreen() {
                     backgroundColor: active
                       ? colors.primary + "18"
                       : colors.card,
-                    borderColor: active
-                      ? colors.primary + "55"
-                      : colors.border,
+                    borderColor: active ? colors.primary + "55" : colors.border,
                   },
                 ]}
               >

@@ -2,24 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-import { getEntryForDate } from "@/constants/observatory";
-import { findDusk } from "@/constants/solar";
+import {
+  buildObservatorySchedule,
+  parseNotificationIds,
+} from "@/constants/notificationDomain";
+import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
 
 const ENABLED_KEY = "pale_notifications_enabled";
-const LOCATION_KEY = "pale_location_cache"; // written by app/tonight-sky.tsx
+export const NOTIFICATION_IDS_KEY = "pale_observatory_notification_ids";
 const CHANNEL_ID = "observatory";
-
-/**
- * iOS silently drops anything past 64 pending local notifications. 50 leaves
- * headroom and is far longer than any realistic gap between app opens.
- */
 const DAYS_AHEAD = 50;
-
-/**
- * Notifications name a specific Observatory entry, so the whole batch goes
- * stale whenever OBSERVATORY_ENTRIES changes. Every refresh therefore cancels
- * and rebuilds rather than topping up.
- */
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -30,6 +22,31 @@ Notifications.setNotificationHandler({
   }),
 });
 
+export {
+  buildObservatorySchedule,
+  parseNotificationIds,
+} from "@/constants/notificationDomain";
+
+async function readOurNotificationIds(): Promise<string[]> {
+  return parseNotificationIds(await AsyncStorage.getItem(NOTIFICATION_IDS_KEY));
+}
+
+async function storeOurNotificationIds(ids: string[]): Promise<void> {
+  await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(ids));
+}
+
+export async function cancelObservatoryNotifications(): Promise<void> {
+  const identifiers = await readOurNotificationIds();
+  await Promise.all(
+    identifiers.map((identifier) =>
+      Notifications.cancelScheduledNotificationAsync(identifier).catch(
+        () => undefined,
+      ),
+    ),
+  );
+  await storeOurNotificationIds([]);
+}
+
 export async function areNotificationsEnabled(): Promise<boolean> {
   try {
     return (await AsyncStorage.getItem(ENABLED_KEY)) === "true";
@@ -38,23 +55,17 @@ export async function areNotificationsEnabled(): Promise<boolean> {
   }
 }
 
-/**
- * Turns the daily notification on or off. Returns the state actually reached,
- * which may be false if the user declines the system permission prompt.
- */
 export async function setNotificationsEnabled(on: boolean): Promise<boolean> {
   if (!on) {
-    try {
-      await AsyncStorage.setItem(ENABLED_KEY, "false");
-    } catch {}
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await AsyncStorage.setItem(ENABLED_KEY, "false").catch(() => undefined);
+    await cancelObservatoryNotifications();
     return false;
   }
 
   const granted = await ensurePermission();
-  try {
-    await AsyncStorage.setItem(ENABLED_KEY, granted ? "true" : "false");
-  } catch {}
+  await AsyncStorage.setItem(ENABLED_KEY, granted ? "true" : "false").catch(
+    () => undefined,
+  );
   if (granted) await refreshObservatorySchedule();
   return granted;
 }
@@ -63,44 +74,29 @@ async function ensurePermission(): Promise<boolean> {
   const existing = await Notifications.getPermissionsAsync();
   if (existing.granted) return true;
   if (!existing.canAskAgain) return false;
-  const asked = await Notifications.requestPermissionsAsync();
-  return asked.granted;
+  return (await Notifications.requestPermissionsAsync()).granted;
 }
 
-async function readCachedLocation(): Promise<{ lat: number; lng: number } | null> {
-  try {
-    const raw = await AsyncStorage.getItem(LOCATION_KEY);
-    if (!raw) return null;
-    const { lat, lng } = JSON.parse(raw);
-    if (typeof lat !== "number" || typeof lng !== "number") return null;
-    return { lat, lng };
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Cancels every pending notification and reschedules the next DAYS_AHEAD
- * nights, each at that night's civil dusk. Returns how many were scheduled.
- *
- * Returns 0 without scheduling anything when notifications are off, permission
- * is missing, or no location has been cached yet. It never guesses a location:
- * a wrong position means an alert firing in the middle of the night.
- */
-export async function refreshObservatorySchedule(): Promise<number> {
+/** Replaces only PALE Observatory notifications; unrelated notifications remain untouched. */
+export async function refreshObservatorySchedule(
+  now = new Date(),
+): Promise<number> {
   if (!(await areNotificationsEnabled())) {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await cancelObservatoryNotifications();
     return 0;
   }
 
-  const perms = await Notifications.getPermissionsAsync();
-  if (!perms.granted) {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+  const permissions = await Notifications.getPermissionsAsync();
+  if (!permissions.granted) {
+    await cancelObservatoryNotifications();
     return 0;
   }
 
-  const loc = await readCachedLocation();
-  if (!loc) return 0;
+  const cache = parseCachedLocation(
+    await AsyncStorage.getItem(LOCATION_CACHE_KEY).catch(() => null),
+    now.getTime(),
+  );
+  if (!cache.ok) return 0;
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
@@ -109,35 +105,28 @@ export async function refreshObservatorySchedule(): Promise<number> {
     });
   }
 
-  await Notifications.cancelAllScheduledNotificationsAsync();
-
-  const now = Date.now();
-  let scheduled = 0;
-
-  for (let offset = 0; offset < DAYS_AHEAD; offset++) {
-    const day = new Date();
-    day.setHours(12, 0, 0, 0);
-    day.setDate(day.getDate() + offset);
-
-    const dusk = findDusk(loc.lat, loc.lng, day);
-    if (!dusk) continue; // polar summer, or the sky never darkens that day
-    if (dusk.getTime() <= now + 60_000) continue; // today's dusk already passed
-
-    const entry = getEntryForDate(day);
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `The Observatory: ${entry.location}`,
-        body: entry.locationDetail,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: dusk,
-        ...(Platform.OS === "android" ? { channelId: CHANNEL_ID } : {}),
-      },
-    });
-    scheduled++;
+  await cancelObservatoryNotifications();
+  const scheduledIds: string[] = [];
+  try {
+    for (const candidate of buildObservatorySchedule(
+      cache.value,
+      now,
+      DAYS_AHEAD,
+    )) {
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: { title: candidate.title, body: candidate.body },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: candidate.at,
+          ...(Platform.OS === "android" ? { channelId: CHANNEL_ID } : {}),
+        },
+      });
+      scheduledIds.push(identifier);
+      await storeOurNotificationIds(scheduledIds);
+    }
+  } catch (error) {
+    await storeOurNotificationIds(scheduledIds).catch(() => undefined);
+    throw error;
   }
-
-  return scheduled;
+  return scheduledIds.length;
 }

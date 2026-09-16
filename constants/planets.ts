@@ -23,13 +23,7 @@ type Elements = {
 };
 
 export type PlanetId =
-  | "mercury"
-  | "venus"
-  | "mars"
-  | "jupiter"
-  | "saturn"
-  | "uranus"
-  | "neptune";
+  "mercury" | "venus" | "mars" | "jupiter" | "saturn" | "uranus" | "neptune";
 
 const ELEMENTS: Record<PlanetId | "earth", Elements> = {
   mercury: {
@@ -147,7 +141,7 @@ export type PlanetPosition = {
 
 export function getPlanetPosition(
   planet: PlanetId,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): PlanetPosition {
   const d = dayNumber(date);
 

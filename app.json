@@ -34,10 +34,7 @@
       "package": "com.stellara.pale",
       "versionCode": 2,
       "backgroundColor": "#000000",
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
-      ]
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {
       "favicon": "./assets/images/icon.png"

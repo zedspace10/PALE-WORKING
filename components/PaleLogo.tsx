@@ -1,5 +1,5 @@
 import React from "react";
-import Svg, { Circle, Ellipse, Line } from "react-native-svg";
+import Svg, { Circle, Line } from "react-native-svg";
 
 interface Props {
   size?: number;
@@ -7,7 +7,11 @@ interface Props {
   dotColor?: string;
 }
 
-export function PaleLogo({ size = 72, color = "#C8A96E", dotColor = "#8B9BB4" }: Props) {
+export function PaleLogo({
+  size = 72,
+  color = "#A995FF",
+  dotColor = "#8B9BB4",
+}: Props) {
   const cx = size / 2;
   const cy = size / 2;
   const outerR = size * 0.44;

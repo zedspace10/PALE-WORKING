@@ -10,7 +10,7 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 
-const easeInOut = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
 type Props = { size?: number };
 
@@ -35,7 +35,7 @@ export function EarthView({ size = 180 }: Props) {
           easing: easeInOut,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
 
     // Expanding rings
@@ -54,7 +54,7 @@ export function EarthView({ size = 180 }: Props) {
             duration: 0,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       );
 
     pulse.start();
@@ -73,9 +73,6 @@ export function EarthView({ size = 180 }: Props) {
 
   const ringOpacity = (anim: Animated.Value) =>
     anim.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 0.18, 0] });
-
-  const center = size / 2;
-  const r = size * 0.42;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>

@@ -2,11 +2,13 @@
 
 # dependencies
 node_modules/
+.kilo/
 
 # Expo
 .expo/
 dist/
 web-build/
+coverage/
 expo-env.d.ts
 
 # Native

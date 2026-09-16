@@ -6,6 +6,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
@@ -16,6 +17,13 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MomentCard } from "@/components/MomentCard";
 import { useNotificationSchedule } from "@/hooks/useNotificationSchedule";
 import { useOpenCount } from "@/hooks/useOpenCount";
+import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
+import palette from "@/constants/colors";
+import {
+  classifySolarAltitude,
+  getSolarAltitude,
+  SolarState,
+} from "@/constants/solar";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,10 +36,37 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
   // Full moment card on the first open of the day only.
   const [dismissed, setDismissed] = useState(openCount > 1);
   const hour = new Date().getHours();
+  const [momentSolarState, setMomentSolarState] = useState<
+    SolarState | null | undefined
+  >(undefined);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const now = new Date();
+      const cached = parseCachedLocation(
+        await AsyncStorage.getItem(LOCATION_CACHE_KEY).catch(() => null),
+        now.getTime(),
+      );
+      const next = cached.ok
+        ? classifySolarAltitude(
+            getSolarAltitude(cached.value.lat, cached.value.lng, now),
+          )
+        : null;
+      if (active) setMomentSolarState(next);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <>
-      <Stack>
+      <Stack
+        screenOptions={{
+          contentStyle: { backgroundColor: palette.dark.background },
+        }}
+      >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="shift"
@@ -66,10 +101,11 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
         />
       </Stack>
 
-      {!dismissed && (
+      {!dismissed && momentSolarState !== undefined && (
         <MomentCard
           hour={hour}
           openCount={openCount}
+          solarState={momentSolarState}
           onDismiss={() => setDismissed(true)}
         />
       )}
@@ -109,7 +145,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView style={{ flex: 1 }}>
+          <GestureHandlerRootView
+            style={{ flex: 1, backgroundColor: palette.dark.background }}
+          >
             <RootLayoutNav openCount={todayCount} />
           </GestureHandlerRootView>
         </QueryClientProvider>

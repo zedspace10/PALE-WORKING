@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -23,26 +24,61 @@ import Svg, {
 import { useRouter } from "expo-router";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SkyStateIcon } from "@/components/SkyStateIcon";
+import { SourceDisclosure } from "@/components/SourceDisclosure";
 import { StarField } from "@/components/StarField";
+import {
+  CONTENT_REVIEWED_AT,
+  scientificMeta,
+  ScientificItem,
+  ScientificSourceId,
+} from "@/constants/scientificContent";
 import { findStarByAge } from "@/constants/starCatalog";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 import {
   formatLightTime,
   getPlanetPosition,
   PlanetId,
 } from "@/constants/planets";
-import { findDusk } from "@/constants/solar";
+import {
+  equatorialToHorizontal,
+  getMoonIllumination,
+  getMoonPhaseFraction,
+  getMoonPosition,
+} from "@/constants/astronomy";
+import {
+  LOCATION_CACHE_KEY,
+  parseCachedLocation,
+  serializeCachedLocation,
+  withTimeout,
+} from "@/constants/location";
+import {
+  classifySolarAltitude,
+  findEveningSolarCrossing,
+  getSolarAltitude,
+  SOLAR_STATE_LABELS,
+  SolarCrossingResult,
+  SolarState,
+} from "@/constants/solar";
+import { resolveSkyLocation } from "@/constants/skyLocation";
+import {
+  getObservationGuidance,
+  LOCAL_CONDITIONS_NOTE,
+  ObservingObjectKind,
+} from "@/constants/visibility";
 
 const { width: SW } = Dimensions.get("window");
-const GOLD = "#C8A96E";
-const WARM_WHITE = "#F5F0E8";
-const BLUE_GREY = "#8B9BB4";
+const GOLD = "#A995FF";
+const WARM_WHITE = "#F7F4FF";
+const BLUE_GREY = "#AAA4BE";
 
-type NightObjectType = "moon" | "planet" | "star" | "constellation" | "galaxy" | "satellite";
+type NightObjectType =
+  "moon" | "planet" | "star" | "constellation" | "galaxy" | "satellite";
 
-interface NightObject {
+interface NightObject extends ScientificItem {
   id: string;
   name: string;
   type: NightObjectType;
@@ -53,21 +89,27 @@ interface NightObject {
   truth: string;
   wonder: string;
   instruction: string;
+  apparentMagnitude?: number;
+  observingKind?: ObservingObjectKind;
+  opticalAid?: "binoculars" | "telescope";
   alt?: number;
   az?: number;
 }
 
-const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
+type NightObjectSeed = Omit<NightObject, "alt" | "az" | "science">;
+
+const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
   {
     id: "moon",
     name: "The Moon",
     type: "moon",
     color: "#E8E0D0",
     truth:
-      "The Moon is moving away from Earth at 3.8 centimetres per year — the same speed your fingernails grow. It has been doing this for 4.5 billion years.",
-    wonder: "Every human who has ever lived has looked at this same Moon.",
+      "Lunar laser measurements show the Moon is currently receding from Earth by about 3.8 centimetres per year. That rate has changed over geological time.",
+    wonder:
+      "People across cultures have watched the Moon throughout recorded history.",
     instruction:
-      "Find the Moon tonight. It has been there every night of every human life ever lived.",
+      "If it is above your horizon, look for the Moon along the direction shown. Its phase changes how easy it is to find.",
   },
   {
     id: "venus",
@@ -75,10 +117,11 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "planet",
     color: "#FFF8DC",
     truth:
-      "Venus is the brightest object in the night sky after the Moon. It is so bright it can cast shadows. Ancient civilisations thought it was two different stars — the morning star and the evening star.",
+      "Venus is the brightest planet in Earth's sky and, under very dark conditions, can cast faint shadows.",
     wonder:
       "What you are seeing is sunlight that bounced off Venus and carried on to your eyes.",
-    instruction: "Look for the brightest point of light in the sky. That's Venus.",
+    instruction:
+      "Look in the indicated direction for an exceptionally bright, steady planet. Other bright objects can be present too.",
   },
   {
     id: "jupiter",
@@ -86,10 +129,11 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "planet",
     color: "#C88B3A",
     truth:
-      "Jupiter is so massive that it does not orbit the Sun. Both Jupiter and the Sun orbit a point called the barycentre — a point that lies just outside the Sun's surface.",
+      "Jupiter and the Sun both orbit their common barycentre. Because Jupiter is so massive, that point can lie just outside the Sun's surface.",
     wonder:
       "You are not seeing Jupiter as it is. You are seeing it as it was when the light set off.",
-    instruction: "Find the bright steady point that doesn't twinkle. That's Jupiter.",
+    instruction:
+      "Look for the indicated bright point. Planets usually appear steadier than stars, though atmospheric turbulence near the horizon can still make them shimmer.",
   },
   {
     id: "saturn",
@@ -98,8 +142,10 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     color: "#E4D191",
     truth:
       "Saturn's rings are 282,000 kilometres wide but only about 10 metres thick. If Saturn were the size of a basketball, its rings would be thinner than a sheet of paper.",
-    wonder: "The light reaching you from Saturn set off while you were doing something else entirely.",
-    instruction: "Saturn doesn't twinkle. It shines with a steady golden light.",
+    wonder:
+      "The light reaching you from Saturn set off while you were doing something else entirely.",
+    instruction:
+      "Look for the indicated pale-gold point. It usually appears steadier than nearby stars when well above the horizon.",
   },
   {
     id: "mars",
@@ -107,7 +153,7 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "planet",
     color: "#C1440E",
     truth:
-      "Right now there are active spacecraft on Mars. The Perseverance rover is driving across an ancient lake bed, collecting samples that may one day tell us if life existed there.",
+      "Robotic missions have explored Mars from orbit and on the surface. Perseverance has studied rocks in Jezero Crater and cached samples intended for possible future analysis.",
     wonder:
       "Mars has the largest volcano in the solar system — Olympus Mons, three times taller than Everest.",
     instruction:
@@ -121,9 +167,9 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "star",
     color: "#B0C4DE",
     truth:
-      "Sirius is 8.6 light-years away. The light reaching your eyes right now left Sirius 8.6 years ago. You are not seeing Sirius as it is — you are seeing it as it was.",
+      "Sirius is roughly 8.6 light-years away. The light arriving from it began its journey about 8.6 years earlier, so every view is of its past.",
     wonder:
-      "Sirius is the brightest star in the night sky. Ancient Egyptians used its annual appearance to predict the flooding of the Nile.",
+      "Sirius is the brightest star in Earth's night sky by apparent magnitude.",
     instruction:
       "The brightest star in the sky. Look for the one that sparkles with blue-white light.",
   },
@@ -135,9 +181,9 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "constellation",
     color: "#E8F0FF",
     truth:
-      "The three stars in Orion's belt are between 800 and 1,340 light-years away from Earth. They are not actually close to each other — they just appear aligned from our vantage point.",
+      "The three stars in Orion's belt are roughly 1,200 to 2,000 light-years away by current estimates. They are not physically adjacent; they appear aligned from our vantage point.",
     wonder:
-      "Orion has been recognised as a figure by cultures on every inhabited continent. Every human civilisation that has ever existed looked up and saw the same pattern.",
+      "Many cultures have recognised patterns in these stars, often telling very different stories about the same part of the sky.",
     instruction:
       "Look for three stars in a straight line. That's Orion's belt — one of the most recognisable patterns in the sky.",
   },
@@ -149,10 +195,11 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "star",
     color: "#FF6B35",
     truth:
-      "Betelgeuse is so large that if it replaced our Sun, it would extend beyond the orbit of Jupiter. You could fit 700 million Suns inside it.",
+      "Betelgeuse is a red supergiant large enough to engulf the inner planets if placed at the centre of our Solar System. Its exact radius is difficult to define and published estimates vary.",
     wonder:
-      "Betelgeuse is one of the largest stars visible from Earth — so vast that if it replaced our Sun it would extend beyond the orbit of Jupiter. It has been shining steadily for millions of years and is one of the most remarkable objects in the night sky.",
-    instruction: "Find the reddish-orange star in Orion's shoulder. That's Betelgeuse.",
+      "Betelgeuse varies in brightness and sheds material into space. Models agree it is enormous, but not on one exact boundary for its extended atmosphere.",
+    instruction:
+      "Find the reddish-orange star in Orion's shoulder. That's Betelgeuse.",
   },
   {
     id: "vega",
@@ -164,7 +211,7 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     truth:
       "Vega is 25 light-years away. Due to Earth's axial precession, Vega will become the North Star in approximately 12,000 years. The night sky is always slowly changing.",
     wonder:
-      "Carl Sagan chose Vega as the source of the alien signal in his novel Contact. It was chosen because it is bright, close, and exactly the kind of star that could have planets.",
+      "Carl Sagan chose Vega as the fictional source of the signal in his novel Contact. The literary choice is not evidence of a planet or civilisation there.",
     instruction:
       "Vega is one of the brightest stars in the summer sky. Look for a brilliant blue-white point high overhead.",
   },
@@ -176,9 +223,9 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "star",
     color: "#FFB347",
     truth:
-      "Arcturus is 37 light-years away and moving through the galaxy at an unusual angle to most other stars — it is a visitor from a different part of the Milky Way.",
+      "Arcturus is about 37 light-years away and has a comparatively large motion through the sky relative to the Sun.",
     wonder:
-      "The light from Arcturus was used to open the 1933 World's Fair in Chicago. Astronomers calculated that the light arriving at Earth that day had left Arcturus in 1893 — the year of the previous Chicago World's Fair.",
+      "Its warm orange appearance comes from a cooler surface temperature than the Sun's, not from a nearby fire-like glow.",
     instruction:
       "Follow the curve of the Big Dipper's handle and it will arc to Arcturus — a warm orange star.",
   },
@@ -190,7 +237,7 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "galaxy",
     color: "#9966cc",
     truth:
-      "What you are seeing is not a cloud. It is 400 billion stars — so many and so distant that their individual light blurs into a band. You are looking at the plane of our galaxy from inside it.",
+      "The pale band is the combined light of vast numbers of unresolved stars, mixed with dark dust, as we look through the Milky Way's disk from inside it. The galaxy as a whole is estimated to contain roughly 100 to 400 billion stars.",
     wonder:
       "The Milky Way core is best seen from June to September in the northern hemisphere. The band of light you see is our galaxy seen edge-on from within.",
     instruction:
@@ -204,9 +251,9 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "constellation",
     color: "#E8F0FF",
     truth:
-      "Cassiopeia contains several star clusters visible to the naked eye. One of them — the Double Cluster — contains over 300 young blue stars and is 7,000 light-years away.",
+      "Near Cassiopeia lies the Double Cluster, which is physically in the neighbouring constellation Perseus. Under a dark sky it can appear as a faint patch to unaided eyes and resolves into many stars with binoculars.",
     wonder:
-      "Cassiopeia is circumpolar from most of the northern hemisphere — it never sets below the horizon. It has been visible every single night from northern latitudes for all of human history.",
+      "From many northern latitudes Cassiopeia is circumpolar, remaining above the horizon through the night, although weather and daylight often hide it.",
     instruction: "Look for a distinctive W or M shape near the North Star.",
   },
   {
@@ -219,7 +266,7 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     truth:
       "Five of the seven stars in the Big Dipper are moving through space together — they were born from the same cloud of gas and are travelling in the same direction. They will eventually drift apart over millions of years.",
     wonder:
-      "The two stars at the end of the Big Dipper's bowl always point toward the North Star. Sailors have used this for navigation for thousands of years.",
+      "The two stars at the end of the Big Dipper's bowl form a useful guide toward Polaris. Northern navigators have long used the surrounding sky for orientation.",
     instruction:
       "The Big Dipper is one of the most recognisable patterns in the northern sky. Look for seven stars in the shape of a ladle.",
   },
@@ -231,9 +278,9 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     type: "star",
     color: "#F0F8FF",
     truth:
-      "Polaris appears stationary because it sits almost exactly above Earth's North Pole. Every other star in the northern sky appears to rotate around it over the course of a night.",
+      "Polaris appears nearly fixed because it lies less than a degree from the north celestial pole. Other northern stars trace apparent arcs around that pole over a night.",
     wonder:
-      "Polaris has been used for navigation by sailors, travellers and explorers for thousands of years. It is the one star that never moves.",
+      "Polaris has long been used for northern navigation. It traces a small circle around the celestial pole rather than remaining perfectly fixed.",
     instruction:
       "Find the North Star by following the two stars at the end of the Big Dipper's bowl — they point directly to Polaris.",
   },
@@ -247,15 +294,89 @@ const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = [
     truth:
       "The heart of Scorpius is Antares — a red supergiant so large that if it replaced our Sun, it would swallow Mercury, Venus, Earth and Mars.",
     wonder:
-      "Scorpius and Orion are on opposite sides of the sky and never appear at the same time — an ancient myth says they were placed there so they would never meet.",
+      "Scorpius and Orion occupy nearly opposite parts of the sky, so one is usually prominent when the other is not. Near seasonal transitions, parts of both can briefly be above opposite horizons.",
     instruction:
-      "Scorpius is best seen in summer from the southern hemisphere. Look for a curved line of stars with a distinctive red star — Antares — at its heart.",
+      "Scorpius is best placed during Southern Hemisphere winter evenings. Look for a curved line of stars with the reddish star Antares near its heart.",
   },
 ];
 
-const PRIORITY: NightObjectType[] = ["satellite", "moon", "planet", "star", "constellation", "galaxy"];
+const NIGHT_OBJECT_SOURCES: Partial<
+  Record<string, readonly [ScientificSourceId, ...ScientificSourceId[]]>
+> = {
+  moon: ["nasaMoonFacts", "nasaMoonPhases"],
+  venus: ["nasaSolarSystem"],
+  jupiter: ["nasaBarycenter"],
+  saturn: ["nasaSolarSystem"],
+  mars: ["nasaSolarSystem"],
+  betelgeuse: ["nasaBetelgeuse"],
+  milkyway: ["nasaMilkyWay"],
+  cassiopeia: ["nasaDoubleCluster"],
+};
 
-const OBJECT_PRIORITY_ORDER = ["moon", "venus", "jupiter", "saturn", "mars", "sirius", "betelgeuse", "vega", "arcturus", "orion", "ursamajor", "cassiopeia", "polaris", "scorpius", "milkyway"];
+function getNightObjectSources(
+  object: NightObjectSeed,
+): readonly [ScientificSourceId, ...ScientificSourceId[]] {
+  const specific = NIGHT_OBJECT_SOURCES[object.id];
+  if (specific) return specific;
+  if (object.type === "planet") return ["nasaSolarSystem"];
+  if (object.type === "star" || object.type === "constellation")
+    return ["nasaStars"];
+  if (object.type === "galaxy") return ["nasaMilkyWay"];
+  return ["nasaUniverseOverview"];
+}
+
+const NIGHT_OBJECT_OBSERVING: Record<
+  string,
+  Pick<NightObject, "apparentMagnitude" | "observingKind" | "opticalAid">
+> = {
+  moon: { apparentMagnitude: -12.7, observingKind: "moon" },
+  venus: { apparentMagnitude: -4, observingKind: "planet" },
+  jupiter: { apparentMagnitude: -2, observingKind: "planet" },
+  saturn: { apparentMagnitude: 1, observingKind: "planet" },
+  mars: { apparentMagnitude: 1.5, observingKind: "planet" },
+  sirius: { apparentMagnitude: -1.46, observingKind: "point-source" },
+  orion: { observingKind: "constellation" },
+  betelgeuse: { apparentMagnitude: 0.5, observingKind: "point-source" },
+  vega: { apparentMagnitude: 0.03, observingKind: "point-source" },
+  arcturus: { apparentMagnitude: -0.05, observingKind: "point-source" },
+  milkyway: { observingKind: "extended-object" },
+  cassiopeia: { observingKind: "constellation" },
+  ursamajor: { observingKind: "constellation" },
+  polaris: { apparentMagnitude: 1.98, observingKind: "point-source" },
+  scorpius: { observingKind: "constellation" },
+};
+
+const NIGHT_OBJECTS: Omit<NightObject, "alt" | "az">[] = NIGHT_OBJECTS_BASE.map(
+  (object) => ({
+    ...object,
+    ...NIGHT_OBJECT_OBSERVING[object.id],
+    science: scientificMeta({
+      classification: "estimate",
+      reviewedAt: CONTENT_REVIEWED_AT,
+      sourceIds: getNightObjectSources(object),
+      precisionNote:
+        "Sky positions are approximate and visibility depends on local conditions.",
+    }),
+  }),
+);
+
+const OBJECT_PRIORITY_ORDER = [
+  "moon",
+  "venus",
+  "jupiter",
+  "saturn",
+  "mars",
+  "sirius",
+  "betelgeuse",
+  "vega",
+  "arcturus",
+  "orion",
+  "ursamajor",
+  "cassiopeia",
+  "polaris",
+  "scorpius",
+  "milkyway",
+];
 
 const CATALOG_STAR_COORDS: Record<string, { ra: number; dec: number }> = {
   "Proxima Centauri": { ra: 217.4, dec: -62.7 },
@@ -289,102 +410,6 @@ const CATALOG_STAR_COORDS: Record<string, { ra: number; dec: number }> = {
   Achernar: { ra: 24.4, dec: -57.2 },
   Polaris: { ra: 37.9, dec: 89.3 },
 };
-
-function getLocalSiderealTime(lng: number, date: Date): number {
-  const JD = date.getTime() / 86400000 + 2440587.5;
-  const T = (JD - 2451545.0) / 36525;
-  const GMST =
-    280.46061837 + 360.98564736629 * (JD - 2451545.0) + 0.000387933 * T * T;
-  return ((GMST + lng) % 360 + 360) % 360;
-}
-
-function getAltAz(
-  ra: number,
-  dec: number,
-  lat: number,
-  lst: number
-): { alt: number; az: number } {
-  const ha = ((lst - ra) % 360 + 360) % 360;
-  const haRad = (ha * Math.PI) / 180;
-  const decRad = (dec * Math.PI) / 180;
-  const latRad = (lat * Math.PI) / 180;
-  const sinAlt =
-    Math.sin(decRad) * Math.sin(latRad) +
-    Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad);
-  const altRad = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
-  const alt = (altRad * 180) / Math.PI;
-  const cosAlt = Math.cos(altRad);
-  const cosAz =
-    cosAlt > 0.0001
-      ? (Math.sin(decRad) - Math.sin(latRad) * sinAlt) /
-        (Math.cos(latRad) * cosAlt)
-      : 0;
-  let az = (Math.acos(Math.max(-1, Math.min(1, cosAz))) * 180) / Math.PI;
-  if (Math.sin(haRad) > 0) az = 360 - az;
-  return { alt, az };
-}
-
-function getMoonPosition(date: Date): { ra: number; dec: number } {
-  const d = date.getTime() / 86400000 + 2440587.5 - 2451545.0;
-  const L = ((218.316 + 13.176396 * d) % 360 + 360) % 360;
-  const M = ((134.963 + 13.064993 * d) % 360 + 360) % 360;
-  const F = ((93.272 + 13.22935 * d) % 360 + 360) % 360;
-  const lam = L + 6.289 * Math.sin((M * Math.PI) / 180);
-  const b = 5.128 * Math.sin((F * Math.PI) / 180);
-  const eps = (23.439 * Math.PI) / 180;
-  const lamRad = (lam * Math.PI) / 180;
-  const bRad = (b * Math.PI) / 180;
-  const ra =
-    (Math.atan2(
-      Math.sin(lamRad) * Math.cos(eps) - Math.tan(bRad) * Math.sin(eps),
-      Math.cos(lamRad)
-    ) *
-      180) /
-    Math.PI;
-  const dec =
-    (Math.asin(
-      Math.sin(bRad) * Math.cos(eps) +
-        Math.cos(bRad) * Math.sin(eps) * Math.sin(lamRad)
-    ) *
-      180) /
-    Math.PI;
-  return { ra: ((ra % 360) + 360) % 360, dec };
-}
-
-function getMoonIllumination(date: Date): number {
-  const knownNew = new Date("2024-01-11T11:57:00Z").getTime();
-  const synodic = 29.53059 * 86400000;
-  const phase = (((date.getTime() - knownNew) % synodic) + synodic) % synodic / synodic;
-  return 0.5 * (1 - Math.cos(2 * Math.PI * phase));
-}
-
-function getMoonPhaseAngle(date: Date): number {
-  const knownNew = new Date("2024-01-11T11:57:00Z").getTime();
-  const synodic = 29.53059 * 86400000;
-  return (((date.getTime() - knownNew) % synodic) + synodic) % synodic / synodic;
-}
-
-function getSolarAltitude(lat: number, lng: number, date: Date): number {
-  const JD = date.getTime() / 86400000 + 2440587.5;
-  const n = JD - 2451545.0;
-  const L = (280.46 + 0.9856474 * n) % 360;
-  const g = ((357.528 + 0.9856003 * n) % 360) * (Math.PI / 180);
-  const lam =
-    (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * (Math.PI / 180);
-  const eps = 23.439 * (Math.PI / 180);
-  const ra = Math.atan2(
-    Math.cos(eps) * Math.sin(lam),
-    Math.cos(lam)
-  );
-  const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
-  const lst = getLocalSiderealTime(lng, date);
-  const ha = ((lst - (ra * 180) / Math.PI + 360) % 360) * (Math.PI / 180);
-  const latRad = (lat * Math.PI) / 180;
-  const sinAlt =
-    Math.sin(dec) * Math.sin(latRad) +
-    Math.cos(dec) * Math.cos(latRad) * Math.cos(ha);
-  return (Math.asin(Math.max(-1, Math.min(1, sinAlt))) * 180) / Math.PI;
-}
 
 function azToCompass(az: number): string {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -440,50 +465,95 @@ const CONSTELLATION_DOTS: Record<string, { x: number; y: number }[]> = {
 };
 
 const CONSTELLATION_LINE_INDICES: Record<string, [number, number][]> = {
-  orion: [[0,2],[1,4],[2,3],[3,4],[4,1],[5,4],[6,2]],
-  cassiopeia: [[0,1],[1,2],[2,3],[3,4]],
-  ursamajor: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3]],
-  scorpius: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8]],
+  orion: [
+    [0, 2],
+    [1, 4],
+    [2, 3],
+    [3, 4],
+    [4, 1],
+    [5, 4],
+    [6, 2],
+  ],
+  cassiopeia: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+  ],
+  ursamajor: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [4, 5],
+    [5, 6],
+    [6, 3],
+  ],
+  scorpius: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+    [4, 5],
+    [5, 6],
+    [6, 7],
+    [7, 8],
+  ],
 };
 
 interface VisibleObject extends NightObject {
   alt: number;
   az: number;
+  visibilityQualifier: string;
+  unaidedEligible: boolean;
   isPersonalStar?: boolean;
   personalStarDistance?: number;
-  personalStarBirthYear?: number;
+  personalStarDepartureYear?: number;
 }
 
 interface NightSkyState {
-  status: "loading" | "denied" | "before_dark" | "ready";
+  status:
+    "loading" | "denied" | "unavailable" | "ready-current" | "ready-cached";
   objects: VisibleObject[];
   moonIllumination: number;
   moonPhase: number;
   solarAlt: number;
-  /** When the sky actually darkens tonight. Null where it never does. */
-  duskAt: Date | null;
-  lat: number;
-  lng: number;
+  solarState: SolarState;
+  darkness: SolarCrossingResult | null;
+  lat: number | null;
+  lng: number | null;
+  calculatedAt: Date;
 }
+
+const LOCATION_REQUEST_TIMEOUT_MS = 10000;
 
 function computeVisibleObjects(
   lat: number,
   lng: number,
-  date: Date
+  date: Date,
 ): { objects: NightObject[]; moonIllumination: number; moonPhase: number } {
-  const lst = getLocalSiderealTime(lng, date);
   const moonIllum = getMoonIllumination(date);
-  const moonPhase = getMoonPhaseAngle(date);
+  const moonPhase = getMoonPhaseFraction(date);
   const moonPos = getMoonPosition(date);
-  const moonAltAz = getAltAz(moonPos.ra, moonPos.dec, lat, lst);
+  const moonAltAz = equatorialToHorizontal(moonPos, { lat, lng }, date);
 
   const visible: VisibleObject[] = [];
 
   if (moonAltAz.alt > 10 && moonIllum > 0.1) {
+    const object = NIGHT_OBJECTS.find(
+      (candidate) => candidate.id === "moon",
+    ) as NightObject;
+    const guidance = getObservationGuidance({
+      altitude: moonAltAz.alt,
+      apparentMagnitude: object.apparentMagnitude,
+      kind: object.observingKind ?? "moon",
+    });
     visible.push({
-      ...(NIGHT_OBJECTS.find((o) => o.id === "moon") as NightObject),
+      ...object,
       alt: moonAltAz.alt,
       az: moonAltAz.az,
+      visibilityQualifier: guidance.qualifier,
+      unaidedEligible: guidance.unaidedEligible,
     });
   }
 
@@ -494,24 +564,49 @@ function computeVisibleObjects(
     // than stored. Their light travel time changes with it.
     if (obj.type === "planet") {
       const pos = getPlanetPosition(obj.id as PlanetId, date);
-      const { alt, az } = getAltAz(pos.ra, pos.dec, lat, lst);
+      const { alt, az } = equatorialToHorizontal(pos, { lat, lng }, date);
       if (alt > 10) {
+        const guidance = getObservationGuidance({
+          altitude: alt,
+          apparentMagnitude: obj.apparentMagnitude,
+          kind: obj.observingKind ?? "planet",
+        });
         visible.push({
           ...obj,
           alt,
           az,
           wonder: `${obj.wonder} Right now its light takes ${formatLightTime(
-            pos.lightMinutes
+            pos.lightMinutes,
           )} to reach you.`,
+          visibilityQualifier: guidance.qualifier,
+          unaidedEligible: guidance.unaidedEligible,
         });
       }
       continue;
     }
 
     if (!obj.ra || obj.dec === undefined) continue;
-    const { alt, az } = getAltAz(obj.ra, obj.dec, lat, lst);
+    const { alt, az } = equatorialToHorizontal(
+      { ra: obj.ra, dec: obj.dec },
+      { lat, lng },
+      date,
+    );
     if (alt > 10) {
-      visible.push({ ...obj, alt, az });
+      const guidance = getObservationGuidance({
+        altitude: alt,
+        apparentMagnitude: obj.apparentMagnitude,
+        kind:
+          obj.observingKind ??
+          (obj.type === "constellation" ? "constellation" : "point-source"),
+        opticalAid: obj.opticalAid,
+      });
+      visible.push({
+        ...obj,
+        alt,
+        az,
+        visibilityQualifier: guidance.qualifier,
+        unaidedEligible: guidance.unaidedEligible,
+      });
     }
   }
 
@@ -524,7 +619,15 @@ function computeVisibleObjects(
   return { objects: visible, moonIllumination: moonIllum, moonPhase };
 }
 
-function CompassIndicator({ az, alt, color }: { az: number; alt: number; color: string }) {
+function CompassIndicator({
+  az,
+  alt,
+  color,
+}: {
+  az: number;
+  alt: number;
+  color: string;
+}) {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   const activeDir = Math.round(az / 45) % 8;
   return (
@@ -536,8 +639,9 @@ function CompassIndicator({ az, alt, color }: { az: number; alt: number; color: 
             style={[
               styles.compassDir,
               {
-                color: i === activeDir ? GOLD : "rgba(200,169,110,0.25)",
-                fontFamily: i === activeDir ? "Inter_600SemiBold" : "Inter_400Regular",
+                color: i === activeDir ? GOLD : "rgba(169,149,255,0.25)",
+                fontFamily:
+                  i === activeDir ? "Inter_600SemiBold" : "Inter_400Regular",
               },
             ]}
           >
@@ -583,10 +687,19 @@ function MoonVisual({ phase, size }: { phase: number; size: number }) {
   );
 }
 
-function ConstellationVisual({ id, color, size }: { id: string; color: string; size: number }) {
+function ConstellationVisual({
+  id,
+  color,
+  size,
+}: {
+  id: string;
+  color: string;
+  size: number;
+}) {
   const key = id === "ursamajor" ? "ursamajor" : id;
   const dots = CONSTELLATION_DOTS[key] ?? CONSTELLATION_DOTS.orion;
-  const lines = CONSTELLATION_LINE_INDICES[key] ?? CONSTELLATION_LINE_INDICES.orion;
+  const lines =
+    CONSTELLATION_LINE_INDICES[key] ?? CONSTELLATION_LINE_INDICES.orion;
   return (
     <Svg width={size} height={size}>
       {lines.map(([a, b], i) => {
@@ -658,14 +771,29 @@ function StarPlanetVisual({ color, size }: { color: string; size: number }) {
       </Defs>
       <Circle cx={c} cy={c} r={c} fill={`url(#${glowId})`} />
       <Circle cx={c} cy={c} r={c * 0.18} fill={color} opacity={0.95} />
-      <Circle cx={c * 0.88} cy={c * 0.82} r={c * 0.04} fill="#ffffff" opacity={0.7} />
+      <Circle
+        cx={c * 0.88}
+        cy={c * 0.82}
+        r={c * 0.04}
+        fill="#ffffff"
+        opacity={0.7}
+      />
     </Svg>
   );
 }
 
-function ObjectVisual({ obj, moonPhase, size = 160 }: { obj: VisibleObject; moonPhase: number; size?: number }) {
+function ObjectVisual({
+  obj,
+  moonPhase,
+  size = 160,
+}: {
+  obj: VisibleObject;
+  moonPhase: number;
+  size?: number;
+}) {
   if (obj.type === "moon") return <MoonVisual phase={moonPhase} size={size} />;
-  if (obj.type === "constellation") return <ConstellationVisual id={obj.id} color={obj.color} size={size} />;
+  if (obj.type === "constellation")
+    return <ConstellationVisual id={obj.id} color={obj.color} size={size} />;
   if (obj.type === "galaxy") return <GalaxyVisual size={size} />;
   return <StarPlanetVisual color={obj.color} size={size} />;
 }
@@ -679,7 +807,14 @@ interface CardProps {
   isNewMoon: boolean;
 }
 
-function ObjectCard({ obj, moonPhase, moonIllumination, isAfterMidnight, isFullMoon, isNewMoon }: CardProps) {
+function ObjectCard({
+  obj,
+  moonPhase,
+  moonIllumination,
+  isAfterMidnight,
+  isFullMoon,
+  isNewMoon,
+}: CardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -688,7 +823,9 @@ function ObjectCard({ obj, moonPhase, moonIllumination, isAfterMidnight, isFullM
       duration: 700,
       useNativeDriver: true,
     }).start();
-    return () => { fadeAnim.setValue(0); };
+    return () => {
+      fadeAnim.setValue(0);
+    };
   }, [obj.id, fadeAnim]);
 
   const dirLabel = obj.az !== undefined ? azToCompass(obj.az) : "—";
@@ -699,7 +836,9 @@ function ObjectCard({ obj, moonPhase, moonIllumination, isAfterMidnight, isFullM
     <Animated.View style={[styles.card, { opacity: fadeAnim, width: SW }]}>
       {obj.isPersonalStar && (
         <View style={styles.personalBadge}>
-          <Text style={styles.personalBadgeText}>YOUR STAR IS VISIBLE TONIGHT</Text>
+          <Text style={styles.personalBadgeText}>
+            AGE–DISTANCE MATCH · DIRECTION ESTIMATE
+          </Text>
         </View>
       )}
 
@@ -710,10 +849,10 @@ function ObjectCard({ obj, moonPhase, moonIllumination, isAfterMidnight, isFullM
         {obj.type === "moon" && (
           <Text style={styles.moonNote}>
             {isFullMoon
-              ? "Full Moon · Bright sky tonight"
+              ? "Moon appears nearly full · Brighter sky while it is up"
               : isNewMoon
-              ? "New Moon · Darkest sky of the month"
-              : `${Math.round(moonIllumination * 100)}% illuminated`}
+                ? "Moon is near its new phase"
+                : `${Math.round(moonIllumination * 100)}% illuminated`}
           </Text>
         )}
       </View>
@@ -726,24 +865,36 @@ function ObjectCard({ obj, moonPhase, moonIllumination, isAfterMidnight, isFullM
         )}
         <Text style={styles.truth}>{obj.truth}</Text>
         <Text style={styles.wonder}>{obj.wonder}</Text>
+        <SourceDisclosure science={obj.science} />
       </View>
 
       <View style={styles.inviteSection}>
         <View style={styles.separator} />
         <Text style={styles.direction}>
-          Look {dirLabel} · {heightLabel}
+          Estimated direction: {dirLabel} · {heightLabel}
         </Text>
         <Text style={styles.instruction}>{obj.instruction}</Text>
-        {obj.isPersonalStar && obj.personalStarDistance !== undefined && obj.personalStarBirthYear !== undefined && (
-          <Text style={styles.personalLine}>
-            Light leaving {obj.name} right now will reach Earth in {obj.personalStarBirthYear}.
-            {"\n"}Tonight you can see the source of that light with your own eyes.
-          </Text>
-        )}
-        <Text style={styles.goOutside}>Go outside. Look up. It's there.</Text>
+        <Text style={styles.conditionNote}>{obj.visibilityQualifier}</Text>
+        {obj.isPersonalStar &&
+          obj.personalStarDistance !== undefined &&
+          obj.personalStarDepartureYear !== undefined && (
+            <Text style={styles.personalLine}>
+              This is a storytelling match: its rounded distance in light-years
+              is closest to your age in years, not a physical or astrological
+              link.{"\n"}
+              Light arriving around now left {obj.name} around{" "}
+              {obj.personalStarDepartureYear}.{"\n"}
+              {obj.unaidedEligible
+                ? "It may be visible unaided in good conditions."
+                : "Use the optical-aid guidance above."}
+            </Text>
+          )}
+        <Text style={styles.goOutside}>
+          If conditions allow, use the estimated direction above.
+        </Text>
         {isTimeless && (
           <Text style={styles.eternityLine}>
-            It's been there every night of every human life ever lived.
+            People have watched this part of the sky across many generations.
           </Text>
         )}
       </View>
@@ -753,20 +904,34 @@ function ObjectCard({ obj, moonPhase, moonIllumination, isAfterMidnight, isFullM
 
 function EndCard() {
   return (
-    <View style={[styles.card, { width: SW, justifyContent: "center", paddingHorizontal: 32 }]}>
+    <View
+      style={[
+        styles.card,
+        { width: SW, justifyContent: "center", paddingHorizontal: 32 },
+      ]}
+    >
       <Text style={styles.endText}>And behind all of this —</Text>
-      <Text style={styles.endText}>two trillion more galaxies.</Text>
+      <Text style={styles.endText}>
+        hundreds of billions of galaxies — perhaps more.
+      </Text>
       <Text style={[styles.endSub, { marginTop: 24 }]}>
-        Each containing hundreds of billions of stars.
+        Some are tiny dwarfs; others contain hundreds of billions of stars.
       </Text>
       <Text style={styles.endSub}>
-        The sky you're looking at tonight is the smallest possible fraction of what exists.
+        The sky you're looking at tonight is the smallest possible fraction of
+        what exists.
       </Text>
     </View>
   );
 }
 
-function DeniedScreen() {
+function LocationStateScreen({
+  denied,
+  onRetry,
+}: {
+  denied: boolean;
+  onRetry: () => void;
+}) {
   const colors = useColors();
   const router = useRouter();
   return (
@@ -774,60 +939,108 @@ function DeniedScreen() {
       <StarField count={60} containerOpacity={0.3} />
       <TouchableOpacity
         onPress={() => router.back()}
-        style={{ position: "absolute", top: 60, left: 24, zIndex: 200, padding: 12 }}
+        accessibilityRole="button"
+        accessibilityLabel="Back"
+        style={{
+          position: "absolute",
+          top: 60,
+          left: 24,
+          zIndex: 200,
+          padding: 12,
+        }}
       >
-        <Text style={{ color: "#C8A96E", fontSize: 22 }}>←</Text>
+        <Text style={{ color: colors.primary, fontSize: 22 }}>←</Text>
       </TouchableOpacity>
       <View style={styles.deniedContent}>
         <Text style={styles.deniedMain}>
           We don't know where you are tonight.
         </Text>
         <Text style={styles.deniedSub}>
-          But wherever you are, the same stars are above you that were above
-          every human who ever lived.
+          {denied
+            ? "Location permission is off, so PALE will not guess your sky from another city."
+            : "Your current location could not be read and there is no fresh, valid cached location."}
         </Text>
+        <TouchableOpacity
+          onPress={denied ? () => Linking.openSettings() : onRetry}
+          style={styles.retryButton}
+          accessibilityRole="button"
+          accessibilityLabel={
+            denied ? "Open location settings" : "Try location again"
+          }
+        >
+          <Text style={styles.retryText}>
+            {denied ? "OPEN SETTINGS" : "TRY AGAIN"}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-function BeforeDarkScreen({ duskAt }: { duskAt: Date | null }) {
+function DaylightScreen({
+  solarState,
+  darkness,
+  now,
+}: {
+  solarState: SolarState;
+  darkness: SolarCrossingResult | null;
+  now: Date;
+}) {
   const colors = useColors();
   const router = useRouter();
-  const now = new Date();
-
   const duskLine = (() => {
-    if (!duskAt) return "The sky will not fully darken tonight.";
-    const mins = Math.round((duskAt.getTime() - now.getTime()) / 60000);
-    const at = duskAt.toLocaleTimeString([], {
+    if (!darkness) return "Astronomical-darkness timing is unavailable.";
+    if (darkness.kind === "always-above") {
+      return "The Sun does not reach astronomical darkness on this local date.";
+    }
+    if (darkness.kind === "always-below") {
+      return "The Sun remains below the astronomical-darkness threshold on this local date.";
+    }
+    if (darkness.kind === "no-evening-crossing") {
+      return "There is no evening astronomical-darkness crossing on this local date.";
+    }
+    const mins = Math.round((darkness.at.getTime() - now.getTime()) / 60000);
+    const at = darkness.at.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
-    if (mins <= 0) return "Darkness is arriving now.";
-    if (mins < 60) return `Darkness arrives at ${at}, in ${mins} minutes.`;
+    if (mins <= 0) return "Astronomical darkness is arriving around now.";
+    if (mins < 60)
+      return `Astronomical darkness begins around ${at}, in about ${mins} minutes.`;
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     const gap = m === 0 ? `${h} ${h === 1 ? "hour" : "hours"}` : `${h}h ${m}m`;
-    return `Darkness arrives at ${at}, in ${gap}.`;
+    return `Astronomical darkness begins around ${at}, in about ${gap}.`;
   })();
   return (
     <View style={[styles.fullCenter, { backgroundColor: colors.background }]}>
       <StarField count={60} containerOpacity={0.15} />
       <TouchableOpacity
         onPress={() => router.back()}
-        style={{ position: "absolute", top: 60, left: 24, zIndex: 200, padding: 12 }}
+        accessibilityRole="button"
+        accessibilityLabel="Back"
+        style={{
+          position: "absolute",
+          top: 60,
+          left: 24,
+          zIndex: 200,
+          padding: 12,
+        }}
       >
-        <Text style={{ color: "#C8A96E", fontSize: 22 }}>←</Text>
+        <Text style={{ color: colors.primary, fontSize: 22 }}>←</Text>
       </TouchableOpacity>
       <View style={styles.deniedContent}>
-        <Text style={styles.deniedMain}>The stars are coming.</Text>
+        <SkyStateIcon state={solarState} size={148} />
+        <Text style={styles.skyStateLabel}>
+          {SOLAR_STATE_LABELS[solarState]}
+        </Text>
         <Text style={[styles.timeText]}>
           {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </Text>
         <Text style={styles.deniedSub}>{duskLine}</Text>
         <Text style={[styles.deniedSub, { marginTop: 16 }]}>
-          The same stars that are above you right now, invisible in the
-          daylight, have been there your entire life.
+          Bright objects may be detectable before astronomical darkness, but the
+          Sun's light reduces contrast. Local conditions still matter.
         </Text>
       </View>
     </View>
@@ -839,6 +1052,8 @@ export default function TonightSkyScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { birthday } = useBirthday();
+  const reduceMotion = useReducedMotion();
+  const [retryToken, setRetryToken] = useState(0);
 
   const [state, setState] = useState<NightSkyState>({
     status: "loading",
@@ -846,9 +1061,11 @@ export default function TonightSkyScreen() {
     moonIllumination: 0,
     moonPhase: 0,
     solarAlt: -20,
-    duskAt: null,
-    lat: 40,
-    lng: -74,
+    solarState: "astronomical-darkness",
+    darkness: null,
+    lat: null,
+    lng: null,
+    calculatedAt: new Date(),
   });
   const [page, setPage] = useState(0);
   const scrollRef = useRef<ScrollView | undefined>(undefined);
@@ -858,16 +1075,31 @@ export default function TonightSkyScreen() {
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const personalStarCard = useMemo((): VisibleObject | null => {
-    if (!birthday) return null;
-    const ageYears = (Date.now() - birthday.getTime()) / (365.25 * 86400000);
-    const star = findStarByAge(Math.round(ageYears));
+    if (!birthday || state.lat === null || state.lng === null) return null;
+    const ageYears =
+      (state.calculatedAt.getTime() - birthday.getTime()) / (365.25 * 86400000);
+    const star = findStarByAge(ageYears);
     if (!star) return null;
     const coords = CATALOG_STAR_COORDS[star.name];
     if (!coords) return null;
-    const lst = getLocalSiderealTime(state.lng, new Date());
-    const { alt, az } = getAltAz(coords.ra, coords.dec, state.lat, lst);
+    const { alt, az } = equatorialToHorizontal(
+      coords,
+      { lat: state.lat, lng: state.lng },
+      state.calculatedAt,
+    );
     if (alt <= 10) return null;
-    const birthYear = birthday.getFullYear();
+    const guidance = getObservationGuidance({
+      altitude: alt,
+      apparentMagnitude: star.apparentMagnitude,
+      kind: "point-source",
+      opticalAid:
+        star.apparentMagnitude === undefined || star.apparentMagnitude > 8
+          ? "telescope"
+          : "binoculars",
+    });
+    if (!guidance.eligibleForCard) return null;
+    const departureYear =
+      state.calculatedAt.getFullYear() - Math.round(star.distance);
     return {
       id: `personal_${star.name}`,
       name: star.name,
@@ -876,112 +1108,159 @@ export default function TonightSkyScreen() {
       dec: coords.dec,
       color: GOLD,
       truth: star.note,
-      wonder: `This star is ${star.distance} light-years away. Light that left it in ${birthYear} is only just arriving at Earth around now.`,
-      instruction: `Look ${azToCompass(az)} · ${altToLabel(alt)}. It's been travelling toward this moment your entire life.`,
+      wonder: `This star is ${star.distance} light-years away. Light reaching Earth around now began its journey around ${departureYear}.`,
+      instruction: `Estimated direction: ${azToCompass(az)} · ${altToLabel(alt)}. The light has been travelling toward Earth for about ${Math.round(star.distance)} years.`,
       alt,
       az,
       isPersonalStar: true,
       personalStarDistance: star.distance,
-      personalStarBirthYear: birthYear,
+      personalStarDepartureYear: departureYear,
+      science: star.science,
+      apparentMagnitude: star.apparentMagnitude,
+      observingKind: "point-source",
+      visibilityQualifier: guidance.qualifier,
+      unaidedEligible: guidance.unaidedEligible,
     };
-  }, [birthday, state.lat, state.lng]);
+  }, [birthday, state.calculatedAt, state.lat, state.lng]);
 
-  const computeAndSet = (lat: number, lng: number) => {
-    const now = new Date();
+  const computeAndSet = (
+    lat: number,
+    lng: number,
+    source: "current" | "cached",
+    now = new Date(),
+  ) => {
     const solarAlt = getSolarAltitude(lat, lng, now);
-    const { objects, moonIllumination, moonPhase } = computeVisibleObjects(lat, lng, now);
+    const { objects, moonIllumination, moonPhase } = computeVisibleObjects(
+      lat,
+      lng,
+      now,
+    );
     setState({
-      status: solarAlt > -6 ? "before_dark" : "ready",
-      duskAt: findDusk(lat, lng, now),
+      status: source === "current" ? "ready-current" : "ready-cached",
+      darkness: findEveningSolarCrossing(lat, lng, now),
       objects: objects as VisibleObject[],
       moonIllumination,
       moonPhase,
       solarAlt,
+      solarState: classifySolarAltitude(solarAlt),
       lat,
       lng,
+      calculatedAt: now,
     });
   };
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
+    let cancelled = false;
+
+    const startRefresh = (
+      lat: number,
+      lng: number,
+      source: "current" | "cached",
+    ) => {
+      if (interval) clearInterval(interval);
+      computeAndSet(lat, lng, source);
+      interval = setInterval(
+        () => computeAndSet(lat, lng, source, new Date()),
+        5 * 60 * 1000,
+      );
+    };
 
     (async () => {
+      setState((previous) => ({ ...previous, status: "loading" }));
+      const cache = parseCachedLocation(
+        await AsyncStorage.getItem(LOCATION_CACHE_KEY).catch(() => null),
+        Date.now(),
+      );
       try {
-        // Check cached location first
-        try {
-          const cached = await AsyncStorage.getItem("pale_location_cache");
-          if (cached) {
-            const { lat, lng, timestamp } = JSON.parse(cached);
-            const age = Date.now() - timestamp;
-            if (age < 30 * 60 * 1000) {
-              computeAndSet(lat, lng);
-              interval = setInterval(() => {
-                computeAndSet(lat, lng);
-              }, 5 * 60 * 1000);
-              return;
-            }
-          }
-        } catch {}
-
-        // Request permission
-        const { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await withTimeout(
+          Location.requestForegroundPermissionsAsync(),
+          LOCATION_REQUEST_TIMEOUT_MS,
+          "Location permission request timed out",
+        );
+        if (cancelled) return;
         if (status !== "granted") {
-          setState((s) => ({ ...s, status: "denied" }));
+          const resolution = resolveSkyLocation("denied", null, cache);
+          setState((previous) => ({ ...previous, status: resolution.status }));
           return;
         }
 
-        // Get location with 10-second timeout
         let loc: Location.LocationObject;
         try {
-          loc = await Promise.race([
+          loc = await withTimeout(
             Location.getCurrentPositionAsync({
               accuracy: Location.Accuracy.Balanced,
             }),
-            new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error("timeout")), 10000)
-            ),
-          ]);
+            LOCATION_REQUEST_TIMEOUT_MS,
+            "Current location request timed out",
+          );
         } catch {
-          // Location timed out or failed — fall back to London silently
-          computeAndSet(51.5074, -0.1278);
+          if (cancelled) return;
+          const resolution = resolveSkyLocation("granted", null, cache);
+          if (resolution.status === "ready-cached") {
+            startRefresh(
+              resolution.coordinates.lat,
+              resolution.coordinates.lng,
+              "cached",
+            );
+          } else {
+            setState((previous) => ({
+              ...previous,
+              status: resolution.status,
+            }));
+          }
           return;
         }
 
-        const lat = loc.coords.latitude;
-        const lng = loc.coords.longitude;
-
-        // Cache the location
+        const resolution = resolveSkyLocation(
+          "granted",
+          { lat: loc.coords.latitude, lng: loc.coords.longitude },
+          cache,
+        );
+        if (resolution.status !== "ready-current") {
+          throw new Error("Device returned invalid coordinates");
+        }
+        const { lat, lng } = resolution.coordinates;
+        const serialized = serializeCachedLocation({ lat, lng }, Date.now());
         try {
-          await AsyncStorage.setItem(
-            "pale_location_cache",
-            JSON.stringify({ lat, lng, timestamp: Date.now() })
-          );
+          await AsyncStorage.setItem(LOCATION_CACHE_KEY, serialized);
         } catch {}
-
-        computeAndSet(lat, lng);
-        interval = setInterval(() => {
-          computeAndSet(lat, lng);
-        }, 5 * 60 * 1000);
-
+        if (!cancelled) startRefresh(lat, lng, "current");
       } catch (err) {
-        // Any unexpected error — fall back to London
         console.warn("Tonight sky location error:", err);
-        computeAndSet(51.5074, -0.1278);
+        if (cancelled) return;
+        const resolution = resolveSkyLocation("granted", null, cache);
+        if (resolution.status === "ready-cached") {
+          startRefresh(
+            resolution.coordinates.lat,
+            resolution.coordinates.lng,
+            "cached",
+          );
+        } else {
+          setState((previous) => ({ ...previous, status: resolution.status }));
+        }
       }
     })();
 
-    return () => { if (interval) clearInterval(interval); };
-  }, []);
+    return () => {
+      cancelled = true;
+      if (interval) clearInterval(interval);
+    };
+  }, [retryToken]);
 
   useEffect(() => {
-    if (state.status === "ready") {
+    if (state.status === "ready-current" || state.status === "ready-cached") {
+      if (reduceMotion) {
+        fadeIn.setValue(1);
+        return;
+      }
       Animated.timing(fadeIn, {
         toValue: 1,
         duration: 1200,
         useNativeDriver: true,
       }).start();
     }
-  }, [state.status, fadeIn]);
+  }, [state.status, fadeIn, reduceMotion]);
 
   const allCards = useMemo(() => {
     const cards: VisibleObject[] = [...state.objects];
@@ -991,7 +1270,7 @@ export default function TonightSkyScreen() {
     return cards;
   }, [state.objects, personalStarCard]);
 
-  const now = new Date();
+  const now = state.calculatedAt;
   const isAfterMidnight = now.getHours() < 4;
   const isFullMoon = state.moonIllumination > 0.9;
   const isNewMoon = state.moonIllumination < 0.05;
@@ -1003,7 +1282,15 @@ export default function TonightSkyScreen() {
         <StarField count={80} containerOpacity={0.4} />
         <TouchableOpacity
           onPress={() => router.back()}
-          style={{ position: "absolute", top: topPad + 12, left: 24, zIndex: 200, padding: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          style={{
+            position: "absolute",
+            top: topPad + 12,
+            left: 24,
+            zIndex: 200,
+            padding: 12,
+          }}
         >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
@@ -1012,8 +1299,31 @@ export default function TonightSkyScreen() {
     );
   }
 
-  if (state.status === "denied") return <DeniedScreen />;
-  if (state.status === "before_dark") return <BeforeDarkScreen duskAt={state.duskAt} />;
+  if (state.status === "denied") {
+    return (
+      <LocationStateScreen
+        denied
+        onRetry={() => setRetryToken((value) => value + 1)}
+      />
+    );
+  }
+  if (state.status === "unavailable") {
+    return (
+      <LocationStateScreen
+        denied={false}
+        onRetry={() => setRetryToken((value) => value + 1)}
+      />
+    );
+  }
+  if (state.solarState === "daylight") {
+    return (
+      <DaylightScreen
+        solarState={state.solarState}
+        darkness={state.darkness}
+        now={state.calculatedAt}
+      />
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -1022,6 +1332,8 @@ export default function TonightSkyScreen() {
       {/* Back button always visible — outside fade animation */}
       <TouchableOpacity
         onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel="Back"
         style={{
           position: "absolute",
           top: topPad + 12,
@@ -1035,14 +1347,37 @@ export default function TonightSkyScreen() {
 
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeIn }]}>
         <View style={[styles.header, { paddingTop: topPad + 8 }]}>
+          <View style={styles.skyHeaderIcon}>
+            <SkyStateIcon state={state.solarState} size={76} />
+          </View>
           <Text style={styles.screenTitle}>TONIGHT'S SKY</Text>
-          {featuredObj && featuredObj.az !== undefined && featuredObj.alt !== undefined && (
-            <CompassIndicator az={featuredObj.az} alt={featuredObj.alt} color={GOLD} />
+          <Text style={styles.guidanceStatus}>
+            {state.status === "ready-cached"
+              ? "Using a recent last-known location · "
+              : "Using current device location · "}
+            {SOLAR_STATE_LABELS[state.solarState]}
+          </Text>
+          {state.solarState !== "astronomical-darkness" && (
+            <Text style={styles.twilightNote}>
+              Twilight reduces contrast; directions are estimates.{" "}
+              {LOCAL_CONDITIONS_NOTE}
+            </Text>
           )}
+          {featuredObj &&
+            featuredObj.az !== undefined &&
+            featuredObj.alt !== undefined && (
+              <CompassIndicator
+                az={featuredObj.az}
+                alt={featuredObj.alt}
+                color={GOLD}
+              />
+            )}
         </View>
 
         <ScrollView
-          ref={(r) => { scrollRef.current = r ?? undefined; }}
+          ref={(r) => {
+            scrollRef.current = r ?? undefined;
+          }}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
@@ -1074,8 +1409,7 @@ export default function TonightSkyScreen() {
               style={[
                 styles.dot,
                 {
-                  backgroundColor:
-                    i === page ? GOLD : "rgba(200,169,110,0.3)",
+                  backgroundColor: i === page ? GOLD : "rgba(169,149,255,0.3)",
                   width: i === page ? 16 : 4,
                 },
               ]}
@@ -1109,6 +1443,17 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     fontFamily: "Inter_600SemiBold",
   },
+  guidanceStatus: {
+    color: "rgba(245,240,232,0.65)",
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+  },
+  twilightNote: {
+    color: "rgba(169,149,255,0.7)",
+    fontSize: 10,
+    lineHeight: 15,
+    fontFamily: "Inter_400Regular",
+  },
   compassRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1125,7 +1470,7 @@ const styles = StyleSheet.create({
   elevBar: {
     width: 2,
     height: 20,
-    backgroundColor: "rgba(200,169,110,0.2)",
+    backgroundColor: "rgba(169,149,255,0.2)",
     borderRadius: 1,
     position: "relative",
   },
@@ -1154,7 +1499,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   moonNote: {
-    color: "rgba(200,169,110,0.6)",
+    color: "rgba(169,149,255,0.6)",
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     letterSpacing: 1,
@@ -1191,11 +1536,11 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "rgba(200,169,110,0.15)",
+    backgroundColor: "rgba(169,149,255,0.15)",
     marginBottom: 4,
   },
   direction: {
-    color: "rgba(200,169,110,0.7)",
+    color: "rgba(169,149,255,0.7)",
     fontSize: 12,
     letterSpacing: 2,
     fontFamily: "Inter_500Medium",
@@ -1204,6 +1549,12 @@ const styles = StyleSheet.create({
     color: "rgba(245,240,232,0.65)",
     fontSize: 14,
     lineHeight: 22,
+    fontFamily: "Inter_400Regular",
+  },
+  conditionNote: {
+    color: "rgba(245,240,232,0.5)",
+    fontSize: 11,
+    lineHeight: 17,
     fontFamily: "Inter_400Regular",
   },
   personalLine: {
@@ -1221,7 +1572,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   eternityLine: {
-    color: "rgba(200,169,110,0.45)",
+    color: "rgba(169,149,255,0.45)",
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     fontStyle: "italic",
@@ -1257,16 +1608,26 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   loadingText: {
-    color: "rgba(200,169,110,0.5)",
+    color: "rgba(169,149,255,0.5)",
     fontSize: 13,
     letterSpacing: 2,
     fontFamily: "Inter_400Regular",
   },
   deniedContent: {
     paddingHorizontal: 36,
-    gap: 20,
+    gap: 14,
     alignItems: "center",
+    maxWidth: 560,
   },
+  skyStateLabel: {
+    color: WARM_WHITE,
+    fontSize: 15,
+    lineHeight: 21,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.8,
+    textTransform: "capitalize",
+  },
+  skyHeaderIcon: { alignItems: "center", marginBottom: -2 },
   deniedMain: {
     color: WARM_WHITE,
     fontSize: 18,
@@ -1282,11 +1643,25 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     textAlign: "center",
   },
+  retryButton: {
+    borderWidth: 1,
+    borderColor: GOLD,
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+  },
+  retryText: {
+    color: GOLD,
+    fontSize: 11,
+    letterSpacing: 2,
+    fontFamily: "Inter_600SemiBold",
+  },
   timeText: {
     color: GOLD,
-    fontSize: 28,
-    fontFamily: "Inter_400Regular",
-    letterSpacing: 4,
+    fontSize: 34,
+    lineHeight: 42,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 1.5,
   },
   endText: {
     color: WARM_WHITE,

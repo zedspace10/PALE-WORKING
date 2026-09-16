@@ -1,4 +1,11 @@
-export type ObservatoryEntry = {
+import {
+  CONTENT_REVIEWED_AT,
+  scientificMeta,
+  ScientificItem,
+  ScientificSourceId,
+} from "@/constants/scientificContent";
+
+type ObservatoryEntryBase = {
   id: string;
   location: string;
   locationDetail: string;
@@ -8,14 +15,16 @@ export type ObservatoryEntry = {
   question: string;
 };
 
-export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
+export type ObservatoryEntry = ObservatoryEntryBase & ScientificItem;
+
+const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "andromeda",
     location: "Andromeda Galaxy",
-    locationDetail: "Our nearest galactic neighbor",
+    locationDetail: "Our nearest major galactic neighbour",
     distance: "2.537 million light years",
     reflection:
-      "The light reaching your eyes from Andromeda tonight began its journey before modern humans walked the Earth. Every photon is a message from a civilization of stars that predates our species by millions of years.",
+      "Light reaching Earth from Andromeda began its journey before modern humans existed. It carries information from a galaxy whose stars predate our species by millions of years.",
     scale:
       "If the universe's age were compressed into one year, the entirety of recorded human history would occupy the last 12 seconds of December 31st.",
     question:
@@ -25,9 +34,9 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     id: "voyager",
     location: "Voyager 1",
     locationDetail: "The most distant human-made object",
-    distance: "25 billion kilometers from Earth",
+    distance: "Tens of billions of kilometres from Earth",
     reflection:
-      "A machine no heavier than a small car, launched in 1977, is now drifting through interstellar space — the first human artifact to leave the solar system. It carries a golden record with the sounds of Earth, still traveling outward at 17 kilometers per second.",
+      "A machine no heavier than a small car, launched in 1977, is now travelling through interstellar space beyond the heliosphere. It has not yet passed the Solar System's distant Oort Cloud. It carries a golden record with sounds and images from Earth.",
     scale:
       "Voyager has been traveling since 1977 and has barely left our cosmic neighborhood. The nearest star is still more than 1,500 times farther away.",
     question: "What would you want humanity to be remembered for?",
@@ -38,7 +47,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "Eagle Nebula — stellar nursery",
     distance: "6,500 light years",
     reflection:
-      "These towering columns of gas and dust, each one thousands of times wider than our entire solar system, are giving birth to new stars. The light we see left before the ancient Egyptians built their first monuments. Some astronomers think a supernova has already swept the pillars away, and that we are still waiting on the light.",
+      "These towering columns of gas and dust are regions of active star formation. The light we see left roughly 6,500 years before it reached Earth, so every image is a view into the past.",
     scale:
       "The tallest Pillar of Creation is four light years tall — roughly the distance from Earth to our nearest star neighbor.",
     question:
@@ -50,7 +59,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "Supermassive black hole at the Milky Way's center",
     distance: "26,000 light years",
     reflection:
-      "At the heart of our galaxy sits a black hole four million times the mass of our Sun. Every star in the Milky Way — every one of the 300 billion — orbits around this invisible point of gravity. Our Sun completes one orbit every 225 million years.",
+      "At the heart of our galaxy sits a black hole about four million times the mass of our Sun. Nearby stars orbit it directly; farther out, including our Sun, stars orbit the Milky Way's total distributed mass. The Sun takes roughly 230 million years to circle the galaxy.",
     scale:
       "The last time our Sun was in the position it is today, the first dinosaurs were only just appearing on Earth.",
     question:
@@ -86,7 +95,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "Red supergiant in Orion — nearing supernova",
     distance: "650 light years",
     reflection:
-      "Betelgeuse is so massive that if placed at the center of our solar system, its surface would swallow Mars and reach toward Jupiter. It is in the final stages of its life and will one day explode in a supernova visible in daylight. That explosion may have already happened — the light simply hasn't reached us yet.",
+      "Betelgeuse is a red supergiant so large that, if placed at the center of our solar system, its surface would extend beyond Mars and perhaps toward Jupiter; its exact size and distance remain difficult to measure. It is expected to end as a supernova, but astronomers cannot predict when.",
     scale:
       "Betelgeuse has existed for less than 10 million years — far younger than our 4.5-billion-year-old Sun. Yet it has lived so fast and bright it is already dying.",
     question:
@@ -98,10 +107,11 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "A vast near-emptiness in the cosmic web",
     distance: "700 million light years",
     reflection:
-      "The Boötes Void is a region of space 330 million light years across containing almost no galaxies. Where thousands of galaxies should exist, there is nearly nothing. Scientists still debate why. It is a reminder that the universe contains absences as profound as its presences.",
+      "The Boötes Void is a vast, unusually underdense region of the cosmic web, roughly hundreds of millions of light-years across. It is not completely empty: galaxies have been observed inside it, just far fewer than in denser regions.",
     scale:
       "If our Milky Way were the size of a coin, the Boötes Void would be the length of a football pitch.",
-    question: "Where in your life might emptiness actually be a form of clarity?",
+    question:
+      "Where in your life might emptiness actually be a form of clarity?",
   },
   {
     id: "cosmic-background",
@@ -133,9 +143,9 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "Saturn's moon — world with lakes and weather",
     distance: "1.2 billion kilometers",
     reflection:
-      "Saturn's moon Titan has lakes, rivers, rain, and a thick atmosphere — but they are made of liquid methane, not water. Beneath its orange haze lies a world where it rains hydrocarbons and the 'rocks' are made of ice. It reminds us that our intuitions about what a world should look like are shaped entirely by one very particular world.",
+      "Saturn's moon Titan has clouds, rain, rivers, and lakes of liquid methane and ethane on its surface. Beneath the water-ice crust, evidence points to a global subsurface ocean of liquid water. It is familiar geography made from unfamiliar materials.",
     scale:
-      "Titan is larger than the planet Mercury. It could hold liquid — just not water. Life as we know it would find it deadly. Life as we don't know it might find it home.",
+      "Titan is larger than Mercury. Its surface lakes contain hydrocarbons rather than water, while evidence points to a separate water-rich ocean beneath its icy crust.",
     question:
       "Where might you be seeing a situation through your own assumptions rather than its actual nature?",
   },
@@ -154,10 +164,10 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "kepler-442b",
     location: "Kepler-442b",
-    locationDetail: "One of the most Earth-like planets known",
+    locationDetail: "A super-Earth-size exoplanet in its star's habitable zone",
     distance: "1,200 light years",
     reflection:
-      "Kepler-442b orbits in the habitable zone of its star, receives about two thirds the sunlight Earth does, and is about 1.3 times Earth's size. It is one of the best candidates for a world that might harbor life. If it does, those beings are 1,200 light years away — close enough that the light leaving Earth today will reach them, and far enough that nobody alive will know what they made of it.",
+      "Kepler-442b is about 1.34 times Earth's radius and orbits a K-type star in a region where surface liquid water could be possible under suitable atmospheric conditions. Its composition and atmosphere have not been measured, and there is no evidence that it hosts life.",
     scale:
       "A radio wave sent from Earth toward Kepler-442b right now would arrive 1,200 years from today — around the year 3226.",
     question:
@@ -166,10 +176,11 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "europa",
     location: "Europa",
-    locationDetail: "Jupiter's moon — a global ocean beneath the ice",
+    locationDetail:
+      "Jupiter's moon — strong evidence for an ocean beneath the ice",
     distance: "628 million kilometers",
     reflection:
-      "Beneath Europa's icy shell lies a global ocean of liquid water — more water than all of Earth's oceans combined. It has been liquid for billions of years, warmed by Jupiter's gravitational pull. Of all the places in our solar system, many scientists believe Europa is the most likely to harbor life right now.",
+      "Multiple lines of evidence point to a salty global ocean beneath Europa's icy shell, potentially holding more water than Earth's oceans. Tidal flexing can supply heat, making Europa a leading target in the search for habitable environments; no evidence of life there has been found.",
     scale:
       "Europa's ocean is thought to be 100 kilometers deep. The deepest point in Earth's oceans is 11 kilometers.",
     question:
@@ -190,24 +201,24 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "barnards-star",
     location: "Barnard's Star",
-    locationDetail: "The fastest-moving star in our sky",
+    locationDetail: "The star with the highest known proper motion",
     distance: "5.96 light years",
     reflection:
-      "Barnard's Star moves across our sky faster than any other star — fast enough that over a human lifetime, its position visibly shifts. In 10,000 years, it will be the closest star to Earth. We are not living in a static universe. Everything is in motion, always.",
+      "Barnard's Star has the highest measured proper motion against the background sky, enough for its plotted position to shift over a human lifetime. It is too faint to see without optical aid. We are not living in a static universe.",
     scale:
-      "Even at its great speed, Barnard's Star will take 10,000 years to become our nearest stellar neighbor. Motion at cosmic scales is imperceptible to any single human life.",
+      "Its apparent motion is about ten arcseconds each year. Stellar trajectories are estimates and close approaches change over long timescales.",
     question:
       "What feels permanent in your life that is actually, slowly, moving?",
   },
   {
     id: "whirlpool-galaxy",
     location: "The Whirlpool Galaxy",
-    locationDetail: "M51 — two galaxies in collision",
+    locationDetail: "M51 — two interacting galaxies",
     distance: "31 million light years",
     reflection:
-      "The Whirlpool Galaxy and its companion are in the process of merging — a cosmic collision that began hundreds of millions of years ago and will continue for hundreds of millions more. When galaxies collide, individual stars almost never touch. The vast spaces between them mean the merger is one of gravity and gas and time, not destruction.",
+      "The Whirlpool Galaxy and its companion are interacting, with tidal forces shaping their stars and gas. They may eventually merge. Direct collisions between individual stars are extraordinarily unlikely because the distances between stars are so large.",
     scale:
-      "Two galaxies containing hundreds of billions of stars each can pass through one another and individual stars will never collide. Scale changes everything.",
+      "Galaxies can pass through one another with very few direct star-to-star collisions. Their gas, dust, and gravitational fields still interact strongly.",
     question:
       "Where in your life might two forces that seem to be in collision actually have enough space to pass through each other?",
   },
@@ -217,7 +228,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "The brightest star in Lyra — our former north star",
     distance: "25 light years",
     reflection:
-      "Vega was Earth's north star 12,000 years ago and will be again in 14,000 years. Because Earth's axis wobbles slowly over 26,000 years, the star we navigate by is always changing. The fixed point in the sky is not fixed — it only appears so within a single human lifetime.",
+      "Vega lay near Earth's north celestial pole thousands of years ago and will approach it again roughly twelve thousand years from now. Axial precession traces a cycle of about 26,000 years, so no pole star is permanent.",
     scale:
       "In the time it takes Earth's axis to complete one wobble, countless human civilizations rise and fall. What we consider permanent is measured against a very short ruler.",
     question:
@@ -238,22 +249,22 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "hercules-corona-borealis",
     location: "Hercules-Corona Borealis Great Wall",
-    locationDetail: "The largest known structure in the universe",
+    locationDetail: "A proposed, highly contested large-scale pattern",
     distance: "10 billion light years",
     reflection:
-      "The Hercules-Corona Borealis Great Wall is a massive concentration of galaxies stretching 10 billion light years across — so large that it would challenge our models of how the universe formed. Some astronomers doubt it is a real structure at all. The universe is lumpy in ways we don't fully understand, and this is one of the arguments.",
+      "A statistical clustering of gamma-ray bursts has been interpreted as a structure spanning several billion light-years. Whether it represents one physical object is disputed, and it should not be treated as a confirmed cosmic wall.",
     scale:
-      "At 10 billion light years across, this structure spans about a ninth of the observable universe. If the observable universe were scaled down to the size of Earth, the Great Wall would still stretch further than the Mediterranean.",
+      "The reported scale is one reason researchers question whether the clustering represents a coherent physical structure rather than a statistical pattern.",
     question:
       "What assumptions are you making about how things should be that the universe has never agreed to?",
   },
   {
     id: "tau-ceti",
     location: "Tau Ceti",
-    locationDetail: "A Sun-like star that may have Earth-like planets",
+    locationDetail: "A nearby Sun-like star with reported planet candidates",
     distance: "11.9 light years",
     reflection:
-      "Tau Ceti is one of our nearest stellar neighbors and remarkably similar to our Sun. It appears to have at least four planets, and two of them orbit in or near the habitable zone. Any civilization there could detect our Sun with basic optical technology. We might be visible to them, if they are looking.",
+      "Tau Ceti is a nearby star broadly similar to the Sun. Researchers have reported several planet candidates from subtle changes in its radial velocity, but the candidate list and their properties depend on difficult signal analysis. No life has been detected there.",
     scale:
       "A message sent to Tau Ceti today would arrive in 11.9 years. Any reply would reach us 23.8 years from now. Our nearest conversations with the cosmos are measured in decades.",
     question:
@@ -265,7 +276,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "A dying star's final gift",
     distance: "2,300 light years",
     reflection:
-      "The Ring Nebula is what our Sun will become in about five billion years — the outer layers gently expelled into space, glowing with the energy of the dying star at its center. It is not violent. It is a slow, beautiful release. The star that made it is now a white dwarf the size of Earth, slowly cooling.",
+      "The Ring Nebula is the glowing material expelled by a Sun-like star as it ran out of fuel. The Sun is expected to pass through a broadly similar planetary-nebula stage in about five billion years, though it would not reproduce this object's exact shape. A hot white dwarf remains at the Ring Nebula's center.",
     scale:
       "The Ring Nebula is about one light year across. The dying star at its center is smaller than Earth, yet what it has released encircles an entire light year of space.",
     question:
@@ -277,7 +288,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "Home to some of the most massive stars known",
     distance: "7,500 light years",
     reflection:
-      "The Carina Nebula is one of the largest and brightest nebulae in our sky, containing some of the most massive and luminous stars known — including Eta Carinae, a star 150 times the mass of our Sun that could explode as a supernova at any time. It is a region of extremes: creation, destruction, and everything in between.",
+      "The Carina Nebula contains exceptionally massive and luminous stars, including the unstable Eta Carinae system. Eta Carinae is expected eventually to end in a supernova or related stellar explosion, but its timing and exact outcome are uncertain.",
     scale:
       "Eta Carinae releases as much energy in 6 seconds as our Sun releases in an entire year. Some things simply operate at a different scale.",
     question:
@@ -286,10 +297,10 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "perseus-cluster",
     location: "The Perseus Galaxy Cluster",
-    locationDetail: "A cluster of thousands of galaxies making sound",
+    locationDetail: "Pressure waves in a cluster's hot gas",
     distance: "250 million light years",
     reflection:
-      "In 2003, NASA detected actual sound waves emanating from the Perseus Cluster — pressure waves in the hot gas between galaxies, caused by a central black hole. The note is a B-flat, 57 octaves below middle C, so low that a single wave takes 10 million years to complete. The universe has been singing since before Earth existed.",
+      "X-ray observations revealed ripples in the Perseus Cluster's hot gas that researchers interpreted as pressure waves driven by its central black hole. Converted to a pitch, their frequency is about a B-flat 57 octaves below middle C — far below human hearing.",
     scale:
       "The Perseus Cluster contains thousands of galaxies. The sound wave crossing it takes 10 million years per cycle — longer than the entire existence of our genus, Homo.",
     question:
@@ -325,7 +336,7 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "The large-scale structure of the universe",
     distance: "Spanning the observable universe",
     reflection:
-      "At the largest scales, the universe is not random. Galaxies gather into filaments and sheets, separated by vast voids, forming a structure that looks remarkably like a neural network — or the mycelium of a forest. The same patterns appear at the scale of the cosmos as at the scale of the brain. Scale changes; structure persists.",
+      "At the largest scales, galaxies gather into filaments and sheets separated by vast voids. Images can resemble neural networks or fungal mycelium, but that visual similarity does not mean the systems share a physical mechanism.",
     scale:
       "The cosmic web spans billions of light years. The voids between filaments can be 300 million light years across — and yet, within those filaments, individual human beings are constructing theories that describe the whole.",
     question:
@@ -334,10 +345,10 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "eridanus-void",
     location: "The Eridanus Supervoid",
-    locationDetail: "The largest known void in the universe",
+    locationDetail: "A proposed supervoid aligned with the CMB Cold Spot",
     distance: "1 billion light years",
     reflection:
-      "The Eridanus Supervoid is a region of space roughly a billion light years across that contains far fewer galaxies than the surrounding universe. It corresponds to a cold spot in the cosmic microwave background — a scar from the earliest moments of creation, or possibly something stranger. Some physicists believe it might be a window into another universe.",
+      "Galaxy surveys have found an underdense region in the direction of the cosmic microwave background Cold Spot. Its size and ability to explain the Cold Spot remain debated; current evidence does not support exotic-universe explanations.",
     scale:
       "If the entire observable universe were a city, the Eridanus Void would be a neighborhood-sized park. The universe has room for absences as grand as its structures.",
     question:
@@ -346,12 +357,12 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
   {
     id: "edge-observable",
     location: "The Edge of the Observable Universe",
-    locationDetail: "The boundary of what light has had time to reach us",
+    locationDetail: "Our present cosmological horizon",
     distance: "46.5 billion light years",
     reflection:
-      "The observable universe extends 46.5 billion light years in every direction — not because that's where the universe ends, but because that's as far as light has had time to travel since the Big Bang. Beyond this horizon lies more universe, forever hidden from us. We live inside a cosmic bubble of knowability, surrounded by an infinite unknown.",
+      "Matter whose ancient light reaches us today is now estimated to be about 46.5 billion light-years away in comoving distance because space expanded while the light travelled for about 13.8 billion years. This is an observational horizon, not a known physical edge of the universe.",
     scale:
-      "At the speed of light, it would take 46.5 billion years to reach the edge of what we can observe. A human lifetime is, at most, 100 years.",
+      "The observable radius is a present-day distance, not a destination a traveller could reach in 46.5 billion years; cosmic expansion changes the horizon throughout the journey.",
     question:
       "What is just beyond the horizon of what you can currently see or understand that might change everything?",
   },
@@ -361,13 +372,88 @@ export const OBSERVATORY_ENTRIES: ObservatoryEntry[] = [
     locationDetail: "Our nearest stellar system — three suns",
     distance: "4.37 light years",
     reflection:
-      "Alpha Centauri is actually three stars: two Sun-like stars orbiting each other, and Proxima Centauri, a dim red dwarf slightly closer to us. From a planet around Alpha Centauri A, our Sun would appear as an unremarkable star in the southern sky — one of many. We are someone else's background star.",
+      "Alpha Centauri is a three-star system: Alpha Centauri A and B orbit each other, while Proxima Centauri is a much wider companion and slightly closer to us. From there, our Sun would appear as a modest star in the northern constellation Cassiopeia.",
     scale:
-      "Alpha Centauri A is so similar to our Sun that if you replaced our Sun with it, you might not notice the difference. Yet it is 4.37 light years — 40 trillion kilometers — away.",
+      "Alpha Centauri A is Sun-like but more luminous than our Sun; replacing the Sun with it would materially change Earth's energy balance. The system is about 4.37 light-years away.",
     question:
       "To the universe, you are an unremarkable point of light. To the people who love you, you are a sun. Which of those truths do you live by?",
   },
 ];
+
+const OBSERVATORY_SOURCE_BY_ID: Partial<
+  Record<string, readonly [ScientificSourceId, ...ScientificSourceId[]]>
+> = {
+  andromeda: ["nasaAndromeda"],
+  voyager: ["nasaVoyager"],
+  "pale-blue-dot": ["nasaVoyager"],
+  pillars: ["nasaNebulae"],
+  "sagittarius-a": ["nasaBlackHoles"],
+  proxima: ["nasaProxima"],
+  betelgeuse: ["nasaBetelgeuse"],
+  "bootes-void": ["nasaGalaxies"],
+  "cosmic-background": ["nasaCmb"],
+  "orion-nebula": ["nasaNebulae"],
+  titan: ["nasaTitan"],
+  "crab-nebula": ["nasaNebulae"],
+  "kepler-442b": ["nasaKepler442b"],
+  europa: ["nasaEuropa"],
+  "messier-87": ["nasaGalaxies", "nasaBlackHoles"],
+  "barnards-star": ["nasaBarnard"],
+  "whirlpool-galaxy": ["nasaGalaxies"],
+  vega: ["nasaStars", "esaGaia"],
+  "lagoon-nebula": ["nasaNebulae"],
+  "hercules-corona-borealis": ["greatWallPaper"],
+  "tau-ceti": ["nasaStars", "nasaExoplanets"],
+  "ring-nebula": ["nasaRingNebula", "nasaNebulae"],
+  "carina-nebula": ["nasaNebulae"],
+  "perseus-cluster": ["nasaGalaxies"],
+  "cat-eye-nebula": ["nasaNebulae"],
+  "eridanus-void": ["eridanusStudy"],
+  "edge-observable": ["nasaUniverseOverview"],
+  "alpha-centauri": ["nasaAlphaCentauri"],
+  "galactic-center": ["nasaMilkyWay", "nasaBlackHoles"],
+  "cosmic-web": ["nasaGalaxies"],
+};
+
+const DISPUTED_OBSERVATORY_IDS = new Set([
+  "hercules-corona-borealis",
+  "eridanus-void",
+]);
+
+const MODEL_DEPENDENT_OBSERVATORY_IDS = new Set([
+  "betelgeuse",
+  "europa",
+  "tau-ceti",
+  "ring-nebula",
+]);
+
+export const OBSERVATORY_ENTRIES: ObservatoryEntry[] =
+  OBSERVATORY_ENTRIES_BASE.map((entry) => ({
+    ...entry,
+    science:
+      entry.id === "voyager"
+        ? scientificMeta({
+            classification: "dynamic",
+            reviewedAt: CONTENT_REVIEWED_AT,
+            reviewBy: "2027-09-16",
+            sourceIds: ["nasaVoyager"],
+            precisionNote:
+              "Mission status and distance change; wording is reviewed annually.",
+          })
+        : scientificMeta({
+            classification: DISPUTED_OBSERVATORY_IDS.has(entry.id)
+              ? "disputed"
+              : MODEL_DEPENDENT_OBSERVATORY_IDS.has(entry.id)
+                ? "model-dependent"
+                : "estimate",
+            reviewedAt: CONTENT_REVIEWED_AT,
+            sourceIds:
+              OBSERVATORY_SOURCE_BY_ID[entry.id] ??
+              (["nasaUniverseOverview"] as const),
+            precisionNote:
+              "Distances and sizes are rounded; reflective text is interpretation, not measurement.",
+          }),
+  }));
 
 /**
  * The entry for a given date. The notification scheduler needs this for future
