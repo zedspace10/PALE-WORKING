@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  Dimensions,
   Linking,
+  type LayoutChangeEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -69,7 +69,6 @@ import {
   ObservingObjectKind,
 } from "@/constants/visibility";
 
-const { width: SW } = Dimensions.get("window");
 const GOLD = "#8DEBFF";
 const WARM_WHITE = "#F5FAFF";
 const BLUE_GREY = "#A7B6C6";
@@ -819,6 +818,7 @@ function ObjectVisual({
 
 interface CardProps {
   bottomPadding: number;
+  pageWidth: number;
   obj: VisibleObject;
   moonPhase: number;
   moonIllumination: number;
@@ -829,6 +829,7 @@ interface CardProps {
 
 function ObjectCard({
   bottomPadding,
+  pageWidth,
   obj,
   moonPhase,
   moonIllumination,
@@ -863,7 +864,7 @@ function ObjectCard({
       nestedScrollEnabled
       overScrollMode="never"
       showsVerticalScrollIndicator={false}
-      style={[styles.cardPage, { opacity: fadeAnim, width: SW }]}
+      style={[styles.cardPage, { opacity: fadeAnim, width: pageWidth }]}
     >
       {obj.isPersonalStar && (
         <View style={styles.personalBadge}>
@@ -932,7 +933,13 @@ function ObjectCard({
   );
 }
 
-function EndCard({ bottomPadding }: { bottomPadding: number }) {
+function EndCard({
+  bottomPadding,
+  pageWidth,
+}: {
+  bottomPadding: number;
+  pageWidth: number;
+}) {
   return (
     <ScrollView
       bounces={false}
@@ -943,7 +950,7 @@ function EndCard({ bottomPadding }: { bottomPadding: number }) {
       ]}
       overScrollMode="never"
       showsVerticalScrollIndicator={false}
-      style={[styles.cardPage, { width: SW }]}
+      style={[styles.cardPage, { width: pageWidth }]}
     >
       <Text style={styles.endText}>And behind all of this —</Text>
       <Text style={styles.endText}>
@@ -1103,6 +1110,8 @@ export default function TonightSkyScreen() {
     calculatedAt: new Date(),
   });
   const [page, setPage] = useState(0);
+  const pageRef = useRef(0);
+  const [pagerWidth, setPagerWidth] = useState(0);
   const scrollRef = useRef<ScrollView | undefined>(undefined);
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -1311,6 +1320,34 @@ export default function TonightSkyScreen() {
   const isNewMoon = state.moonIllumination < 0.05;
   const featuredObj = allCards[page];
 
+  useEffect(() => {
+    if (pagerWidth <= 0) return;
+    scrollRef.current?.scrollTo({
+      x: pageRef.current * pagerWidth,
+      y: 0,
+      animated: false,
+    });
+  }, [pagerWidth]);
+
+  const updatePageForOffset = (offsetX: number) => {
+    if (pagerWidth <= 0) return;
+    const nextPage = Math.max(
+      0,
+      Math.min(allCards.length, Math.round(offsetX / pagerWidth)),
+    );
+    if (pageRef.current === nextPage) return;
+    pageRef.current = nextPage;
+    setPage(nextPage);
+  };
+
+  const handlePagerLayout = (event: LayoutChangeEvent) => {
+    const measuredWidth = Math.round(event.nativeEvent.layout.width);
+    if (measuredWidth <= 0) return;
+    setPagerWidth((currentWidth) =>
+      currentWidth === measuredWidth ? currentWidth : measuredWidth,
+    );
+  };
+
   if (state.status === "loading") {
     return (
       <View style={[styles.fullCenter, { backgroundColor: colors.background }]}>
@@ -1417,25 +1454,33 @@ export default function TonightSkyScreen() {
           pagingEnabled
           directionalLockEnabled
           showsHorizontalScrollIndicator={false}
+          onLayout={handlePagerLayout}
+          scrollEventThrottle={32}
+          onScroll={(event) =>
+            updatePageForOffset(event.nativeEvent.contentOffset.x)
+          }
           onMomentumScrollEnd={(e) => {
-            const idx = Math.round(e.nativeEvent.contentOffset.x / SW);
-            setPage(idx);
+            updatePageForOffset(e.nativeEvent.contentOffset.x);
           }}
-          style={{ flex: 1 }}
+          style={styles.pager}
         >
-          {allCards.map((obj) => (
-            <ObjectCard
-              key={obj.id}
-              bottomPadding={bottomPad}
-              obj={obj}
-              moonPhase={state.moonPhase}
-              moonIllumination={state.moonIllumination}
-              isAfterMidnight={isAfterMidnight}
-              isFullMoon={isFullMoon}
-              isNewMoon={isNewMoon}
-            />
-          ))}
-          <EndCard bottomPadding={bottomPad} />
+          {pagerWidth > 0 &&
+            allCards.map((obj) => (
+              <ObjectCard
+                key={obj.id}
+                bottomPadding={bottomPad}
+                pageWidth={pagerWidth}
+                obj={obj}
+                moonPhase={state.moonPhase}
+                moonIllumination={state.moonIllumination}
+                isAfterMidnight={isAfterMidnight}
+                isFullMoon={isFullMoon}
+                isNewMoon={isNewMoon}
+              />
+            ))}
+          {pagerWidth > 0 && (
+            <EndCard bottomPadding={bottomPad} pageWidth={pagerWidth} />
+          )}
         </ScrollView>
 
         <View style={[styles.dots, { bottom: bottomPad + 20 }]}>
@@ -1554,6 +1599,10 @@ const styles = StyleSheet.create({
   },
   cardPage: {
     flex: 1,
+  },
+  pager: {
+    flex: 1,
+    width: "100%",
   },
   card: {
     flexGrow: 1,

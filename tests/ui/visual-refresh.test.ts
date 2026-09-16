@@ -136,6 +136,11 @@ describe("refreshed screen contracts", () => {
     expect(tonight).toContain("Math.round(az / 45)");
     expect(tonight).toContain("<Animated.ScrollView");
     expect(tonight).toContain("nestedScrollEnabled");
+    expect(tonight).toContain("onLayout={handlePagerLayout}");
+    expect(tonight).toContain("pageWidth={pagerWidth}");
+    expect(tonight).toContain("updatePageForOffset");
+    expect(tonight).toContain("onScroll={(event)");
+    expect(tonight).not.toContain('Dimensions.get("window")');
     expect(tonight).toContain('fontFamily: "Inter_700Bold"');
   });
 
