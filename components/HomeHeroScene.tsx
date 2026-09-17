@@ -581,6 +581,7 @@ const styles = StyleSheet.create({
     height: 88,
     position: "relative",
     width: 88,
+    filter: 'brightness(1.5) blur(4px)',
   },
   energyLayer: {
     ...StyleSheet.absoluteFillObject,
