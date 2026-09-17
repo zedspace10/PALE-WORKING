@@ -108,9 +108,14 @@ export default function HomeScreen() {
 
         {/* Counters */}
         <Animated.View style={[styles.counters, { opacity: counterOpacity }]}>
-          <Text style={[styles.counterMain, { color: colors.foreground }]}>
+                    <Text style={[styles.counterMain, { color: colors.foreground }]}>
             {universeDisplay}
           </Text>
+          <Text
+            style={[styles.counterLabel, { color: colors.mutedForeground }]}
+          >
+            since the universe began
+          </Text>>
           {userDays !== null ? (
             <>
               <Text
