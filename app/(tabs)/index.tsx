@@ -115,18 +115,18 @@ export default function HomeScreen() {
             style={[styles.counterLabel, { color: colors.mutedForeground }]}
           >
             since the universe began
-          </Text>>
+          </Text>
           {userDays !== null ? (
             <>
               <Text
                 style={[styles.counterSub, { color: colors.primaryStrong }]}
               >
-                about {formatBig(userDays)}
+              {formatBig(userDays)}
               </Text>
               <Text
                 style={[styles.counterLabel, { color: colors.mutedForeground }]}
               >
-                days since your birth date
+              days since you were born
               </Text>
             </>
           ) : (
