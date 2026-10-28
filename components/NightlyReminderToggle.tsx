@@ -41,9 +41,9 @@ export function NightlyReminderToggle({ variant = "card" }: Props) {
       const raw = await AsyncStorage.getItem(LOCATION_CACHE_KEY);
       return parseCachedLocation(raw, Date.now()).ok
         ? null
-        : "Open Tonight's Sky to refresh your location before scheduling astronomical-darkness reminders.";
+        : "Open Tonight's Sky once, so PALE knows when it gets dark where you are.";
     } catch {
-      return "PALE could not read the saved location. Open Tonight's Sky and try again.";
+      return "PALE could not read your saved location. Open Tonight's Sky and try again.";
     }
   }
 
@@ -55,7 +55,7 @@ export function NightlyReminderToggle({ variant = "card" }: Props) {
       setOn(reached);
       if (next && !reached) {
         setNote(
-          "Notifications are turned off for PALE in your device settings.",
+          "Notifications for PALE are turned off in your phone's settings.",
         );
       } else if (reached) {
         setNote(await locationNote());
@@ -78,7 +78,7 @@ export function NightlyReminderToggle({ variant = "card" }: Props) {
             Observatory reminder
           </Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-            tonight's entry, near astronomical darkness
+            Tonight&apos;s entry, as it gets properly dark
           </Text>
         </View>
         <Switch

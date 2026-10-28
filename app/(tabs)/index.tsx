@@ -1,6 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Platform,
@@ -18,6 +19,7 @@ import { HomeHeroStars, HomeLocationSphere } from "@/components/HomeHeroScene";
 import { MagicalAction } from "@/components/MagicalSurface";
 import { StarField } from "@/components/StarField";
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
+import { areNotificationsEnabled } from "@/constants/notifications";
 import { getTodaysEntry } from "@/constants/observatory";
 import { formatUniverseAgeEstimate } from "@/constants/personalInsights";
 import { calmSpace, calmSurface, calmTypography } from "@/constants/ui";
@@ -26,6 +28,11 @@ import { useColors } from "@/hooks/useColors";
 import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
+
+// The quiet invitation on the Observatory card is shown for a person's first few openings of
+// the card only, and never once the reminder is on.
+const REMINDER_HINT_KEY = "@pale_reminder_hint_views";
+const REMINDER_HINT_LIMIT = 3;
 
 function formatBig(n: number): string {
   return Math.floor(n).toLocaleString("en-US");
@@ -46,6 +53,44 @@ export default function HomeScreen() {
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [obsExpanded, setObsExpanded] = useState(false);
+  const [reminderOn, setReminderOn] = useState<boolean | null>(null);
+  const [hintViews, setHintViews] = useState(REMINDER_HINT_LIMIT);
+
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      areNotificationsEnabled()
+        .then((on) => alive && setReminderOn(on))
+        .catch(() => undefined);
+      AsyncStorage.getItem(REMINDER_HINT_KEY)
+        .then((raw) => alive && setHintViews(Number(raw) || 0))
+        .catch(() => undefined);
+      return () => {
+        alive = false;
+      };
+    }, []),
+  );
+
+  const showReminderHint =
+    reminderOn === false && hintViews < REMINDER_HINT_LIMIT;
+
+  const toggleObservatory = () => {
+    const opening = !obsExpanded;
+    setObsExpanded(opening);
+    if (opening && showReminderHint) {
+      const next = hintViews + 1;
+      setHintViews(next);
+      AsyncStorage.setItem(REMINDER_HINT_KEY, String(next)).catch(
+        () => undefined,
+      );
+    }
+    if (!opening) {
+      // The reminder may have been switched on inside the card.
+      areNotificationsEnabled()
+        .then(setReminderOn)
+        .catch(() => undefined);
+    }
+  };
   const userDays = birthday
     ? Math.max(0, Math.floor((Date.now() - birthday.getTime()) / 86_400_000))
     : null;
@@ -166,7 +211,7 @@ export default function HomeScreen() {
         >
           {/* The Observatory: today's entry */}
           <CalmPressable
-            onPress={() => setObsExpanded(!obsExpanded)}
+            onPress={toggleObservatory}
             accessibilityRole="button"
             accessibilityState={{ expanded: obsExpanded }}
             style={[
@@ -195,6 +240,11 @@ export default function HomeScreen() {
                 >
                   {todaysEntry.locationDetail}
                 </Text>
+                {showReminderHint && !obsExpanded ? (
+                  <Text style={[styles.obsHint, { color: colors.primary }]}>
+                    Get a new one each evening, as it gets dark
+                  </Text>
+                ) : null}
               </View>
               <View style={[styles.obsLive, { backgroundColor: colors.glow }]}>
                 <Feather
@@ -399,6 +449,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     lineHeight: 20,
+  },
+  obsHint: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+    lineHeight: 18,
+    marginTop: 6,
   },
   obsLive: {
     alignItems: "center",
