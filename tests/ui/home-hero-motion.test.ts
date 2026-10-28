@@ -120,46 +120,33 @@ describe("Home hero scene contracts", () => {
     expect(home).not.toContain("styles.dotWrap");
   });
 
-  it("keeps one centered dimensional sphere across Shift entry and journey", () => {
+  it("zooms out through nested pictures in Shift, then flies home", () => {
     const shift = read("app/(tabs)/shift.tsx");
+    const scene = read("components/ShiftZoomScene.tsx");
     expect(shift).toContain('from "@/components/HomeHeroScene"');
     expect(shift).toContain("useHomeHeroMotionActive(reduceMotion)");
     expect(shift).toContain("active={ambientMotionActive}");
-    expect(shift).toContain('testID="shift-continuous-sphere"');
-    expect(shift.match(/<HomeLocationSphere/g)).toHaveLength(1);
-    expect(shift).not.toContain('testID="shift-entry-sphere"');
-    expect(shift).not.toContain('testID="shift-journey-sphere"');
+    expect(shift).toContain("<ShiftZoomScene");
+    expect(shift).toContain('testID="shift-entry-sphere"');
     expect(shift).toContain(
       "<StarField count={72} containerOpacity={0.38} drift={11}",
     );
-    expect(shift).toContain("SHIFT_SPHERE_VARIANTS");
-    expect(shift).toContain('"solar"');
-    expect(shift).toContain('"galaxy"');
-    expect(shift).toContain('"cluster"');
-    expect(shift).toContain('"cosmos"');
-    expect(shift).toContain("variant={journeyActive");
-    expect(shift).toContain("drift={14 + stage * 5}");
-    expect(shift).toContain("scale: Animated.divide(");
-    expect(shift).toContain("journeySphereSize.interpolate({");
-    expect(shift).toContain("const stageSphereOffsets = useMemo(");
-    expect(shift).toContain("viewportHeight * 0.26 + 140");
-    expect(shift).toContain("outputRange: stageSphereOffsets");
-    expect(shift).toContain("const stageTextTop =");
-    expect(shift).toContain("top: stageTextTop");
-    expect(shift).toContain("opacity: Animated.add(");
-    expect(shift).not.toContain("JOURNEY_SPHERE_X");
-    expect(shift).not.toContain("translateX:");
-    expect(shift).toContain('left: "50%"');
+    // Each stage pulls the camera back to the next picture; the last stays on everything.
+    expect(shift).toContain("Math.min(idx, SHIFT_MAX_ZOOM)");
+    // The return flies back to Earth before the welcome.
+    expect(shift).toContain("duration: ZOOM_HOME_MS");
     expect(shift).toContain("accessibilityViewIsModal={journeyActive}");
     expect(shift).toContain("const stageRunId = useRef(0)");
     expect(shift).toContain("runId !== stageRunId.current");
     expect(shift).toContain(
       "if (stageRef.current >= SHIFT_STAGES.length) return",
     );
-    expect(shift).not.toContain("styles.journeyCircle");
-    expect(shift).not.toContain("styles.completedCircleAnchor");
-    expect(shift).not.toContain("styles.orbGlow");
-    expect(shift).not.toContain("styles.orbRing");
-    expect(shift).not.toContain("styles.orbDot");
+    // Reduced motion jumps straight to each picture.
+    expect(shift).toContain("zoom.setValue(target)");
+    // All movement runs on the native driver, sampled from the same zoom maths.
+    expect(scene).toContain("shiftFrame(z, size)");
+    expect(scene).toContain("<HomeLocationSphere");
+    expect(scene).toContain("You are here");
+    expect(scene).not.toContain("useNativeDriver: false");
   });
 });
