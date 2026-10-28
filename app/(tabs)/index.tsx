@@ -87,203 +87,213 @@ export default function HomeScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StarField count={58} containerOpacity={0.3} drift={10} />
 
-      {/* ── Hero: Pale Blue Dot ── */}
-      <View style={[styles.hero, { paddingTop: topPad + 34 }]}>
-        {/* The Dot */}
-        <HomeHeroStars active={ambientMotionActive} />
-        <HomeLocationSphere
-          active={ambientMotionActive}
-          testID="home-location-sphere"
-        />
-
-        {/* "You are here." */}
-        <Animated.Text
-          style={[
-            styles.youAreHere,
-            { color: colors.foreground, opacity: youAreHereOpacity },
-          ]}
-        >
-          You are here.
-        </Animated.Text>
-
-        {/* Counters */}
-        <Animated.View style={[styles.counters, { opacity: counterOpacity }]}>
-                    <Text style={[styles.counterMain, { color: colors.foreground }]}>
-            {universeDisplay}
-          </Text>
-          <Text
-            style={[styles.counterLabel, { color: colors.mutedForeground }]}
-          >
-            since the universe began
-          </Text>
-          {userDays !== null ? (
-            <>
-              <Text
-                style={[styles.counterSub, { color: colors.primaryStrong }]}
-              >
-              {formatBig(userDays)}
-              </Text>
-              <Text
-                style={[styles.counterLabel, { color: colors.mutedForeground }]}
-              >
-              days since you were born
-              </Text>
-            </>
-          ) : (
-            <TouchableOpacity
-              onPress={() => router.push("/(tabs)/you")}
-              accessibilityRole="button"
-              style={styles.promptButton}
-            >
-              <Text
-                style={[
-                  styles.counterPrompt,
-                  { color: colors.mutedForeground },
-                ]}
-              >
-                Set your birthday to see your place in time
-              </Text>
-              <Feather
-                name="arrow-right"
-                size={14}
-                color={colors.primaryStrong}
-              />
-            </TouchableOpacity>
-          )}
-        </Animated.View>
-      </View>
-
-      {/* ── Scrollable Content ── */}
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingBottom: bottomPad + 100,
-            paddingHorizontal: 20,
-            paddingTop: 12,
-          },
-        ]}
+        contentContainerStyle={{ paddingBottom: bottomPad + 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Observatory — Today's Entry */}
-        <CalmPressable
-          onPress={() => setObsExpanded(!obsExpanded)}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: obsExpanded }}
-          style={[
-            styles.obsCard,
-            {
-              backgroundColor: colors.card,
-              borderColor: obsExpanded ? colors.primary + "66" : colors.border,
-            },
-          ]}
-        >
-          <CardArtwork name="observatory" />
-          <View style={styles.obsHeader}>
-            <View style={styles.obsHeaderLeft}>
-              <Text
-                style={[styles.cardLabel, { color: colors.mutedForeground }]}
-              >
-                THE OBSERVATORY
-              </Text>
-              <Text style={[styles.obsTitle, { color: colors.foreground }]}>
-                {todaysEntry.location}
-              </Text>
-              <Text style={[styles.obsSub, { color: colors.mutedForeground }]}>
-                {todaysEntry.locationDetail}
-              </Text>
-            </View>
-            <View style={[styles.obsLive, { backgroundColor: colors.glow }]}>
-              <Feather
-                name={obsExpanded ? "chevron-up" : "chevron-down"}
-                size={15}
-                color={colors.primaryStrong}
-              />
-            </View>
-          </View>
+        {/* Hero: the pale blue dot. It scrolls with the page, so the cards below always have room. */}
+        <View style={[styles.hero, { paddingTop: topPad + 34 }]}>
+          {/* The Dot */}
+          <HomeHeroStars active={ambientMotionActive} />
+          <HomeLocationSphere
+            active={ambientMotionActive}
+            testID="home-location-sphere"
+          />
 
-          {obsExpanded && (
-            <View style={styles.obsBody}>
-              <View
-                style={[styles.obsDivider, { backgroundColor: colors.border }]}
-              />
-              <Text style={[styles.obsText, { color: colors.foreground }]}>
-                {todaysEntry.reflection}
-              </Text>
-              <View style={styles.obsMeta}>
+          {/* "You are here." */}
+          <Animated.Text
+            style={[
+              styles.youAreHere,
+              { color: colors.foreground, opacity: youAreHereOpacity },
+            ]}
+          >
+            You are here.
+          </Animated.Text>
+
+          {/* Counters */}
+          <Animated.View style={[styles.counters, { opacity: counterOpacity }]}>
+            <Text style={[styles.counterMain, { color: colors.foreground }]}>
+              {universeDisplay}
+            </Text>
+            <Text
+              style={[styles.counterLabel, { color: colors.mutedForeground }]}
+            >
+              since the universe began
+            </Text>
+            {userDays !== null ? (
+              <>
+                <Text
+                  style={[styles.counterSub, { color: colors.primaryStrong }]}
+                >
+                  {formatBig(userDays)}
+                </Text>
                 <Text
                   style={[
-                    styles.obsMetaText,
+                    styles.counterLabel,
                     { color: colors.mutedForeground },
                   ]}
                 >
-                  {todaysEntry.distance}
+                  days since you were born
+                </Text>
+              </>
+            ) : (
+              <TouchableOpacity
+                onPress={() => router.push("/(tabs)/you")}
+                accessibilityRole="button"
+                style={styles.promptButton}
+              >
+                <Text
+                  style={[
+                    styles.counterPrompt,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
+                  Set your birthday to see your place in time
+                </Text>
+                <Feather
+                  name="arrow-right"
+                  size={14}
+                  color={colors.primaryStrong}
+                />
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+        </View>
+
+        <View
+          style={[styles.content, { paddingHorizontal: 20, paddingTop: 12 }]}
+        >
+          {/* The Observatory: today's entry */}
+          <CalmPressable
+            onPress={() => setObsExpanded(!obsExpanded)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: obsExpanded }}
+            style={[
+              styles.obsCard,
+              {
+                backgroundColor: colors.card,
+                borderColor: obsExpanded
+                  ? colors.primary + "66"
+                  : colors.border,
+              },
+            ]}
+          >
+            <CardArtwork name="observatory" />
+            <View style={styles.obsHeader}>
+              <View style={styles.obsHeaderLeft}>
+                <Text
+                  style={[styles.cardLabel, { color: colors.mutedForeground }]}
+                >
+                  THE OBSERVATORY
+                </Text>
+                <Text style={[styles.obsTitle, { color: colors.foreground }]}>
+                  {todaysEntry.location}
+                </Text>
+                <Text
+                  style={[styles.obsSub, { color: colors.mutedForeground }]}
+                >
+                  {todaysEntry.locationDetail}
                 </Text>
               </View>
-
-              <NightlyReminderToggle variant="row" />
+              <View style={[styles.obsLive, { backgroundColor: colors.glow }]}>
+                <Feather
+                  name={obsExpanded ? "chevron-up" : "chevron-down"}
+                  size={15}
+                  color={colors.primaryStrong}
+                />
+              </View>
             </View>
-          )}
-        </CalmPressable>
 
-        {/* Nav Cards */}
-        <View style={styles.navRow}>
+            {obsExpanded && (
+              <View style={styles.obsBody}>
+                <View
+                  style={[
+                    styles.obsDivider,
+                    { backgroundColor: colors.border },
+                  ]}
+                />
+                <Text style={[styles.obsText, { color: colors.foreground }]}>
+                  {todaysEntry.reflection}
+                </Text>
+                <View style={styles.obsMeta}>
+                  <Text
+                    style={[
+                      styles.obsMetaText,
+                      { color: colors.mutedForeground },
+                    ]}
+                  >
+                    {todaysEntry.distance}
+                  </Text>
+                </View>
+
+                <NightlyReminderToggle variant="row" />
+              </View>
+            )}
+          </CalmPressable>
+
+          {/* Nav Cards */}
+          <View style={styles.navRow}>
+            <MagicalAction
+              onPress={() => router.push("/(tabs)/shift")}
+              accessibilityRole="button"
+              variant="secondary"
+              wrapperStyle={styles.navCardWrap}
+              style={styles.navCardFrame}
+              contentStyle={styles.navCard}
+            >
+              <CardArtwork name="shift" />
+              <View style={styles.navCardCopy}>
+                <Text style={[styles.navLabel, { color: colors.foreground }]}>
+                  Shift
+                </Text>
+                <Text
+                  style={[styles.navSub, { color: colors.mutedForeground }]}
+                >
+                  a minute to the edge of everything
+                </Text>
+              </View>
+            </MagicalAction>
+
+            <MagicalAction
+              onPress={() => router.push("/(tabs)/deeptime")}
+              accessibilityRole="button"
+              variant="quiet"
+              wrapperStyle={styles.navCardWrap}
+              style={styles.navCardFrame}
+              contentStyle={styles.navCard}
+            >
+              <CardArtwork name="timeMachine" />
+              <View style={styles.navCardCopy}>
+                <Text style={[styles.navLabel, { color: colors.foreground }]}>
+                  Time Machine
+                </Text>
+                <Text
+                  style={[styles.navSub, { color: colors.mutedForeground }]}
+                >
+                  the story of everything
+                </Text>
+              </View>
+            </MagicalAction>
+          </View>
+
           <MagicalAction
-            onPress={() => router.push("/(tabs)/shift")}
+            onPress={() => router.push("/tonight-sky")}
             accessibilityRole="button"
-            variant="secondary"
-            wrapperStyle={styles.navCardWrap}
             style={styles.navCardFrame}
-            contentStyle={styles.navCard}
+            contentStyle={[styles.navCard, styles.universeCard]}
           >
-            <CardArtwork name="shift" />
-            <View style={styles.navCardCopy}>
+            <CardArtwork name="tonightsSky" />
+            <View style={styles.universeCopy}>
               <Text style={[styles.navLabel, { color: colors.foreground }]}>
-                Shift
+                Tonight's Sky
               </Text>
               <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
-                perspective journey
-              </Text>
-            </View>
-          </MagicalAction>
-
-          <MagicalAction
-            onPress={() => router.push("/(tabs)/deeptime")}
-            accessibilityRole="button"
-            variant="quiet"
-            wrapperStyle={styles.navCardWrap}
-            style={styles.navCardFrame}
-            contentStyle={styles.navCard}
-          >
-            <CardArtwork name="timeMachine" />
-            <View style={styles.navCardCopy}>
-              <Text style={[styles.navLabel, { color: colors.foreground }]}>
-                Time Machine
-              </Text>
-              <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
-                13.8 billion years
+                What you can see from where you are
               </Text>
             </View>
           </MagicalAction>
         </View>
-
-        <MagicalAction
-          onPress={() => router.push("/tonight-sky")}
-          accessibilityRole="button"
-          style={styles.navCardFrame}
-          contentStyle={[styles.navCard, styles.universeCard]}
-        >
-          <CardArtwork name="tonightsSky" />
-          <View style={styles.universeCopy}>
-            <Text style={[styles.navLabel, { color: colors.foreground }]}>
-              Tonight's Sky
-            </Text>
-            <Text style={[styles.navSub, { color: colors.mutedForeground }]}>
-              Location-aware, condition-qualified guidance
-            </Text>
-          </View>
-        </MagicalAction>
       </ScrollView>
     </View>
   );

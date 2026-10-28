@@ -72,8 +72,8 @@ describe("audited scientific corrections", () => {
       (star) => star.name === "Proxima Centauri",
     );
     const barnard = STAR_CATALOG.find((star) => star.name === "Barnard's Star");
-    expect(proxima?.note).toMatch(/M-type star.*roughly 4.2 light-years/i);
-    expect(barnard?.note).toMatch(/M-type star.*roughly 5.9 light-years/i);
+    expect(proxima?.note).toMatch(/M-type star.*roughly 4.2 light years/i);
+    expect(barnard?.note).toMatch(/M-type star.*roughly 5.9 light years/i);
     expect(textFor(STAR_CATALOG.map((star) => star.note))).not.toMatch(
       /prime candidate for planets with life|civilisation|confirmed planet|known planets/i,
     );

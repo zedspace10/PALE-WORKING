@@ -32,7 +32,7 @@ import {
   ScientificItem,
   ScientificSourceId,
 } from "@/constants/scientificContent";
-import { findStarByAge } from "@/constants/starCatalog";
+import { findStarByAge, getMoonPhase } from "@/constants/starCatalog";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -40,8 +40,11 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   formatLightTime,
   getPlanetPosition,
+  getPlanetSkyPlacement,
   PlanetId,
+  type SkyPlacement,
 } from "@/constants/planets";
+import { getTonightsEvent } from "@/constants/skyEvents";
 import {
   equatorialToHorizontal,
   getMoonIllumination,
@@ -153,7 +156,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     truth:
       "Robotic missions have explored Mars from orbit and on the surface. Perseverance has studied rocks in Jezero Crater and cached samples intended for possible future analysis.",
     wonder:
-      "Mars has the largest volcano in the solar system — Olympus Mons, three times taller than Everest.",
+      "Mars has the largest volcano in the solar system, Olympus Mons, three times taller than Everest.",
     instruction:
       "Mars has a distinctive reddish tint. It doesn't twinkle like stars do.",
   },
@@ -165,7 +168,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "star",
     color: "#B0C4DE",
     truth:
-      "Sirius is roughly 8.6 light-years away. The light arriving from it began its journey about 8.6 years earlier, so every view is of its past.",
+      "Sirius is roughly 8.6 light years away. The light arriving from it began its journey about 8.6 years earlier, so every view is of its past.",
     wonder:
       "Sirius is the brightest star in Earth's night sky by apparent magnitude.",
     instruction:
@@ -179,11 +182,11 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "constellation",
     color: "#E8F0FF",
     truth:
-      "The three stars in Orion's belt are roughly 1,200 to 2,000 light-years away by current estimates. They are not physically adjacent; they appear aligned from our vantage point.",
+      "The three stars in Orion's belt are roughly 1,200 to 2,000 light years away by current estimates. They are not physically adjacent; they appear aligned from our vantage point.",
     wonder:
       "Many cultures have recognised patterns in these stars, often telling very different stories about the same part of the sky.",
     instruction:
-      "Look for three stars in a straight line. That's Orion's belt — one of the most recognisable patterns in the sky.",
+      "Look for three stars in a straight line. That's Orion's belt, one of the most recognisable patterns in the sky.",
   },
   {
     id: "betelgeuse",
@@ -207,7 +210,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "star",
     color: "#E8F0FF",
     truth:
-      "Vega is 25 light-years away. Due to Earth's axial precession, Vega will become the North Star in approximately 12,000 years. The night sky is always slowly changing.",
+      "Vega is 25 light years away. Due to Earth's axial precession, Vega will become the North Star in approximately 12,000 years. The night sky is always slowly changing.",
     wonder:
       "Carl Sagan chose Vega as the fictional source of the signal in his novel Contact. The literary choice is not evidence of a planet or civilisation there.",
     instruction:
@@ -221,11 +224,11 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "star",
     color: "#FFB347",
     truth:
-      "Arcturus is about 37 light-years away and has a comparatively large motion through the sky relative to the Sun.",
+      "Arcturus is about 37 light years away and has a comparatively large motion through the sky relative to the Sun.",
     wonder:
       "Its warm orange appearance comes from a cooler surface temperature than the Sun's, not from a nearby fire-like glow.",
     instruction:
-      "Follow the curve of the Big Dipper's handle and it will arc to Arcturus — a warm orange star.",
+      "Follow the curve of the Big Dipper's handle and it will arc to Arcturus, a warm orange star.",
   },
   {
     id: "milkyway",
@@ -239,7 +242,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "The Milky Way core is best seen from June to September in the northern hemisphere. The band of light you see is our galaxy seen edge-on from within.",
     instruction:
-      "Find the darkest part of the sky and look for a faint band of light stretching across it. Let your eyes fully adjust — it takes 20 minutes.",
+      "Find the darkest part of the sky and look for a faint band of light stretching across it. Give your eyes time to adjust. It takes about 20 minutes.",
   },
   {
     id: "cassiopeia",
@@ -262,7 +265,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "constellation",
     color: "#E8F0FF",
     truth:
-      "Five of the seven stars in the Big Dipper are moving through space together — they were born from the same cloud of gas and are travelling in the same direction. They will eventually drift apart over millions of years.",
+      "Five of the seven stars in the Big Dipper are moving through space together. They were born from the same cloud of gas and are travelling in the same direction. They will eventually drift apart over millions of years.",
     wonder:
       "The two stars at the end of the Big Dipper's bowl form a useful guide toward Polaris. Northern navigators have long used the surrounding sky for orientation.",
     instruction:
@@ -270,7 +273,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
   },
   {
     id: "polaris",
-    name: "Polaris — The North Star",
+    name: "Polaris, the North Star",
     ra: 37.9,
     dec: 89.3,
     type: "star",
@@ -280,7 +283,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Polaris has long been used for northern navigation. It traces a small circle around the celestial pole rather than remaining perfectly fixed.",
     instruction:
-      "Find the North Star by following the two stars at the end of the Big Dipper's bowl — they point directly to Polaris.",
+      "Find the North Star by following the two stars at the end of the Big Dipper's bowl. They point straight to Polaris.",
   },
   {
     id: "scorpius",
@@ -290,7 +293,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "constellation",
     color: "#FF6B35",
     truth:
-      "The heart of Scorpius is Antares — a red supergiant so large that if it replaced our Sun, it would swallow Mercury, Venus, Earth and Mars.",
+      "The heart of Scorpius is Antares, a red supergiant so large that if it replaced our Sun, it would swallow Mercury, Venus, Earth and Mars.",
     wonder:
       "Scorpius and Orion occupy nearly opposite parts of the sky, so one is usually prominent when the other is not. Near seasonal transitions, parts of both can briefly be above opposite horizons.",
     instruction:
@@ -683,13 +686,17 @@ function CompassIndicator({
 }
 
 function MoonVisual({ phase, size }: { phase: number; size: number }) {
+  // phase: 0 new, 0.25 first quarter, 0.5 full, 0.75 last quarter.
+  // The lit edge is a half circle on the Sun's side; the terminator is half an ellipse whose width
+  // shrinks to nothing at quarter Moon, bulging into the dark side when more than half is lit.
   const r = size / 2;
-  const lit = phase < 0.5 ? 1 - phase * 2 : (phase - 0.5) * 2;
+  const lit = (1 - Math.cos(2 * Math.PI * phase)) / 2;
   const waning = phase > 0.5;
-  const rx = Math.abs(lit - 0.5) * 2 * r;
+  const gibbous = lit > 0.5;
+  const rx = Math.abs(1 - 2 * lit) * r;
   const d = waning
-    ? `M ${r},0 A ${r},${r} 0 0,0 ${r},${size} A ${rx},${r} 0 0,1 ${r},0`
-    : `M ${r},0 A ${r},${r} 0 0,1 ${r},${size} A ${rx},${r} 0 0,0 ${r},0`;
+    ? `M ${r},0 A ${r},${r} 0 0,0 ${r},${size} A ${rx},${r} 0 0,${gibbous ? 0 : 1} ${r},0`
+    : `M ${r},0 A ${r},${r} 0 0,1 ${r},${size} A ${rx},${r} 0 0,${gibbous ? 1 : 0} ${r},0`;
   return (
     <Svg width={size} height={size}>
       <Defs>
@@ -850,8 +857,8 @@ function ObjectCard({
     };
   }, [obj.id, fadeAnim]);
 
-  const dirLabel = obj.az !== undefined ? azToCompass(obj.az) : "—";
-  const heightLabel = obj.alt !== undefined ? altToLabel(obj.alt) : "—";
+  const dirLabel = obj.az !== undefined ? azToCompass(obj.az) : "unknown";
+  const heightLabel = obj.alt !== undefined ? altToLabel(obj.alt) : "unknown";
   const isTimeless = obj.type === "star" || obj.type === "constellation";
 
   return (
@@ -910,7 +917,7 @@ function ObjectCard({
           obj.personalStarDistance !== undefined &&
           obj.personalStarDepartureYear !== undefined && (
             <Text style={styles.personalLine}>
-              This is a storytelling match: its rounded distance in light-years
+              This is a storytelling match: its rounded distance in light years
               is closest to your age in years, not a physical or astrological
               link.{"\n"}
               Light arriving around now left {obj.name} around{" "}
@@ -952,9 +959,9 @@ function EndCard({
       showsVerticalScrollIndicator={false}
       style={[styles.cardPage, { width: pageWidth }]}
     >
-      <Text style={styles.endText}>And behind all of this —</Text>
+      <Text style={styles.endText}>And behind all of this,</Text>
       <Text style={styles.endText}>
-        hundreds of billions of galaxies — perhaps more.
+        hundreds of billions of galaxies, perhaps more.
       </Text>
       <Text style={[styles.endSub, { marginTop: 24 }]}>
         Some are tiny dwarfs; others contain hundreds of billions of stars.
@@ -967,6 +974,36 @@ function EndCard({
   );
 }
 
+function sentenceCase(text: string): string {
+  return text.charAt(0) + text.slice(1).toLowerCase();
+}
+
+const PLANET_NAMES: Record<PlanetId, string> = {
+  mercury: "Mercury",
+  venus: "Venus",
+  mars: "Mars",
+  jupiter: "Jupiter",
+  saturn: "Saturn",
+  uranus: "Uranus",
+  neptune: "Neptune",
+};
+const NAKED_EYE_PLANETS: PlanetId[] = [
+  "mercury",
+  "venus",
+  "mars",
+  "jupiter",
+  "saturn",
+];
+const PLACEMENT_WORDS: Record<SkyPlacement, string> = {
+  evening: "In the evening sky, after sunset",
+  morning: "In the morning sky, before dawn",
+  "all-night": "Up for most of the night",
+  "in-glare": "Too close to the Sun to see",
+};
+
+// Without a location PALE still shows what is true for everyone tonight: the Moon's phase, where
+// the bright planets are in relation to the Sun, and any meteor shower. Location only adds the
+// exact directions and the time it gets dark, so it is offered, never required.
 function LocationStateScreen({
   denied,
   onRetry,
@@ -976,8 +1013,22 @@ function LocationStateScreen({
 }) {
   const colors = useColors();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const now = useMemo(() => new Date(), []);
+  const moonPhase = getMoonPhaseFraction(now);
+  const moonLit = Math.round(getMoonIllumination(now) * 100);
+  const planets = NAKED_EYE_PLANETS.map((id) => ({
+    id,
+    ...getPlanetSkyPlacement(id, now),
+  }));
+  const visible = planets.filter((p) => p.placement !== "in-glare");
+  const hidden = planets.filter((p) => p.placement === "in-glare");
+  const event = getTonightsEvent(now);
+
   return (
-    <View style={[styles.fullCenter, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StarField count={60} containerOpacity={0.3} />
       <TouchableOpacity
         onPress={() => router.back()}
@@ -985,36 +1036,86 @@ function LocationStateScreen({
         accessibilityLabel="Back"
         style={{
           position: "absolute",
-          top: 60,
+          top: topPad + 12,
           left: 24,
           zIndex: 200,
           padding: 12,
         }}
       >
-        <Text style={{ color: colors.primary, fontSize: 22 }}>←</Text>
+        <Text style={styles.backText}>←</Text>
       </TouchableOpacity>
-      <View style={styles.deniedContent}>
-        <Text style={styles.deniedMain}>
-          We don't know where you are tonight.
-        </Text>
-        <Text style={styles.deniedSub}>
-          {denied
-            ? "Location permission is off, so PALE will not guess your sky from another city."
-            : "Your current location could not be read and there is no fresh, valid cached location."}
-        </Text>
-        <TouchableOpacity
-          onPress={denied ? () => Linking.openSettings() : onRetry}
-          style={styles.retryButton}
-          accessibilityRole="button"
-          accessibilityLabel={
-            denied ? "Open location settings" : "Try location again"
-          }
-        >
-          <Text style={styles.retryText}>
-            {denied ? "OPEN SETTINGS" : "TRY AGAIN"}
+      <ScrollView
+        contentContainerStyle={[
+          styles.everywhereContent,
+          { paddingTop: topPad + 72, paddingBottom: bottomPad + 48 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.everywhereTitle}>Tonight&apos;s Sky</Text>
+
+        <View style={styles.everywhereMoon}>
+          <MoonVisual phase={moonPhase} size={72} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={styles.everywhereHeading}>
+              {sentenceCase(getMoonPhase(now))}, {moonLit}% lit
+            </Text>
+            <Text style={styles.everywhereLine}>
+              {moonLit > 75
+                ? "A bright Moon. Lovely through binoculars, though it hides fainter stars."
+                : moonLit < 25
+                  ? "A dark sky for the Moon. A good night for faint stars, away from city lights."
+                  : "Look along the line between light and dark, where crater shadows are longest."}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.everywhereSection}>
+          <Text style={styles.everywhereLabel}>THE BRIGHT PLANETS</Text>
+          {visible.map((p) => (
+            <View key={p.id} style={styles.everywhereRow}>
+              <Text style={styles.everywhereName}>{PLANET_NAMES[p.id]}</Text>
+              <Text style={styles.everywhereLine}>
+                {PLACEMENT_WORDS[p.placement]}
+              </Text>
+            </View>
+          ))}
+          {hidden.length > 0 && (
+            <Text style={styles.everywhereFaint}>
+              {hidden.map((p) => PLANET_NAMES[p.id]).join(" and ")}{" "}
+              {hidden.length === 1 ? "is" : "are"} too close to the Sun to see
+              right now.
+            </Text>
+          )}
+        </View>
+
+        {event && (
+          <View style={styles.everywhereSection}>
+            <Text style={styles.everywhereLabel}>THIS WEEK</Text>
+            <Text style={styles.everywhereName}>{event.title}</Text>
+            <Text style={styles.everywhereLine}>{event.line}</Text>
+          </View>
+        )}
+
+        <View style={[styles.everywhereSection, styles.everywhereInvite]}>
+          <Text style={styles.everywhereLine}>
+            {denied
+              ? "With your location, PALE can show exactly where to look and when it gets dark where you are. It is only used on this phone."
+              : "Your location could not be read just now. With it, PALE can show exactly where to look and when it gets dark."}
           </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            onPress={denied ? () => Linking.openSettings() : onRetry}
+            style={styles.retryButton}
+            accessibilityRole="button"
+            accessibilityLabel={
+              denied ? "Open location settings" : "Try location again"
+            }
+          >
+            <Text style={styles.retryText}>
+              {denied ? "Turn on location" : "Try again"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -1152,7 +1253,7 @@ export default function TonightSkyScreen() {
       dec: coords.dec,
       color: GOLD,
       truth: star.note,
-      wonder: `This star is ${star.distance} light-years away. Light reaching Earth around now began its journey around ${departureYear}.`,
+      wonder: `This star is ${star.distance} light years away. Light reaching Earth around now began its journey around ${departureYear}.`,
       instruction: `Estimated direction: ${azToCompass(az)} · ${altToLabel(alt)}. The light has been travelling toward Earth for about ${Math.round(star.distance)} years.`,
       alt,
       az,
@@ -1401,7 +1502,7 @@ export default function TonightSkyScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StarField count={120} containerOpacity={0.5} />
 
-      {/* Back button always visible — outside fade animation */}
+      {/* Back button always visible, outside fade animation */}
       <TouchableOpacity
         onPress={() => router.back()}
         accessibilityRole="button"
@@ -1770,6 +1871,52 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     textAlign: "center",
   },
+  everywhereContent: {
+    alignSelf: "center",
+    gap: 28,
+    maxWidth: 560,
+    paddingHorizontal: 28,
+    width: "100%",
+  },
+  everywhereTitle: {
+    color: WARM_WHITE,
+    fontSize: 26,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.3,
+  },
+  everywhereMoon: { flexDirection: "row", alignItems: "center", gap: 20 },
+  everywhereSection: { gap: 10 },
+  everywhereInvite: { alignItems: "flex-start", gap: 16, marginTop: 8 },
+  everywhereLabel: {
+    color: "rgba(245,250,255,0.5)",
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 2,
+  },
+  everywhereHeading: {
+    color: WARM_WHITE,
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: "Inter_600SemiBold",
+  },
+  everywhereRow: { gap: 2 },
+  everywhereName: {
+    color: WARM_WHITE,
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+  },
+  everywhereLine: {
+    color: "rgba(245,250,255,0.7)",
+    fontSize: 14,
+    lineHeight: 22,
+    fontFamily: "Inter_400Regular",
+  },
+  everywhereFaint: {
+    color: "rgba(245,250,255,0.45)",
+    fontSize: 13,
+    lineHeight: 20,
+    fontFamily: "Inter_400Regular",
+  },
   retryButton: {
     borderWidth: 1,
     borderColor: GOLD,
@@ -1779,8 +1926,8 @@ const styles = StyleSheet.create({
   },
   retryText: {
     color: GOLD,
-    fontSize: 11,
-    letterSpacing: 2,
+    fontSize: 14,
+    letterSpacing: 0.3,
     fontFamily: "Inter_600SemiBold",
   },
   timeText: {

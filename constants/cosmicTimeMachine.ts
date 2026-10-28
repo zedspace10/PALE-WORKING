@@ -49,7 +49,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "13.8 billion years ago (380,000 years after Big Bang)",
     title: "The First Light",
     description:
-      "The universe cools enough for electrons to combine with protons, forming the first hydrogen atoms. For the first time, light can travel freely. This light — the cosmic microwave background — still surrounds us today in every direction.",
+      "The universe cools enough for electrons to combine with protons, forming the first hydrogen atoms. For the first time, light can travel freely. This light, the cosmic microwave background, still surrounds us today in every direction.",
     perspective:
       "Right now, ancient microwave radiation from when the universe became transparent is passing through your surroundings. It is the oldest electromagnetic light we can directly observe.",
     color: "#FFB347",
@@ -61,7 +61,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "13.6 billion years ago",
     title: "The Cosmic Dark Ages",
     description:
-      "The universe enters a period of darkness — no stars yet, only clouds of hydrogen and helium slowly cooling and drifting. For hundreds of millions of years, the universe is dark and silent.",
+      "The universe enters a period of darkness. No stars yet, only clouds of hydrogen and helium slowly cooling and drifting. For hundreds of millions of years, the universe is dark and silent.",
     perspective:
       "After the cosmic background light was released, roughly one to two hundred million years passed before the first stars began to shine. Darkness preceded starlight, but not the background radiation still travelling through the universe.",
     color: "#3A3060",
@@ -73,7 +73,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "13.5 billion years ago",
     title: "The First Stars",
     description:
-      "The first stars ignite — massive, hot, and short-lived. Their lives and explosions enrich their surroundings with elements heavier than helium. Later generations of stars and compact-object events continue producing and dispersing elements such as carbon, oxygen, iron, and gold.",
+      "The first stars ignite: massive, hot, and short-lived. Their lives and explosions enrich their surroundings with elements heavier than helium. Later generations of stars and compact-object events continue producing and dispersing elements such as carbon, oxygen, iron, and gold.",
     perspective:
       "Many elements in your body were forged by stars or stellar explosions; hydrogen is largely primordial. You are made from matter recycled across cosmic history.",
     color: "#FFF0A0",
@@ -85,7 +85,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "13.4 billion years ago",
     title: "The First Galaxies",
     description:
-      "Gravity gathers stars into the first galaxies. They are small, irregular, and turbulent — nothing like the grand spirals we see today. They collide, merge, and grow over billions of years into the structure of the cosmic web.",
+      "Gravity gathers stars into the first galaxies. They are small, irregular, and turbulent, nothing like the grand spirals we see today. They collide, merge, and grow over billions of years into the structure of the cosmic web.",
     perspective:
       "The Milky Way assembled through gas accretion, star formation, and mergers over billions of years. Our galaxy still carries evidence of those earlier interactions.",
     color: "#A0C0F0",
@@ -98,7 +98,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "4.6 billion years ago",
     title: "Our Sun is Born",
     description:
-      "A cloud of gas and dust — perhaps triggered by a nearby supernova — collapses under gravity. At its center, pressure and temperature become high enough to ignite nuclear fusion. Our Sun begins to shine. Around it, the remaining disk of material will become the planets.",
+      "A cloud of gas and dust, perhaps triggered by a nearby supernova, collapses under gravity. At its center, pressure and temperature become high enough to ignite nuclear fusion. Our Sun begins to shine. Around it, the remaining disk of material will become the planets.",
     perspective:
       "Our Sun is built from the ashes of stars that came before it. We live inside a stellar inheritance.",
     color: "#FFD700",
@@ -123,7 +123,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "4.4 billion years ago",
     title: "The First Oceans",
     description:
-      "Water — delivered by comets and asteroids, or released from volcanic activity — accumulates on Earth's surface. The oceans form. The stage is set for life.",
+      "Water, delivered by comets and asteroids, or released from volcanic activity, accumulates on Earth's surface. The oceans form. The stage is set for life.",
     perspective:
       "Earth's water has multiple possible sources, including water-rich material incorporated during formation and later delivery by small bodies. The relative contributions remain under study.",
     color: "#3D8FBF",
@@ -185,7 +185,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Over tens of millions of years, many major animal groups become conspicuous in the fossil record. Eyes, limbs, shells, and new predator-prey relationships spread through increasingly complex marine ecosystems.",
     perspective:
-      "The body plan you inhabit — bilateral symmetry, a central nervous system, a head with eyes on it — is a Cambrian design. You are driving a vehicle whose basic architecture is 540 million years old.",
+      "The body plan you live in (two matching sides, a central nervous system, a head with eyes) is a Cambrian design. You are driving a vehicle whose basic architecture is 540 million years old.",
     color: "#A0B890",
     icon: "eye",
   },
@@ -207,7 +207,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "230 million years ago",
     title: "The Age of Dinosaurs",
     description:
-      "After the Permian mass extinction wipes out around 80% of marine species, dinosaurs emerge and come to dominate. They rule Earth for 165 million years — some 27 times longer than our own lineage has existed.",
+      "After the Permian mass extinction wipes out around 80% of marine species, dinosaurs emerge and come to dominate. They rule Earth for 165 million years, some 27 times longer than our own lineage has existed.",
     perspective:
       "Dinosaurs existed for 165 million years. Our entire human lineage has existed for perhaps 6 million years. We are newcomers, not successors.",
     color: "#8DA060",
@@ -233,7 +233,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "With the dinosaurs gone, mammals rapidly diversify into the ecological niches left empty. Whales return to the sea. Bats take to the air. Primates develop in the forests. The world fills with warm-blooded, social, curious animals.",
     perspective:
-      "The diversity of mammals — from blue whales to bats to humans — all emerged in the 66 million years since the asteroid. Evolution is fast when given empty space.",
+      "The diversity of mammals, from blue whales to bats to humans, all emerged in the 66 million years since the asteroid. Evolution is fast when given empty space.",
     color: "#C09070",
     icon: "heart",
   },
@@ -292,7 +292,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "12,000 years ago",
     title: "Settled Societies Expand",
     description:
-      "Humans domesticate plants and animals and begin to build permanent settlements. Cities follow, then writing, some 7,000 years later still. What we call 'history' begins — though humanity had existed for 295,000 years before anyone wrote anything down.",
+      "Humans domesticate plants and animals and begin to build permanent settlements. Cities follow, then writing, some 7,000 years later still. What we call 'history' begins, though humanity had existed for 295,000 years before anyone wrote anything down.",
     perspective:
       "Agriculture and permanent settlements expanded within roughly the last 12,000 years; cities and writing came later in several regions. Art, symbolic expression, and ritual traditions reach much further into human prehistory.",
     color: "#C8A060",
@@ -327,7 +327,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
   {
     id: "milky-way-merger",
     era: "future",
-    when: "Several billion years from now — uncertain",
+    when: "Several billion years from now, timing uncertain",
     title: "A Possible Andromeda Encounter",
     description:
       "Andromeda is approaching the Milky Way, but newer measurements make a direct collision within the next several billion years uncertain. If a close encounter or merger occurs, it would unfold over billions of years.",
@@ -356,7 +356,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "In standard long-term models, usable gas dwindles and star formation eventually ceases. The timing depends on cosmology and stellar populations; remnants and black holes would dominate an increasingly cold, dark universe.",
     perspective:
-      "The era of stars — the era that made us possible — is just a brief, bright chapter in the universe's very long story. We are lucky to have been born in the age of starlight.",
+      "The era of stars, the era that made us possible, is just a brief, bright chapter in the universe's very long story. We are lucky to have been born in the age of starlight.",
     color: "#303050",
     icon: "moon",
   },

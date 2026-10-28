@@ -34,7 +34,7 @@ export function PaleLogo({
         opacity={0.9}
       />
 
-      {/* Inner ring — subtle */}
+      {/* Inner ring, subtle */}
       <Circle
         cx={cx}
         cy={cy}
@@ -76,7 +76,7 @@ export function PaleLogo({
         opacity={0.25}
       />
 
-      {/* Pale Blue Dot — small dot sitting on horizon */}
+      {/* Pale Blue Dot, small dot sitting on horizon */}
       <Circle
         cx={cx}
         cy={horizonY}

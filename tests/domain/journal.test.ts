@@ -117,7 +117,7 @@ describe("journal repository integrity", () => {
         ...entry("legacy", new Date()),
         universeAge: 13_797_002_345.123,
       }),
-    ).toBe("Approximately 13.8 billion years (legacy entry)");
+    ).toBe("About 13.8 billion years");
   });
 });
 
@@ -167,15 +167,15 @@ describe("journal retrospective labels", () => {
 });
 
 describe("journal UI contract", () => {
-  it("uses consistent local unencrypted storage disclosure and preserves failed drafts", () => {
+  it("says entries stay on the phone and are not encrypted, and preserves failed drafts", () => {
     const screen = fs.readFileSync(
       path.resolve(process.cwd(), "app/(tabs)/journal.tsx"),
       "utf8",
     );
-    expect(screen).toMatch(/stored locally · unencrypted/i);
-    expect(
-      screen.match(/unencrypted app storage/g)?.length,
-    ).toBeGreaterThanOrEqual(2);
+    // Says plainly where entries live, and that they are not encrypted, without claiming privacy.
+    expect(screen).toMatch(/Only on this phone, never sent to us/);
+    expect(screen).toMatch(/Entries are not encrypted/);
+    expect(screen.match(/PRIVACY_FULL/g)?.length).toBeGreaterThanOrEqual(3);
     expect(screen).not.toMatch(/This is private|private perspective/i);
     expect(screen).toMatch(/draft stays in `write`/);
   });

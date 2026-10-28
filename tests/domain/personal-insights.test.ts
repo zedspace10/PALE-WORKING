@@ -91,7 +91,7 @@ describe("honest personal metrics", () => {
 
   it("labels calendar progress and keeps universe age rounded", () => {
     expect(formatUniverseAgeEstimate(13_797_002_345)).toBe(
-      "Approximately 13.8 billion years",
+      "About 13.8 billion years",
     );
     const source = fs.readFileSync(
       path.resolve(process.cwd(), "app/(tabs)/index.tsx"),
@@ -107,8 +107,8 @@ describe("honest personal metrics", () => {
       path.resolve(process.cwd(), "app/(tabs)/you.tsx"),
       "utf8",
     );
-    expect(source).toMatch(/Most hydrogen nuclei/i);
-    expect(source).toMatch(/Many heavier elements/i);
+    expect(source).toMatch(/first moments\s+after the Big Bang/i);
+    expect(source).toMatch(/inside stars/i);
     expect(source).not.toMatch(/hydrogen atoms[^\n]+formed 13\.8/i);
   });
 });
@@ -155,38 +155,38 @@ describe("serialized local state", () => {
 });
 
 describe("Moment Card local-condition honesty", () => {
-  it("uses neutral morning wording without a verified location", () => {
-    const text = getMomentLines(7, 1, null)
+  const say = (...args: Parameters<typeof getMomentLines>) =>
+    getMomentLines(...args)
       .map((line) => line.text)
       .join(" ");
-    expect(text).toMatch(/device clock/i);
-    expect(text).toMatch(/not verified/i);
-    expect(text).not.toMatch(/Sun rose/i);
+
+  it("says nothing about the Sun without a verified location", () => {
+    const text = say(7, 1, null);
+    expect(text).toMatch(/good morning/i);
+    expect(text).not.toMatch(/Sun (rose|is up|is above)/i);
   });
 
   it("describes polar daylight from the calculated solar state", () => {
-    const text = getMomentLines(23, 1, "daylight")
-      .map((line) => line.text)
-      .join(" ");
-    expect(text).toMatch(/Sun is above the horizon/i);
-    expect(text).not.toMatch(/stars.*visible/i);
+    const text = say(23, 1, "daylight");
+    expect(text).toMatch(/the Sun is up/i);
+    expect(text).not.toMatch(/stars.*visible|stars are out/i);
   });
 
   it("does not claim a photon is on the user indoors", () => {
-    const text = getMomentLines(12, 1, "daylight")
-      .map((line) => line.text)
-      .join(" ");
-    expect(text).toMatch(
-      /cannot tell whether sunlight is reaching you indoors/i,
-    );
-    expect(text).not.toMatch(/on your skin|just arrived/i);
+    const text = say(12, 1, "daylight");
+    expect(text).toMatch(/eight minutes/i);
+    expect(text).not.toMatch(/on your skin|just arrived|reaching you/i);
   });
 
-  it("qualifies evening star visibility", () => {
-    const text = getMomentLines(19, 1, "civil-twilight")
-      .map((line) => line.text)
-      .join(" ");
+  it("does not promise stars in the evening", () => {
+    const text = say(19, 1, "civil-twilight");
     expect(text).toMatch(/civil twilight/i);
-    expect(text).toMatch(/depends on twilight and local observing conditions/i);
+    expect(text).not.toMatch(/stars (are|will be) (out|visible)/i);
+  });
+
+  it("gives the age of the universe as a sentence", () => {
+    expect(say(15, 1, null)).toMatch(
+      /the universe is about 13\.8 billion years old\./,
+    );
   });
 });

@@ -147,7 +147,11 @@ describe("refreshed screen contracts", () => {
   it("keeps both Home hero states centered and content-driven", () => {
     const home = read("app/(tabs)/index.tsx");
     expect(home).toContain("userDays !== null");
-    expect(home).toContain("days since your birth date");
+    expect(home).toContain("days since you were born");
+    // The hero scrolls with the cards rather than sitting fixed above them.
+    expect(home.indexOf("<ScrollView")).toBeLessThan(
+      home.indexOf("styles.hero"),
+    );
     expect(home).toContain("Set your birthday to see your place in time");
     expect(home).toContain('alignItems: "center"');
     expect(home).toContain('textAlign: "center"');

@@ -116,7 +116,7 @@ export default function LocationScreen() {
             ]}
           >
             <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-              REFLECTION
+              ABOUT
             </Text>
             <Text style={[styles.reflection, { color: colors.foreground }]}>
               {location.reflection}

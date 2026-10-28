@@ -76,7 +76,7 @@ const SHIFT_STAGES_BASE: ShiftStageBase[] = [
   {
     title: "Everything we can see.",
     subtitle:
-      "Hundreds of billions of galaxies, perhaps more.\nAbout forty-six billion light-years\nin every direction.\nStill expanding.",
+      "Hundreds of billions of galaxies, perhaps more.\nAbout forty-six billion light years\nin every direction.\nStill expanding.",
     hint: "THE OBSERVABLE UNIVERSE",
   },
   {
@@ -102,10 +102,10 @@ const LOCATIONS_BASE: LocationBase[] = [
     name: "The Moon",
     subtitle: "Earth's ancient companion",
     distance: "384,400 km",
-    distanceRaw: "1.3 light-seconds",
+    distanceRaw: "1.3 light seconds",
     reflection:
       "Twelve people walked on the Moon between 1969 and 1972. Their footprints can persist for very long periods because the Moon has no weather like Earth's, though micrometeorites slowly alter the surface.",
-    scale: "3,474 km across — smaller than Australia",
+    scale: "3,474 km across, a little narrower than Australia",
     gradientColors: ["#1A1D2E", "#2D324F"],
     artworkKey: "moon",
   },
@@ -114,10 +114,10 @@ const LOCATIONS_BASE: LocationBase[] = [
     name: "Mars",
     subtitle: "The red world",
     distance: "225 million km",
-    distanceRaw: "12.5 light-minutes",
+    distanceRaw: "12.5 light minutes",
     reflection:
       "Mars formed early in Solar System history and has a day only a little longer than Earth's. Its rust-coloured surface records billions of years of geological change.",
-    scale: "6,779 km across — half the size of Earth",
+    scale: "6,779 km across, about half as wide as Earth",
     gradientColors: ["#2D1A14", "#5C3020"],
     artworkKey: "mars",
   },
@@ -126,10 +126,10 @@ const LOCATIONS_BASE: LocationBase[] = [
     name: "Saturn",
     subtitle: "The ringed giant",
     distance: "1.2 billion km",
-    distanceRaw: "70 light-minutes",
+    distanceRaw: "70 light minutes",
     reflection:
       "Saturn's rings are mostly ice, with rock and dust. Their origin and age remain debated; ring material is gradually falling into Saturn, and models suggest the rings could change substantially over hundreds of millions of years.",
-    scale: "116,460 km across — nine Earths wide",
+    scale: "116,460 km across, about nine Earths side by side",
     gradientColors: ["#2A2510", "#4A4020"],
     artworkKey: "saturn",
   },
@@ -137,8 +137,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     id: "galactic-center",
     name: "The Galactic Center",
     subtitle: "Heart of the Milky Way",
-    distance: "26,000 light-years",
-    distanceRaw: "26,000 light-years",
+    distance: "26,000 light years",
+    distanceRaw: "26,000 light years",
     reflection:
       "At the center of our galaxy lies Sagittarius A*, a black hole about four million times the mass of our Sun. Nearby stars orbit it while hot gas in the region varies over time.",
     scale: "The densest region of our galaxy",
@@ -149,12 +149,11 @@ const LOCATIONS_BASE: LocationBase[] = [
     id: "andromeda",
     name: "Andromeda",
     subtitle: "Our nearest major galactic neighbour",
-    distance: "2.5 million light-years",
-    distanceRaw: "2.5 million light-years",
+    distance: "2.5 million light years",
+    distanceRaw: "2.5 million light years",
     reflection:
       "The light reaching us from Andromeda left before modern humans existed. The two galaxies are approaching, but current models no longer make a future collision certain.",
-    scale:
-      "Rough estimates often place its stellar population near a trillion, with substantial uncertainty",
+    scale: "Perhaps a trillion stars, though counts vary widely",
     gradientColors: ["#0A1530", "#1A2D5A"],
     artworkKey: "andromeda",
   },
@@ -162,11 +161,11 @@ const LOCATIONS_BASE: LocationBase[] = [
     id: "nebula",
     name: "Pillars of Creation",
     subtitle: "Where stars are born",
-    distance: "6,500 light-years",
-    distanceRaw: "6,500 light-years",
+    distance: "6,500 light years",
+    distanceRaw: "6,500 light years",
     reflection:
       "These towering columns of gas and dust are stellar nurseries where new stars are forming. We see them as they were about 6,500 years before the light reached Earth.",
-    scale: "About 4 light-years tall — some 38 trillion km high",
+    scale: "About 4 light years tall, some 38 trillion km",
     gradientColors: ["#0D1A25", "#143040"],
     artworkKey: "pillars-of-creation",
   },
@@ -174,11 +173,11 @@ const LOCATIONS_BASE: LocationBase[] = [
     id: "black-hole",
     name: "Sagittarius A*",
     subtitle: "A black hole at our center",
-    distance: "26,000 light-years",
-    distanceRaw: "26,000 light-years",
+    distance: "26,000 light years",
+    distanceRaw: "26,000 light years",
     reflection:
       "Beyond the event horizon, light cannot return to the outside universe. A distant observer sees an infalling clock appear to slow, while the falling object crosses the horizon in its own finite time.",
-    scale: "25 million km across — eighteen times the width of the Sun",
+    scale: "25 million km across, about eighteen times the width of the Sun",
     gradientColors: ["#06060A", "#0F0F1E"],
     artworkKey: "sagittarius-a-star",
   },
@@ -186,8 +185,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     id: "edge",
     name: "The Observable Edge",
     subtitle: "As far as light can reach",
-    distance: "46 billion light-years",
-    distanceRaw: "46 billion light-years",
+    distance: "46 billion light years",
+    distanceRaw: "46 billion light years",
     reflection:
       "Light from beyond our current observable horizon has not had time to reach us. The horizon is not a physical edge, and what can influence or be observed changes over cosmic time.",
     scale: "The present horizon of the observable universe",
@@ -269,7 +268,7 @@ const DEEP_TIME_CALENDAR_BASE: DeepTimeEventBase[] = [
     date: "September 3",
     title: "Earth forms",
     description:
-      "A rocky world takes shape — still molten, bombarded by debris, yet carrying the seeds of everything to come.",
+      "A rocky world takes shape, still molten and bombarded by debris, yet carrying the seeds of everything to come.",
     yearsAgo: "4.5 billion years ago",
   },
   {
@@ -388,7 +387,8 @@ const COSMIC_EVENTS_BASE: CosmicEventBase[] = [
   {
     year: 1977,
     title: "Voyager 1 launched",
-    description: "Now in interstellar space — the farthest human-made object.",
+    description:
+      "Now in interstellar space, and the farthest thing people have ever made.",
   },
   {
     year: 1990,

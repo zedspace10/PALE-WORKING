@@ -24,6 +24,14 @@ import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
+// Adds the slashes as someone types a date, so "14061995" becomes "14/06/1995".
+function formatBirthdayTyping(text: string): string {
+  const digits = text.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
 export default function YouScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -84,9 +92,9 @@ export default function YouScreen() {
             Your Place
           </Text>
           <Text style={[styles.onboardText, { color: colors.mutedForeground }]}>
-            Enter your birthday to see how far you have travelled through space
-            since you arrived, and which cosmic milestones have happened in your
-            lifetime.
+            Add your birthday to see how far you have travelled around the Sun
+            since you were born, and what we have discovered about the universe
+            in your lifetime. It stays on this phone.
           </Text>
           <View
             style={[
@@ -99,11 +107,13 @@ export default function YouScreen() {
           >
             <TextInput
               value={dateInput}
-              onChangeText={setDateInput}
+              onChangeText={(text) => setDateInput(formatBirthdayTyping(text))}
+              maxLength={10}
+              accessibilityLabel="Your birthday, as day, month and year"
               placeholder="DD/MM/YYYY"
               placeholderTextColor={colors.mutedForeground + "80"}
               style={[styles.input, { color: colors.foreground }]}
-              keyboardType="numbers-and-punctuation"
+              keyboardType="number-pad"
               returnKeyType="done"
               onSubmitEditing={handleSave}
             />
@@ -136,7 +146,7 @@ export default function YouScreen() {
             contentStyle={styles.saveBtn}
           >
             <Text style={[styles.saveBtnText, { color: colors.foreground }]}>
-              REVEAL MY PLACE
+              Show me
             </Text>
           </MagicalAction>
         </ScrollView>
@@ -172,7 +182,7 @@ export default function YouScreen() {
           </Text>
         </View>
 
-        {/* Distance travelled — real time */}
+        {/* Distance travelled, in real time */}
         <View
           style={[
             styles.bigCard,
@@ -183,17 +193,17 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            ESTIMATED PATH ALONG EARTH'S SOLAR ORBIT
+            AROUND THE SUN
           </Text>
           <Text style={[styles.bigNumber, { color: colors.primary }]}>
             {formatApproximateDistance(metrics.approximateOrbitDistanceKm)}
           </Text>
           <Text style={[styles.bigUnit, { color: colors.foreground }]}>
-            kilometres carried along Earth's orbit
+            kilometres travelled with Earth since you were born
           </Text>
           <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
-            Rounded from Earth's average orbital speed; it is not your total
-            path through the galaxy.
+            Earth moves about 30 km every second. Add the Sun's own journey
+            around the galaxy and it is far more.
           </Text>
         </View>
 
@@ -208,14 +218,13 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            ORBITS AROUND THE SUN
+            TRIPS AROUND THE SUN
           </Text>
           <Text style={[styles.bigNumber, { color: colors.primary }]}>
             {metrics.completedSolarOrbits}
           </Text>
           <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
-            whole solar orbits completed · {metrics.daysSinceLastBirthday} days
-            into the current year of your life
+            {metrics.daysSinceLastBirthday} days into the next one
           </Text>
         </View>
 
@@ -244,7 +253,7 @@ export default function YouScreen() {
               {Math.round(metrics.ageHours).toLocaleString()}
             </Text>
             <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
-              hours awake and asleep
+              hours lived
             </Text>
           </View>
         </View>
@@ -261,12 +270,13 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            ATOMIC AGE
+            WHAT YOU ARE MADE OF
           </Text>
           <Text style={[styles.quoteText, { color: colors.foreground }]}>
-            Most hydrogen nuclei in your body trace back to the early universe.
-            Many heavier elements formed later in stars and stellar explosions;
-            those atoms have been recycled through many forms.
+            Most of the hydrogen in your body was made in the first moments
+            after the Big Bang. Much of the rest, like the carbon in your cells
+            and the iron in your blood, was made inside stars that lived and
+            died before the Sun was born.
           </Text>
           <Text style={[styles.quoteNote, { color: colors.primary }]}>
             You are ancient.
@@ -281,7 +291,7 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            CURRENT CALENDAR-YEAR PROGRESS
+            THIS YEAR
           </Text>
           <View
             style={[styles.progressTrack, { backgroundColor: colors.border }]}
@@ -297,7 +307,8 @@ export default function YouScreen() {
             />
           </View>
           <Text style={[styles.orbitPct, { color: colors.primary }]}>
-            {orbitPercent}% of the calendar year elapsed
+            Since 1 January, Earth has gone {orbitPercent}% of the way around
+            the Sun
           </Text>
         </View>
 
@@ -307,7 +318,7 @@ export default function YouScreen() {
             <Text
               style={[styles.cardEyebrow, { color: colors.mutedForeground }]}
             >
-              COSMIC MILESTONES IN YOUR LIFETIME
+              DISCOVERED IN YOUR LIFETIME
             </Text>
             {myEvents.map((event) => (
               <View
@@ -396,9 +407,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   saveBtnText: {
-    fontSize: 12,
+    fontSize: 16,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 2.5,
+    letterSpacing: 0.2,
   },
   bigCard: {
     borderRadius: 24,

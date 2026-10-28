@@ -191,5 +191,5 @@ export function getJournalRetrospective(
 
 export function formatJournalUniverseAge(entry: JournalEntry): string {
   if (entry.universeAgeEstimate) return entry.universeAgeEstimate;
-  return `${formatUniverseAgeEstimate(entry.universeAge)} (legacy entry)`;
+  return formatUniverseAgeEstimate(entry.universeAge);
 }

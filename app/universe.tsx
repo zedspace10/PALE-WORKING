@@ -202,18 +202,18 @@ const TRANSITION_MSG: Record<string, string> = {
 const STAR_OP_BY_LEVEL: Record<number, number> = { 1: 0.6, 2: 0.25, 3: 0.1 };
 
 const MW_FACTS = [
-  "The Milky Way is approximately 100,000 light-years across.",
-  "Our Sun is located about 26,000 light-years from the galactic centre.",
+  "The Milky Way is approximately 100,000 light years across.",
+  "Our Sun is located about 26,000 light years from the galactic centre.",
   "The Milky Way contains between 100 and 400 billion stars.",
   "Our Sun takes about 230 million years to circle the galactic centre once.",
   "The Milky Way and Andromeda are closing on each other, though whether they collide is no longer certain.",
 ];
 
 const UV_FACTS = [
-  "The observable universe's present-day comoving diameter is estimated at roughly 93 billion light-years.",
+  "The observable universe's present-day comoving diameter is estimated at roughly 93 billion light years.",
   "Estimates suggest hundreds of billions of galaxies in the observable universe, perhaps more.",
-  "The cosmic web spans hundreds of millions of light-years.",
-  "The largest voids between galaxy filaments stretch over 300 million light-years.",
+  "The cosmic web spans hundreds of millions of light years.",
+  "The largest voids between galaxy filaments stretch over 300 million light years.",
   "Some observed galaxies are seen as they were within the universe's first few hundred million years.",
 ];
 
@@ -511,7 +511,7 @@ export default function UniverseScreen() {
       setZoomMsg({
         title: "You are here.",
         subtitle:
-          "26,000 light-years from the galactic centre.\nIn a quiet arm of an ordinary galaxy.",
+          "26,000 light years from the galactic centre.\nIn a quiet arm of an ordinary galaxy.",
       });
       Animated.timing(zoomTextOp, {
         toValue: 1,
