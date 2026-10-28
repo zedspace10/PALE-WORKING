@@ -88,7 +88,7 @@ export default function LocationScreen() {
             ]}
           >
             <Text style={[styles.heroLabel, { color: colors.primaryStrong }]}>
-              {location.subtitle.toUpperCase()}
+              {location.subtitle}
             </Text>
             <Text style={[styles.heroName, { color: colors.foreground }]}>
               {location.name}
@@ -116,7 +116,7 @@ export default function LocationScreen() {
             ]}
           >
             <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-              ABOUT
+              About
             </Text>
             <Text style={[styles.reflection, { color: colors.foreground }]}>
               {location.reflection}
@@ -133,7 +133,7 @@ export default function LocationScreen() {
             ]}
           >
             <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-              SCALE
+              Scale
             </Text>
             <Text style={[styles.scaleText, { color: colors.foreground }]}>
               {location.scale}
@@ -185,9 +185,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   heroLabel: {
-    fontSize: 10,
+    fontSize: 14,
     fontFamily: "Inter_500Medium",
-    letterSpacing: 2.5,
+    letterSpacing: 0.2,
     marginBottom: 4,
   },
   heroName: {
@@ -221,15 +221,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cardLabel: {
-    fontSize: 10,
-    fontFamily: "Inter_500Medium",
-    letterSpacing: 2.5,
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.3,
   },
   reflection: {
     fontSize: 16,
     fontFamily: "Inter_400Regular",
     lineHeight: 27,
-    fontStyle: "italic",
   },
   scaleText: {
     fontSize: 15,

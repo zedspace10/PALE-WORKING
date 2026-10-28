@@ -230,7 +230,7 @@ export default function HomeScreen() {
                 <Text
                   style={[styles.cardLabel, { color: colors.mutedForeground }]}
                 >
-                  THE OBSERVATORY
+                  The Observatory
                 </Text>
                 <Text style={[styles.obsTitle, { color: colors.foreground }]}>
                   {todaysEntry.location}
@@ -441,6 +441,9 @@ const styles = StyleSheet.create({
   obsHeaderLeft: { flex: 1, gap: 4 },
   cardLabel: {
     ...calmTypography.meta,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.3,
   },
   obsTitle: {
     ...calmTypography.title,

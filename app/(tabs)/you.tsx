@@ -193,7 +193,7 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            AROUND THE SUN
+            Around the Sun
           </Text>
           <Text style={[styles.bigNumber, { color: colors.primary }]}>
             {formatApproximateDistance(metrics.approximateOrbitDistanceKm)}
@@ -218,7 +218,7 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            TRIPS AROUND THE SUN
+            Trips around the Sun
           </Text>
           <Text style={[styles.bigNumber, { color: colors.primary }]}>
             {metrics.completedSolarOrbits}
@@ -270,7 +270,7 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            WHAT YOU ARE MADE OF
+            What you are made of
           </Text>
           <Text style={[styles.quoteText, { color: colors.foreground }]}>
             Most of the hydrogen in your body was made in the first moments
@@ -291,7 +291,7 @@ export default function YouScreen() {
           ]}
         >
           <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
-            THIS YEAR
+            This year
           </Text>
           <View
             style={[styles.progressTrack, { backgroundColor: colors.border }]}
@@ -318,7 +318,7 @@ export default function YouScreen() {
             <Text
               style={[styles.cardEyebrow, { color: colors.mutedForeground }]}
             >
-              DISCOVERED IN YOUR LIFETIME
+              Discovered in your lifetime
             </Text>
             {myEvents.map((event) => (
               <View
@@ -418,10 +418,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardEyebrow: {
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 2.5,
-    marginBottom: 4,
+    letterSpacing: 0.3,
+    marginBottom: 2,
   },
   bigNumber: {
     fontSize: 36,
