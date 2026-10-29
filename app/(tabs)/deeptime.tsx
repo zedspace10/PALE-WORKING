@@ -144,7 +144,7 @@ export default function TimeMachineScreen() {
               Cosmic Time Machine
             </Text>
             <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-              from the Big Bang to the far future
+              from the Big Bang to what may come
             </Text>
           </View>
         </View>

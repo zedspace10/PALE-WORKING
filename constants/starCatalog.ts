@@ -514,12 +514,21 @@ const REVIEWED_APPARENT_MAGNITUDES: Record<string, number> = {
   Polaris: 1.98,
 };
 
+// Colour words for each spectral type, so the card says what the star looks like before naming
+// its type.
+const TYPE_WORDS: Record<string, string> = {
+  B: "a hot blue white B-type star",
+  A: "a white A-type star",
+  F: "a yellow white F-type star",
+  G: "a yellow G-type star, like our Sun",
+  K: "an orange K-type star",
+  M: "a small red M-type star",
+  D: "a white dwarf",
+};
+
 function getCatalogNote(star: StarBase): string {
-  const typeDescription =
-    star.type === "D"
-      ? "white dwarf"
-      : `${star.type ?? "unclassified"}-type star`;
-  return `${star.name} is catalogued here as a ${typeDescription} in ${star.constellation}, roughly ${star.distance} light years from Earth. The distance is rounded and may be refined by later astrometry.`;
+  const typeDescription = TYPE_WORDS[star.type ?? ""] ?? "a star";
+  return `${star.name} is ${typeDescription} in ${star.constellation}, roughly ${star.distance} light years from Earth.`;
 }
 
 export const STAR_CATALOG: Star[] = STAR_CATALOG_BASE.map((star) => ({
@@ -572,16 +581,19 @@ export function getMoonPhase(date: Date): string {
   const synodic = 29.53059 * 24 * 60 * 60 * 1000;
   const elapsed =
     (((date.getTime() - refNewMoon) % synodic) + synodic) % synodic;
-  const day = elapsed / (24 * 60 * 60 * 1000);
-
-  if (day < 1.85) return "New Moon";
-  if (day < 7.38) return "Waxing Crescent";
-  if (day < 9.22) return "First Quarter";
-  if (day < 14.77) return "Waxing Gibbous";
-  if (day < 16.61) return "Full Moon";
-  if (day < 22.15) return "Waning Gibbous";
-  if (day < 23.99) return "Last Quarter";
-  return "Waning Crescent";
+  // Eight equal slices of the cycle, each centred on its phase, so the night of a full Moon is
+  // called full rather than gibbous.
+  const slice = Math.round((elapsed / synodic) * 8) % 8;
+  return [
+    "New Moon",
+    "Waxing Crescent",
+    "First Quarter",
+    "Waxing Gibbous",
+    "Full Moon",
+    "Waning Gibbous",
+    "Last Quarter",
+    "Waning Crescent",
+  ][slice];
 }
 
 export function formatLargeInt(n: number): string {

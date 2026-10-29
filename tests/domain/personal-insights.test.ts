@@ -182,7 +182,7 @@ describe("Moment Card local-condition honesty", () => {
 
   it("does not promise stars in the evening", () => {
     const text = say(19, 1, "civil-twilight");
-    expect(text).toMatch(/civil twilight/i);
+    expect(text).toMatch(/Where you are, it is twilight\./);
     expect(text).not.toMatch(/stars (are|will be) (out|visible)/i);
   });
 

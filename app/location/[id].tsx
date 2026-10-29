@@ -98,9 +98,11 @@ export default function LocationScreen() {
             >
               {location.distance}
             </Text>
-            <Text style={[styles.heroRaw, { color: colors.mutedForeground }]}>
-              {location.distanceRaw} from Earth
-            </Text>
+            {location.distanceRaw !== location.distance ? (
+              <Text style={[styles.heroRaw, { color: colors.mutedForeground }]}>
+                {location.distanceRaw} from Earth
+              </Text>
+            ) : null}
           </View>
         </View>
 

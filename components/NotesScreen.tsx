@@ -153,6 +153,7 @@ export function NotesScreen() {
   };
 
   const dest = current ? destinationOf(current) : null;
+  const chosen = DESTINATIONS.find((d) => d.id === to) ?? null;
   const others = useMemo(
     () => notes.filter((n) => n.id !== current?.id),
     [notes, current],
@@ -177,9 +178,10 @@ export function NotesScreen() {
               Send a note to the universe
             </Text>
             <Text style={[styles.body, { color: colors.mutedForeground }]}>
-              Write a line and choose a star. The moment you send it, PALE
-              follows the light that leaves Earth with it. Anyone you share the
-              link with can read it.
+              Write a line and choose where it is going. From the moment you
+              send it, PALE follows how far it has gone at the speed of light.
+              You can also send it as real light from your phone, and share a
+              link so others can follow it.
             </Text>
             <TextInput
               value={line}
@@ -208,6 +210,7 @@ export function NotesScreen() {
                     key={d.id}
                     onPress={() => setTo(d.id)}
                     accessibilityRole="button"
+                    accessibilityLabel={`${d.name}, ${arrivalWords(d)}`}
                     accessibilityState={{ selected: on }}
                     style={[
                       styles.star,
@@ -220,22 +223,38 @@ export function NotesScreen() {
                     ]}
                   >
                     <Text
-                      style={[styles.starName, { color: colors.foreground }]}
-                    >
-                      {d.name}
-                    </Text>
-                    <Text
                       style={[
-                        styles.starWhen,
-                        { color: colors.mutedForeground },
+                        styles.starName,
+                        {
+                          color: on
+                            ? colors.foreground
+                            : colors.mutedForeground,
+                        },
                       ]}
                     >
-                      {arrivalWords(d)}
+                      {d.short}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
+            {chosen && (
+              <View
+                style={[
+                  styles.chosen,
+                  { borderColor: colors.border, backgroundColor: colors.card },
+                ]}
+              >
+                <Text style={[styles.chosenName, { color: colors.foreground }]}>
+                  {chosen.name}
+                </Text>
+                <Text
+                  style={[styles.chosenLine, { color: colors.mutedForeground }]}
+                >
+                  {chosen.line} {capitalise(arrivalWords(chosen))}.
+                </Text>
+              </View>
+            )}
             <TouchableOpacity
               onPress={send}
               accessibilityRole="button"
@@ -478,19 +497,19 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: 16,
   },
-  stars: { gap: 8 },
+  stars: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   star: {
     alignItems: "center",
-    borderRadius: 14,
+    borderRadius: 22,
     borderWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    minHeight: 48,
+    justifyContent: "center",
+    minHeight: 44,
     paddingHorizontal: 16,
-    gap: 12,
   },
-  starName: { fontSize: 15, fontFamily: "Inter_600SemiBold", flexShrink: 1 },
-  starWhen: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  starName: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  chosen: { borderRadius: 16, borderWidth: 1, gap: 4, padding: 16 },
+  chosenName: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  chosenLine: { fontSize: 14, lineHeight: 21, fontFamily: "Inter_400Regular" },
   primary: {
     alignItems: "center",
     borderRadius: 27,

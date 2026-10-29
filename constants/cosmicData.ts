@@ -88,12 +88,12 @@ const SHIFT_STAGES_BASE: ShiftStageBase[] = [
 
 export const DAILY_REFLECTIONS = [
   "Every human who has ever lived existed on one small world.",
-  "Many of the elements in your body were forged inside ancient stars.",
+  "Most of the hydrogen in you is as old as the universe.",
   "The light entering your eyes tonight may have begun its journey millions of years ago.",
   "Your problems are real. But they are not the entire universe.",
   "The universe made something that could turn around and look back at it.",
   "From the perspective of the cosmos, all of human history is a brief flicker.",
-  "You are stardust, contemplating the stars that made you.",
+  "Every person who ever lived has looked up at the same Moon.",
 ];
 
 const LOCATIONS_BASE: LocationBase[] = [
@@ -125,8 +125,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     id: "saturn",
     name: "Saturn",
     subtitle: "The ringed giant",
-    distance: "1.2 billion km",
-    distanceRaw: "70 light minutes",
+    distance: "1.4 billion km",
+    distanceRaw: "80 light minutes",
     reflection:
       "Saturn's rings are mostly ice, with rock and dust. Their origin and age remain debated; ring material is gradually falling into Saturn, and models suggest the rings could change substantially over hundreds of millions of years.",
     scale: "116,460 km across, about nine Earths side by side",
@@ -135,12 +135,12 @@ const LOCATIONS_BASE: LocationBase[] = [
   },
   {
     id: "galactic-center",
-    name: "The Galactic Center",
+    name: "The Galactic Centre",
     subtitle: "Heart of the Milky Way",
     distance: "26,000 light years",
     distanceRaw: "26,000 light years",
     reflection:
-      "At the center of our galaxy lies Sagittarius A*, a black hole about four million times the mass of our Sun. Nearby stars orbit it while hot gas in the region varies over time.",
+      "At the centre of our galaxy lies Sagittarius A*, a black hole about four million times the mass of our Sun. Nearby stars orbit it while hot gas in the region varies over time.",
     scale: "The densest region of our galaxy",
     gradientColors: ["#1A0A25", "#3D1550"],
     artworkKey: "galactic-center",
@@ -172,7 +172,7 @@ const LOCATIONS_BASE: LocationBase[] = [
   {
     id: "black-hole",
     name: "Sagittarius A*",
-    subtitle: "A black hole at our center",
+    subtitle: "The black hole at the heart of our galaxy",
     distance: "26,000 light years",
     distanceRaw: "26,000 light years",
     reflection:
@@ -377,7 +377,7 @@ const COSMIC_EVENTS_BASE: CosmicEventBase[] = [
   {
     year: 1961,
     title: "First human in space",
-    description: "Yuri Gagarin saw Earth as a whole for the first time.",
+    description: "Yuri Gagarin circled Earth once, in 108 minutes.",
   },
   {
     year: 1969,
