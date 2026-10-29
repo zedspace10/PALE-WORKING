@@ -32,6 +32,7 @@ import {
   ScientificItem,
   ScientificSourceId,
 } from "@/constants/scientificContent";
+import { compassWords } from "@/constants/notes";
 import { findStarByAge, getMoonPhase } from "@/constants/starCatalog";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
@@ -156,7 +157,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     truth:
       "Robotic missions have explored Mars from orbit and on the surface. Perseverance has studied rocks in Jezero Crater and cached samples intended for possible future analysis.",
     wonder:
-      "Mars has the largest volcano in the solar system, Olympus Mons, three times taller than Everest.",
+      "Mars has the largest volcano in the solar system, Olympus Mons, about two and a half times the height of Everest.",
     instruction:
       "Mars has a distinctive reddish tint. It doesn't twinkle like stars do.",
   },
@@ -412,17 +413,14 @@ const CATALOG_STAR_COORDS: Record<string, { ra: number; dec: number }> = {
   Polaris: { ra: 37.9, dec: 89.3 },
 };
 
-function azToCompass(az: number): string {
-  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  return dirs[Math.round(az / 45) % 8];
-}
-
+// How high something is, in words. This describes height only: an object this high may be rising
+// or setting.
 function altToLabel(alt: number): string {
-  if (alt < 20) return "low on the horizon";
-  if (alt < 35) return "rising";
-  if (alt < 60) return "in the mid sky";
-  if (alt < 80) return "high overhead";
-  return "nearly overhead";
+  if (alt < 20) return "low in the sky";
+  if (alt < 40) return "part way up";
+  if (alt < 60) return "half way up";
+  if (alt < 80) return "high up";
+  return "overhead";
 }
 
 const CONSTELLATION_DOTS: Record<string, { x: number; y: number }[]> = {
@@ -697,18 +695,29 @@ function MoonVisual({ phase, size }: { phase: number; size: number }) {
   const d = waning
     ? `M ${r},0 A ${r},${r} 0 0,0 ${r},${size} A ${rx},${r} 0 0,${gibbous ? 0 : 1} ${r},0`
     : `M ${r},0 A ${r},${r} 0 0,1 ${r},${size} A ${rx},${r} 0 0,${gibbous ? 1 : 0} ${r},0`;
+  // The halo spreads past the Moon, so it is drawn on a larger canvas that overhangs the layout box;
+  // drawing it inside the Moon's own box clipped it into a visible square.
+  const pad = r * 0.6;
   return (
-    <Svg width={size} height={size}>
-      <Defs>
-        <RadialGradient id="mg" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#F0E8D8" stopOpacity="0.2" />
-          <Stop offset="100%" stopColor="#E8E0D0" stopOpacity="0" />
-        </RadialGradient>
-      </Defs>
-      <Circle cx={r} cy={r} r={r * 1.8} fill="url(#mg)" />
-      <Circle cx={r} cy={r} r={r} fill="#1a1a2e" />
-      <Path d={d} fill="#E8E0D0" opacity="0.9" />
-    </Svg>
+    <View style={{ width: size, height: size }}>
+      <Svg
+        width={size + pad * 2}
+        height={size + pad * 2}
+        style={{ position: "absolute", left: -pad, top: -pad }}
+      >
+        <Defs>
+          <RadialGradient id="mg" cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#F0E8D8" stopOpacity="0.16" />
+            <Stop offset="100%" stopColor="#E8E0D0" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={r + pad} cy={r + pad} r={r + pad} fill="url(#mg)" />
+        <G x={pad} y={pad}>
+          <Circle cx={r} cy={r} r={r} fill="#1a1a2e" />
+          <Path d={d} fill="#E8E0D0" opacity="0.9" />
+        </G>
+      </Svg>
+    </View>
   );
 }
 
@@ -857,7 +866,7 @@ function ObjectCard({
     };
   }, [obj.id, fadeAnim]);
 
-  const dirLabel = obj.az !== undefined ? azToCompass(obj.az) : "unknown";
+  const dirLabel = obj.az !== undefined ? compassWords(obj.az) : "unknown";
   const heightLabel = obj.alt !== undefined ? altToLabel(obj.alt) : "unknown";
   const isTimeless = obj.type === "star" || obj.type === "constellation";
 
@@ -875,15 +884,13 @@ function ObjectCard({
     >
       {obj.isPersonalStar && (
         <View style={styles.personalBadge}>
-          <Text style={styles.personalBadgeText}>
-            AGE–DISTANCE MATCH · DIRECTION ESTIMATE
-          </Text>
+          <Text style={styles.personalBadgeText}>Your star</Text>
         </View>
       )}
 
       <View style={styles.visualSection}>
         <ObjectVisual obj={obj} moonPhase={moonPhase} size={160} />
-        <Text style={styles.objectName}>{obj.name.toUpperCase()}</Text>
+        <Text style={styles.objectName}>{obj.name}</Text>
 
         {obj.type === "moon" && (
           <Text style={styles.moonNote}>
@@ -909,7 +916,7 @@ function ObjectCard({
       <View style={styles.inviteSection}>
         <View style={styles.separator} />
         <Text style={styles.direction}>
-          Estimated direction: {dirLabel} · {heightLabel}
+          Look {dirLabel}, {heightLabel}
         </Text>
         <Text style={styles.instruction}>{obj.instruction}</Text>
         <Text style={styles.conditionNote}>{obj.visibilityQualifier}</Text>
@@ -917,19 +924,15 @@ function ObjectCard({
           obj.personalStarDistance !== undefined &&
           obj.personalStarDepartureYear !== undefined && (
             <Text style={styles.personalLine}>
-              This is a storytelling match: its rounded distance in light years
-              is closest to your age in years, not a physical or astrological
-              link.{"\n"}
-              Light arriving around now left {obj.name} around{" "}
-              {obj.personalStarDepartureYear}.{"\n"}
+              The light reaching you from {obj.name} tonight set off around{" "}
+              {obj.personalStarDepartureYear}, close to when you were born. It
+              is a coincidence of distance, not a physical or astrological link.
+              {"\n"}
               {obj.unaidedEligible
-                ? "It may be visible unaided in good conditions."
-                : "Use the optical-aid guidance above."}
+                ? "You may see it without help on a clear, dark night."
+                : "You will need binoculars or a telescope to see it."}
             </Text>
           )}
-        <Text style={styles.goOutside}>
-          If conditions allow, use the estimated direction above.
-        </Text>
         {isTimeless && (
           <Text style={styles.eternityLine}>
             People have watched this part of the sky across many generations.
@@ -1070,7 +1073,7 @@ function LocationStateScreen({
         </View>
 
         <View style={styles.everywhereSection}>
-          <Text style={styles.everywhereLabel}>THE BRIGHT PLANETS</Text>
+          <Text style={styles.everywhereLabel}>The bright planets</Text>
           {visible.map((p) => (
             <View key={p.id} style={styles.everywhereRow}>
               <Text style={styles.everywhereName}>{PLANET_NAMES[p.id]}</Text>
@@ -1132,28 +1135,28 @@ function DaylightScreen({
   const colors = useColors();
   const router = useRouter();
   const duskLine = (() => {
-    if (!darkness) return "Astronomical-darkness timing is unavailable.";
+    if (!darkness) return "PALE could not work out when it gets dark today.";
     if (darkness.kind === "always-above") {
-      return "The Sun does not reach astronomical darkness on this local date.";
+      return "At this time of year it never gets properly dark where you are.";
     }
     if (darkness.kind === "always-below") {
-      return "The Sun remains below the astronomical-darkness threshold on this local date.";
+      return "The Sun stays well below the horizon all day where you are.";
     }
     if (darkness.kind === "no-evening-crossing") {
-      return "There is no evening astronomical-darkness crossing on this local date.";
+      return "It does not get properly dark this evening where you are.";
     }
     const mins = Math.round((darkness.at.getTime() - now.getTime()) / 60000);
     const at = darkness.at.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
-    if (mins <= 0) return "Astronomical darkness is arriving around now.";
+    if (mins <= 0) return "It is getting properly dark around now.";
     if (mins < 60)
-      return `Astronomical darkness begins around ${at}, in about ${mins} minutes.`;
+      return `It gets properly dark around ${at}, in about ${mins} minutes.`;
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     const gap = m === 0 ? `${h} ${h === 1 ? "hour" : "hours"}` : `${h}h ${m}m`;
-    return `Astronomical darkness begins around ${at}, in about ${gap}.`;
+    return `It gets properly dark around ${at}, in about ${gap}.`;
   })();
   return (
     <View style={[styles.fullCenter, { backgroundColor: colors.background }]}>
@@ -1182,8 +1185,8 @@ function DaylightScreen({
         </Text>
         <Text style={styles.deniedSub}>{duskLine}</Text>
         <Text style={[styles.deniedSub, { marginTop: 16 }]}>
-          Bright objects may be detectable before astronomical darkness, but the
-          Sun's light reduces contrast. Local conditions still matter.
+          The Moon and the brightest planets often show before then. Fainter
+          stars need a properly dark sky.
         </Text>
       </View>
     </View>
@@ -1253,8 +1256,8 @@ export default function TonightSkyScreen() {
       dec: coords.dec,
       color: GOLD,
       truth: star.note,
-      wonder: `This star is ${star.distance} light years away. Light reaching Earth around now began its journey around ${departureYear}.`,
-      instruction: `Estimated direction: ${azToCompass(az)} · ${altToLabel(alt)}. The light has been travelling toward Earth for about ${Math.round(star.distance)} years.`,
+      wonder: `The light you would see from it tonight has been travelling for about ${Math.round(star.distance)} years.`,
+      instruction: `Look ${compassWords(az)}, ${altToLabel(alt)}, in ${star.constellation}.`,
       alt,
       az,
       isPersonalStar: true,
@@ -1523,11 +1526,11 @@ export default function TonightSkyScreen() {
           <View style={styles.skyHeaderIcon}>
             <SkyStateIcon state={state.solarState} size={76} />
           </View>
-          <Text style={styles.screenTitle}>TONIGHT'S SKY</Text>
+          <Text style={styles.screenTitle}>Tonight&apos;s Sky</Text>
           <Text style={styles.guidanceStatus}>
             {state.status === "ready-cached"
-              ? "Using a recent last-known location · "
-              : "Using current device location · "}
+              ? "From where you were recently · "
+              : "From where you are · "}
             {SOLAR_STATE_LABELS[state.solarState]}
           </Text>
           {state.solarState !== "astronomical-darkness" && (
@@ -1621,8 +1624,8 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     color: WARM_WHITE,
-    fontSize: 22,
-    letterSpacing: 1.6,
+    fontSize: 26,
+    letterSpacing: -0.3,
     fontFamily: "Inter_700Bold",
   },
   guidanceStatus: {
@@ -1722,8 +1725,8 @@ const styles = StyleSheet.create({
   },
   objectName: {
     color: GOLD,
-    fontSize: 11,
-    letterSpacing: 5,
+    fontSize: 16,
+    letterSpacing: 0.2,
     fontFamily: "Inter_600SemiBold",
   },
   moonNote: {
@@ -1791,13 +1794,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontFamily: "Inter_400Regular",
     fontStyle: "italic",
-  },
-  goOutside: {
-    color: GOLD,
-    fontSize: 14,
-    letterSpacing: 3,
-    fontFamily: "Inter_600SemiBold",
-    marginTop: 4,
   },
   eternityLine: {
     color: "rgba(169,149,255,0.52)",
@@ -1888,10 +1884,10 @@ const styles = StyleSheet.create({
   everywhereSection: { gap: 10 },
   everywhereInvite: { alignItems: "flex-start", gap: 16, marginTop: 8 },
   everywhereLabel: {
-    color: "rgba(245,250,255,0.5)",
-    fontSize: 10,
+    color: "rgba(245,250,255,0.55)",
+    fontSize: 12,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 2,
+    letterSpacing: 0.3,
   },
   everywhereHeading: {
     color: WARM_WHITE,

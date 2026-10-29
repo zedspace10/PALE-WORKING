@@ -11,6 +11,7 @@ import {
   progressWords,
   signalSeconds,
   signalText,
+  voyagerLightSeconds,
 } from "@/constants/notes";
 
 // How the Stellara website reads a note link (src/lib/notes.ts, noteFromHash).
@@ -65,11 +66,21 @@ describe("notes shared with the website", () => {
   });
 
   it("describes how far a note has gone", () => {
-    const note = newNote("Hello", "proxima", 0);
-    expect(progressWords(note, 500)).toBe("just leaving Earth");
-    expect(progressWords(note, 2_000)).toBe("past the Moon");
-    expect(progressWords(note, 600_000)).toBe("past the Sun's distance");
-    expect(progressWords(note, 200_000_000)).toBe("past Voyager 1");
+    const sent = Date.UTC(2026, 9, 29, 21);
+    const note = newNote("Hello", "proxima", sent);
+    expect(progressWords(note, sent + 500)).toBe("just leaving Earth");
+    expect(progressWords(note, sent + 2_000)).toBe("past the Moon");
+    expect(progressWords(note, sent + 600_000)).toBe("past the Sun's distance");
+    // Voyager 1 is about a light day out, so a note passes it a little over a day after sending.
+    expect(progressWords(note, sent + 86_000_000)).toBe("past Neptune's orbit");
+    expect(progressWords(note, sent + 88_000_000)).toBe("past Voyager 1");
+  });
+
+  it("keeps Voyager 1 moving outwards", () => {
+    expect(voyagerLightSeconds(Date.UTC(2026, 10, 15))).toBe(86_400);
+    const ayearOn = voyagerLightSeconds(Date.UTC(2027, 10, 15));
+    expect(ayearOn).toBeGreaterThan(88_000);
+    expect(ayearOn).toBeLessThan(88_400);
   });
 });
 

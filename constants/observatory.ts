@@ -38,7 +38,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     reflection:
       "A machine no heavier than a small car, launched in 1977, is now travelling through interstellar space beyond the heliosphere. It has not yet passed the Solar System's distant Oort Cloud. It carries a golden record with sounds and images from Earth.",
     scale:
-      "Voyager has been traveling since 1977 and has barely left our cosmic neighborhood. The nearest star is still more than 1,500 times farther away.",
+      "Voyager has been travelling since 1977 and has barely left our cosmic neighbourhood. The nearest star is still more than 1,500 times farther away.",
     question: "What would you want humanity to be remembered for?",
   },
   {
@@ -49,14 +49,14 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     reflection:
       "These towering columns of gas and dust are regions of active star formation. The light we see left roughly 6,500 years before it reached Earth, so every image is a view into the past.",
     scale:
-      "The tallest Pillar of Creation is four light years tall, roughly the distance from Earth to our nearest star neighbor.",
+      "The tallest Pillar of Creation is four light years tall, roughly the distance from Earth to our nearest neighbouring star.",
     question:
       "What is being born in you right now, even if it doesn't look like much yet?",
   },
   {
     id: "sagittarius-a",
     location: "Sagittarius A*",
-    locationDetail: "Supermassive black hole at the Milky Way's center",
+    locationDetail: "The black hole at the centre of the Milky Way",
     distance: "26,000 light years",
     reflection:
       "At the heart of our galaxy sits a black hole about four million times the mass of our Sun. Nearby stars orbit it directly; farther out, including our Sun, stars orbit the Milky Way's total distributed mass. The Sun takes roughly 230 million years to circle the galaxy.",
@@ -92,14 +92,13 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "betelgeuse",
     location: "Betelgeuse",
-    locationDetail: "A red supergiant in Orion, near the end of its life",
-    distance: "650 light years",
+    locationDetail: "The red supergiant at Orion's shoulder",
+    distance: "About 550 to 700 light years",
     reflection:
-      "Betelgeuse is a red supergiant so large that, if placed at the center of our solar system, its surface would extend beyond Mars and perhaps toward Jupiter; its exact size and distance remain difficult to measure. It is expected to end as a supernova, but astronomers cannot predict when.",
+      "Betelgeuse is a red supergiant so large that, placed where our Sun is, its surface would reach beyond Mars and perhaps towards Jupiter. Its exact size and distance are hard to measure. In 2025 astronomers reported a small companion star orbiting close to it.",
     scale:
-      "Betelgeuse has existed for less than 10 million years, far younger than our 4.5-billion-year-old Sun. Yet it has lived so fast and bright it is already dying.",
-    question:
-      "What would you do if you burned brighter and shorter, rather than dim and long?",
+      "Betelgeuse is less than 10 million years old, a newcomer beside our 4.6 billion year old Sun, yet it shines around 100,000 times more brightly.",
+    question: "What would you do if you let yourself take up more room?",
   },
   {
     id: "bootes-void",
@@ -119,9 +118,9 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "Light from 380,000 years after the Big Bang",
     distance: "45.7 billion light years",
     reflection:
-      "The faint hiss of cosmic microwave radiation that permeates all of space is the afterglow of the Big Bang, light from 380,000 years after the universe began. It is the oldest light we can observe, and it surrounds us in every direction, right now, passing through your body as you read this.",
+      "The faint hiss of cosmic microwave radiation that permeates all of space is the afterglow of the Big Bang, light from 380,000 years after the universe began. It is the oldest light we can observe, and it surrounds us in every direction, right now. Some of it is falling on you as you read this.",
     scale:
-      "This light has been traveling for 13.8 billion years. Your entire lifespan, viewed against that journey, is too brief to measure.",
+      "This light has been travelling for almost 13.8 billion years. Your entire lifespan, viewed against that journey, is too brief to measure.",
     question:
       "If the universe has been unfolding for 13.8 billion years just to arrive at this moment, what does this moment deserve?",
   },
@@ -141,7 +140,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     id: "titan",
     location: "Titan",
     locationDetail: "Saturn's moon, a world with lakes and weather",
-    distance: "1.2 billion kilometres",
+    distance: "About 1.4 billion kilometres",
     reflection:
       "Saturn's moon Titan has clouds, rain, rivers, and lakes of liquid methane and ethane on its surface. Beneath the water-ice crust, evidence points to a global subsurface ocean of liquid water. It is familiar geography made from unfamiliar materials.",
     scale:
@@ -150,16 +149,16 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
       "Where might you be seeing a situation through your own assumptions rather than its actual nature?",
   },
   {
-    id: "crab-nebula",
-    location: "Crab Nebula",
-    locationDetail: "The remnant of a supernova seen in 1054 CE",
-    distance: "6,500 light years",
+    id: "olympus-mons",
+    location: "Olympus Mons",
+    locationDetail: "The tallest volcano known in the Solar System",
+    distance: "On Mars, about 225 million kilometres away on average",
     reflection:
-      "In July 1054, Chinese astronomers recorded a 'guest star' so bright it was visible in daylight for 23 days. What they saw was a star dying, a supernova explosion 6,500 light years away. The expanding cloud we see today, the Crab Nebula, is that star's remains. At its center, a pulsar spins 30 times per second.",
+      "Olympus Mons rises about 22 kilometres above the plains of Mars, around two and a half times the height of Everest. Its base is about 600 kilometres wide, enough to cover most of the British Isles.",
     scale:
-      "The Crab Nebula is still expanding at 1,500 kilometres per second, and has been since 1054 CE. A thousand years of constant explosion, and it is only 11 light years wide.",
+      "Its slopes are so gentle and so long that someone standing at the summit could not see the edge. The base would lie beyond the horizon.",
     question:
-      "What in your own life might be a kind of explosion, destructive on the surface, but seeding something new?",
+      "What in your life is so large and gradual that you cannot see it from where you stand?",
   },
   {
     id: "kepler-442b",
@@ -169,7 +168,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     reflection:
       "Kepler-442b is about 1.34 times Earth's radius and orbits a K-type star in a region where surface liquid water could be possible under suitable atmospheric conditions. Its composition and atmosphere have not been measured, and there is no evidence that it hosts life.",
     scale:
-      "A radio wave sent from Earth toward Kepler-442b right now would arrive 1,200 years from today, around the year 3226.",
+      "A radio wave sent from Earth toward Kepler-442b right now would arrive about 1,200 years from now.",
     question:
       "If there is other life in the universe, what would you want them to know about what it meant to be human?",
   },
@@ -178,7 +177,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     location: "Europa",
     locationDetail:
       "Jupiter's moon, with strong evidence of an ocean beneath the ice",
-    distance: "628 million kilometres",
+    distance: "Between 590 and 970 million kilometres from Earth",
     reflection:
       "Multiple lines of evidence point to a salty global ocean beneath Europa's icy shell, potentially holding more water than Earth's oceans. Tidal flexing can supply heat, making Europa a leading target in the search for habitable environments; no evidence of life there has been found.",
     scale:
@@ -192,7 +191,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The galaxy whose black hole was first photographed",
     distance: "53 million light years",
     reflection:
-      "In 2019, humanity took its first photograph of a black hole, the supermassive void at the center of Messier 87. The image took years of international collaboration and the computing power of a planet-sized telescope. For the first time in history, we saw the shadow of an object so dense that not even light can escape.",
+      "In 2019, humanity took its first photograph of a black hole, the supermassive black hole at the centre of Messier 87. It took years of international work, linking observatories across the world into one telescope as wide as Earth. For the first time in history, we saw the shadow of an object so dense that not even light can escape.",
     scale:
       "M87's black hole is 6.5 billion times the mass of our Sun. If it replaced our Sun, its event horizon would extend past the orbit of Neptune.",
     question:
@@ -230,7 +229,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     reflection:
       "Vega lay near Earth's north celestial pole thousands of years ago and will approach it again roughly twelve thousand years from now. Axial precession traces a cycle of about 26,000 years, so no pole star is permanent.",
     scale:
-      "In the time it takes Earth's axis to complete one wobble, countless human civilizations rise and fall. What we consider permanent is measured against a very short ruler.",
+      "In the time it takes Earth's axis to complete one wobble, countless human civilisations rise and fall. What we consider permanent is measured against a very short ruler.",
     question:
       "What fixed point in your life might be slowly, invisibly shifting?",
   },
@@ -240,7 +239,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "A glowing cloud of creation in Sagittarius",
     distance: "4,100 light years",
     reflection:
-      "The Lagoon Nebula glows pink because the intense radiation of newly-formed stars inside it ionizes hydrogen gas, causing it to emit light. What looks like a serene cloud is actually a violent, radiant process of birth, young stars screaming energy into their surroundings.",
+      "The Lagoon Nebula glows pink because the intense radiation of newly formed stars inside it ionises hydrogen gas, causing it to emit light. What looks like a serene cloud is actually a violent, radiant process of birth, young stars screaming energy into their surroundings.",
     scale:
       "The Lagoon Nebula is 110 light years wide, so vast that the light we see from its far edge is over 100 years older than the light we see from its near edge.",
     question:
@@ -271,16 +270,16 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
       "If someone 12 light years away could observe your life, what would they see?",
   },
   {
-    id: "ring-nebula",
-    location: "The Ring Nebula",
-    locationDetail: "A dying star's final gift",
-    distance: "2,300 light years",
+    id: "great-red-spot",
+    location: "The Great Red Spot",
+    locationDetail: "A storm on Jupiter wider than Earth",
+    distance: "Between 590 and 970 million kilometres from Earth",
     reflection:
-      "The Ring Nebula is the glowing material expelled by a Sun-like star as it ran out of fuel. The Sun is expected to pass through a broadly similar planetary-nebula stage in about five billion years, though it would not reproduce this object's exact shape. A hot white dwarf remains at the Ring Nebula's center.",
+      "The Great Red Spot is a storm on Jupiter that is wider than our whole planet. People have watched it without a break since at least 1831, and it may be far older. In recent decades it has been slowly shrinking.",
     scale:
-      "The Ring Nebula is about one light year across. The dying star at its center is smaller than Earth, yet what it has released encircles an entire light year of space.",
+      "Winds around its edge reach more than 400 kilometres per hour, faster than any hurricane ever measured on Earth.",
     question:
-      "What would you want your life to release into the world as it comes to its natural end?",
+      "What has been part of your life for so long that you have stopped noticing it?",
   },
   {
     id: "carina-nebula",
@@ -288,7 +287,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "Home to some of the most massive stars known",
     distance: "7,500 light years",
     reflection:
-      "The Carina Nebula contains exceptionally massive and luminous stars, including the unstable Eta Carinae system. Eta Carinae is expected eventually to end in a supernova or related stellar explosion, but its timing and exact outcome are uncertain.",
+      "The Carina Nebula holds some of the most massive and luminous stars known, including the restless Eta Carinae system. In the 1840s Eta Carinae flared until it was one of the brightest stars in the night sky, then faded from view without a telescope.",
     scale:
       "Eta Carinae releases as much energy in 6 seconds as our Sun releases in an entire year. Some things simply operate at a different scale.",
     question:
@@ -307,28 +306,27 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
       "What would you hear if you could tune in to the frequencies that your daily noise is drowning out?",
   },
   {
-    id: "cat-eye-nebula",
-    location: "The Cat's Eye Nebula",
-    locationDetail: "A complex planetary nebula",
-    distance: "3,300 light years",
+    id: "pleiades",
+    location: "The Pleiades",
+    locationDetail: "The Seven Sisters, a young star cluster in Taurus",
+    distance: "444 light years",
     reflection:
-      "The Cat's Eye Nebula is one of the most complex planetary nebulae known: concentric shells, jets, and knots of gas expelled by a dying star over thousands of years. Each layer marks a different epoch in the star's death. It is a record written in light, preserved in space.",
+      "The Pleiades are a family of stars born together about 100 million years ago, long after the first dinosaurs walked on Earth. Cultures across the world, from Aboriginal Australia to ancient Greece to Japan, tell stories about them. In Japan they are called Subaru.",
     scale:
-      "The outermost shell of the Cat's Eye Nebula is about half a light year across, nearly 5 trillion kilometres, yet the whole structure took only a few thousand years to form.",
-    question:
-      "What layers of your own history, visible or not, have shaped the person looking at the stars tonight?",
+      "Six or seven of its stars are easy to see without help. Binoculars show dozens, and the cluster holds more than a thousand.",
+    question: "Who are the people you came into the world alongside?",
   },
   {
     id: "galactic-center",
-    location: "The Center of the Milky Way",
+    location: "The Centre of the Milky Way",
     locationDetail: "The heart of our galaxy, hidden by dust",
     distance: "26,000 light years",
     reflection:
-      "The center of our galaxy is hidden from optical telescopes by clouds of dust and gas, but visible in infrared and radio waves. Stars there orbit the central black hole in years, not millions of years. Time, gravity, and density are extreme, a place so different from our corner of the galaxy it might as well be another universe.",
+      "The centre of our galaxy is hidden from optical telescopes by clouds of dust and gas, but visible in infrared and radio waves. Stars there orbit the central black hole in years, not millions of years. Time, gravity, and density are extreme, a place so different from our corner of the galaxy it might as well be another universe.",
     scale:
-      "Stars near the galactic center orbit Sagittarius A* at speeds of up to 25 million kilometres per hour. Our own Sun moves at just 800,000 km/h in its orbit.",
+      "Stars near the galactic centre orbit Sagittarius A* at more than 25 million kilometres per hour. Our own Sun moves at just 800,000 km/h in its orbit.",
     question:
-      "What would change about your perspective if you could suddenly see your life from its center, rather than its edge?",
+      "What would change about your perspective if you could suddenly see your life from its centre, rather than its edge?",
   },
   {
     id: "cosmic-web",
@@ -340,17 +338,17 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     scale:
       "The cosmic web spans billions of light years. The voids between filaments can be 300 million light years across, and yet, within those filaments, individual human beings are constructing theories that describe the whole.",
     question:
-      "What structure in your own life, invisible to you day to day, might be more beautiful than you realize when seen from above?",
+      "What structure in your own life, invisible to you day to day, might be more beautiful than you realise when seen from above?",
   },
   {
     id: "eridanus-void",
     location: "The Eridanus Supervoid",
     locationDetail: "A proposed supervoid aligned with the CMB Cold Spot",
-    distance: "1 billion light years",
+    distance: "About 3 billion light years",
     reflection:
       "Galaxy surveys have found an underdense region in the direction of the cosmic microwave background Cold Spot. Its size and ability to explain the Cold Spot remain debated; current evidence does not support exotic-universe explanations.",
     scale:
-      "If the entire observable universe were a city, the Eridanus Void would be a neighborhood-sized park. The universe has room for absences as grand as its structures.",
+      "If the entire observable universe were a city, the Eridanus Void would be a park the size of a few streets. The universe has room for absences as grand as its structures.",
     question:
       "What are you avoiding looking at? Could an empty space in your own life be worth exploring?",
   },
@@ -394,7 +392,7 @@ const OBSERVATORY_SOURCE_BY_ID: Partial<
   "cosmic-background": ["nasaCmb"],
   "orion-nebula": ["nasaNebulae"],
   titan: ["nasaTitan"],
-  "crab-nebula": ["nasaNebulae"],
+  "olympus-mons": ["nasaSolarSystem"],
   "kepler-442b": ["nasaKepler442b"],
   europa: ["nasaEuropa"],
   "messier-87": ["nasaGalaxies", "nasaBlackHoles"],
@@ -404,10 +402,10 @@ const OBSERVATORY_SOURCE_BY_ID: Partial<
   "lagoon-nebula": ["nasaNebulae"],
   "hercules-corona-borealis": ["greatWallPaper"],
   "tau-ceti": ["nasaStars", "nasaExoplanets"],
-  "ring-nebula": ["nasaRingNebula", "nasaNebulae"],
+  "great-red-spot": ["nasaSolarSystem"],
   "carina-nebula": ["nasaNebulae"],
   "perseus-cluster": ["nasaGalaxies"],
-  "cat-eye-nebula": ["nasaNebulae"],
+  pleiades: ["nasaStars"],
   "eridanus-void": ["eridanusStudy"],
   "edge-observable": ["nasaUniverseOverview"],
   "alpha-centauri": ["nasaAlphaCentauri"],
@@ -424,7 +422,6 @@ const MODEL_DEPENDENT_OBSERVATORY_IDS = new Set([
   "betelgeuse",
   "europa",
   "tau-ceti",
-  "ring-nebula",
 ]);
 
 export const OBSERVATORY_ENTRIES: ObservatoryEntry[] =

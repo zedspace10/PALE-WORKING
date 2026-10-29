@@ -47,7 +47,7 @@ describe("audited scientific corrections", () => {
     const andromeda = TIME_MACHINE_EVENTS.find(
       (event) => event.id === "milky-way-merger",
     );
-    expect(andromeda?.title).toBe("A Possible Andromeda Encounter");
+    expect(andromeda?.title).toBe("A possible Andromeda encounter");
     expect(andromeda?.when).toMatch(/uncertain/i);
     expect(andromeda?.science.classification).toBe("model-dependent");
   });

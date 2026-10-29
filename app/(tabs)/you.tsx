@@ -89,7 +89,7 @@ export default function YouScreen() {
           }}
         >
           <Text style={[styles.title, { color: colors.foreground }]}>
-            Your Place
+            Your place
           </Text>
           <Text style={[styles.onboardText, { color: colors.mutedForeground }]}>
             Add your birthday to see how far you have travelled around the Sun
@@ -175,7 +175,7 @@ export default function YouScreen() {
       >
         <View style={styles.sectionHeader}>
           <Text style={[styles.title, { color: colors.foreground }]}>
-            Your Place
+            Your place
           </Text>
           <Text style={[styles.titleSub, { color: colors.mutedForeground }]}>
             in the cosmos
@@ -274,8 +274,8 @@ export default function YouScreen() {
           </Text>
           <Text style={[styles.quoteText, { color: colors.foreground }]}>
             Most of the hydrogen in your body was made in the first moments
-            after the Big Bang. Every glass of water you drink holds atoms about
-            13.8 billion years old.
+            after the Big Bang. Every glass of water you drink holds hydrogen
+            about 13.8 billion years old.
           </Text>
           <Text style={[styles.quoteNote, { color: colors.primary }]}>
             You are ancient.
@@ -317,7 +317,7 @@ export default function YouScreen() {
             <Text
               style={[styles.cardEyebrow, { color: colors.mutedForeground }]}
             >
-              Discovered in your lifetime
+              In your lifetime
             </Text>
             {myEvents.map((event) => (
               <View

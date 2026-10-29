@@ -18,6 +18,8 @@ const WEBSITE = "https://stellaraspace.com";
 export interface Destination {
   id: string;
   name: string;
+  /** A short name for the star picker. */
+  short: string;
   /** Right ascension and declination in degrees. */
   ra: number;
   dec: number;
@@ -29,6 +31,7 @@ export interface Destination {
 export const DESTINATIONS: Destination[] = [
   {
     id: "proxima",
+    short: "Proxima Centauri",
     name: "Proxima Centauri",
     ra: 14.4953 * 15,
     dec: -62.679,
@@ -37,6 +40,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "sirius",
+    short: "Sirius",
     name: "Sirius",
     ra: 6.7525 * 15,
     dec: -16.716,
@@ -45,6 +49,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "tau-ceti",
+    short: "Tau Ceti",
     name: "Tau Ceti",
     ra: 1.7345 * 15,
     dec: -15.937,
@@ -53,6 +58,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "vega",
+    short: "Vega",
     name: "Vega",
     ra: 18.6156 * 15,
     dec: 38.784,
@@ -61,6 +67,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "trappist",
+    short: "TRAPPIST-1",
     name: "TRAPPIST-1",
     ra: 23.1081 * 15,
     dec: -5.041,
@@ -69,6 +76,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "pleiades",
+    short: "The Pleiades",
     name: "The Pleiades",
     ra: 3.7908 * 15,
     dec: 24.117,
@@ -77,6 +85,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "orion",
+    short: "Orion Nebula",
     name: "The Orion Nebula",
     ra: 5.5881 * 15,
     dec: -5.391,
@@ -85,6 +94,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "centre",
+    short: "Galactic centre",
     name: "The centre of the Milky Way",
     ra: 17.7611 * 15,
     dec: -29.008,
@@ -93,6 +103,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "andromeda",
+    short: "Andromeda",
     name: "The Andromeda Galaxy",
     ra: 0.7123 * 15,
     dec: 41.269,
@@ -169,20 +180,34 @@ export function kmTravelled(sentAt: number, now: number): number {
   return Math.max(0, (now - sentAt) / 1000) * C_KM_S;
 }
 
-const MARKS: { name: string; seconds: number }[] = [
-  { name: "the Moon", seconds: 1.28 },
-  { name: "the Sun's distance", seconds: 499 },
-  { name: "Jupiter's orbit", seconds: 2600 },
-  { name: "Neptune's orbit", seconds: 15000 },
-  { name: "Voyager 1", seconds: 85000 },
-];
+// Voyager 1 is one light day from Earth in mid November 2026 and moves outwards at about 17 km/s,
+// so its distance is worked out for the moment asked rather than fixed.
+const VOYAGER_LIGHT_DAY_AT = Date.UTC(2026, 10, 15);
+const VOYAGER_KM_S = 16.9;
+
+/** How far Voyager 1 is from Earth at a moment, in light seconds. */
+export function voyagerLightSeconds(at: number): number {
+  return (
+    86_400 + ((at - VOYAGER_LIGHT_DAY_AT) / 1000) * (VOYAGER_KM_S / C_KM_S)
+  );
+}
+
+function marks(now: number): { name: string; seconds: number }[] {
+  return [
+    { name: "the Moon", seconds: 1.28 },
+    { name: "the Sun's distance", seconds: 499 },
+    { name: "Jupiter's orbit", seconds: 2600 },
+    { name: "Neptune's orbit", seconds: 15000 },
+    { name: "Voyager 1", seconds: voyagerLightSeconds(now) },
+  ];
+}
 
 /** "past the Moon", or "past Voyager 1", or "just leaving Earth". */
 export function progressWords(note: Note, now: number): string {
   const seconds = Math.max(0, (now - note.sentAt) / 1000);
   const dest = destinationOf(note);
   if (seconds >= (dest.ly * YEAR_MS) / 1000) return `arrived at ${dest.name}`;
-  const passed = MARKS.filter((m) => seconds >= m.seconds);
+  const passed = marks(now).filter((m) => seconds >= m.seconds);
   return passed.length
     ? `past ${passed[passed.length - 1].name}`
     : "just leaving Earth";

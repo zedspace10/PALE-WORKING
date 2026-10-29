@@ -21,10 +21,10 @@ export const DARK_ALTITUDE = SOLAR_THRESHOLDS.astronomical;
 
 export const SOLAR_STATE_LABELS: Record<SolarState, string> = {
   daylight: "daylight",
-  "civil-twilight": "civil twilight",
-  "nautical-twilight": "nautical twilight",
-  "astronomical-twilight": "astronomical twilight",
-  "astronomical-darkness": "astronomical darkness",
+  "civil-twilight": "twilight",
+  "nautical-twilight": "deep twilight",
+  "astronomical-twilight": "nearly dark",
+  "astronomical-darkness": "properly dark",
 };
 
 export function classifySolarAltitude(altitude: number): SolarState {

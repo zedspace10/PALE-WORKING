@@ -97,7 +97,7 @@ describe("time refresh and personal-star wording", () => {
       path.resolve(process.cwd(), "app/tonight-sky.tsx"),
       "utf8",
     );
-    expect(source).toContain("Light arriving around now left");
+    expect(source).toContain("tonight set off around");
     expect(source).not.toMatch(
       /Light leaving .* right now will reach Earth in/i,
     );
