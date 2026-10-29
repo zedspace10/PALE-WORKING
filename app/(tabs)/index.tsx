@@ -343,6 +343,26 @@ export default function HomeScreen() {
               </Text>
             </View>
           </MagicalAction>
+
+          <CalmPressable
+            onPress={() => router.push("/note")}
+            accessibilityRole="button"
+            accessibilityLabel="Send a note to the universe"
+            style={[
+              styles.obsCard,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
+              Notes
+            </Text>
+            <Text style={[styles.obsTitle, { color: colors.foreground }]}>
+              Send a note to the universe
+            </Text>
+            <Text style={[styles.obsSub, { color: colors.mutedForeground }]}>
+              Follow it out to the stars, and send it as real light
+            </Text>
+          </CalmPressable>
         </View>
       </ScrollView>
     </View>

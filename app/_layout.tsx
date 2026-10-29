@@ -85,6 +85,14 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
           }}
         />
         <Stack.Screen
+          name="note"
+          options={{
+            headerShown: false,
+            presentation: "fullScreenModal",
+            animation: "fade",
+          }}
+        />
+        <Stack.Screen
           name="tonight-sky"
           options={{
             headerShown: false,
