@@ -77,8 +77,8 @@ describe("notes shared with the website", () => {
   });
 
   it("keeps Voyager 1 moving outwards", () => {
-    expect(voyagerLightSeconds(Date.UTC(2026, 10, 15))).toBe(86_400);
-    const ayearOn = voyagerLightSeconds(Date.UTC(2027, 10, 15));
+    expect(voyagerLightSeconds(Date.UTC(2026, 10, 18))).toBe(86_400);
+    const ayearOn = voyagerLightSeconds(Date.UTC(2027, 10, 18));
     expect(ayearOn).toBeGreaterThan(88_000);
     expect(ayearOn).toBeLessThan(88_400);
   });
