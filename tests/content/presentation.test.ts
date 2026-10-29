@@ -14,16 +14,6 @@ describe("honest scientific presentation", () => {
     expect(disclosure).not.toContain("borderWidth");
   });
 
-  it("labels every Universe visual level and explains artistic cosmic-web links", () => {
-    const universe = read("app/universe.tsx");
-    expect(universe).toContain("zoomLevel === 1");
-    expect(universe).toContain("zoomLevel === 2");
-    expect(universe).toContain("connecting lines are decorative");
-    expect(universe).not.toContain("SourceDisclosure");
-    expect(universe).not.toMatch(/two trillion|approximately 2 trillion/i);
-    expect(universe).toMatch(/hundreds of billions of galaxies, perhaps more/i);
-  });
-
   it("labels Shift's animated scale without a source disclosure panel", () => {
     const shift = read("app/(tabs)/shift.tsx");
     expect(shift).toContain("IllustrationDisclosure");
@@ -32,9 +22,6 @@ describe("honest scientific presentation", () => {
   });
 
   it("visibly separates daily poetic reflection from factual copy", () => {
-    expect(read("components/ReflectionCard.tsx")).toContain(
-      "TODAY · POETIC REFLECTION",
-    );
     expect(read("app/(tabs)/deeptime.tsx")).toContain("POETIC REFLECTION");
   });
 
@@ -43,7 +30,6 @@ describe("honest scientific presentation", () => {
       read("app/(tabs)/index.tsx"),
       read("app/(tabs)/shift.tsx"),
       read("app/(tabs)/deeptime.tsx"),
-      read("app/universe.tsx"),
       read("app/tonight-sky.tsx"),
       read("constants/cosmicData.ts"),
       read("constants/cosmicTimeMachine.ts"),

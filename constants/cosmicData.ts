@@ -20,16 +20,6 @@ interface LocationBase {
 
 export interface Location extends LocationBase, ScientificItem {}
 
-interface DeepTimeEventBase {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  yearsAgo: string;
-}
-
-export interface DeepTimeEvent extends DeepTimeEventBase, ScientificItem {}
-
 interface CosmicEventBase {
   year: number;
   title: string;
@@ -84,16 +74,6 @@ const SHIFT_STAGES_BASE: ShiftStageBase[] = [
     subtitle: "…there is you.",
     hint: "",
   },
-];
-
-export const DAILY_REFLECTIONS = [
-  "Every human who has ever lived existed on one small world.",
-  "Most of the hydrogen in you is as old as the universe.",
-  "The light entering your eyes tonight may have begun its journey millions of years ago.",
-  "Your problems are real. But they are not the entire universe.",
-  "The universe made something that could turn around and look back at it.",
-  "From the perspective of the cosmos, all of human history is a brief flicker.",
-  "Every person who ever lived has looked up at the same Moon.",
 ];
 
 const LOCATIONS_BASE: LocationBase[] = [
@@ -235,138 +215,6 @@ export const LOCATIONS: Location[] = LOCATIONS_BASE.map((location) => ({
       "Distances and sizes are rounded; the reflection is interpretive prose.",
   }),
 }));
-
-// Cosmic calendar: 13.8 billion years compressed into 365 days.
-// One day = 37.8 million years. Entries are ordered chronologically.
-const DEEP_TIME_CALENDAR_BASE: DeepTimeEventBase[] = [
-  {
-    id: "big-bang",
-    date: "January 1",
-    title: "The Big Bang",
-    description:
-      "The observable universe begins in an extremely hot, dense state. The expansion happened throughout space; the Big Bang was not an explosion from a central point.",
-    yearsAgo: "13.8 billion years ago",
-  },
-  {
-    id: "milky-way",
-    date: "January 16",
-    title: "The Milky Way forms",
-    description:
-      "Our home galaxy assembles from vast clouds of gas and dark matter, slowly spinning into the shape we know.",
-    yearsAgo: "13.2 billion years ago",
-  },
-  {
-    id: "solar-system",
-    date: "September 1",
-    title: "Our Solar System is born",
-    description:
-      "A cloud of gas and dust collapses under its own gravity. The Sun ignites, and the planets form from what remains.",
-    yearsAgo: "4.6 billion years ago",
-  },
-  {
-    id: "earth",
-    date: "September 3",
-    title: "Earth forms",
-    description:
-      "A rocky world takes shape, still molten and bombarded by debris, yet carrying the seeds of everything to come.",
-    yearsAgo: "4.5 billion years ago",
-  },
-  {
-    id: "life",
-    date: "October 1",
-    title: "First life appears",
-    description:
-      "The earliest evidence of simple microbial life appears in ancient rocks. The exact timing and setting of life's origin remain uncertain.",
-    yearsAgo: "At least 3.5 billion years ago; possibly earlier",
-  },
-  {
-    id: "oxygen",
-    date: "October 26",
-    title: "Oxygen accumulates in the atmosphere",
-    description:
-      "Oxygen produced by microbes begins accumulating in the atmosphere, profoundly changing Earth's chemistry and the environments available to life.",
-    yearsAgo: "2.5 billion years ago",
-  },
-  {
-    id: "multicellular",
-    date: "December 16",
-    title: "Early animals diversify",
-    description:
-      "Animal life becomes more diverse in the oceans, long after multicellular organisms had already evolved in other lineages.",
-    yearsAgo: "600 million years ago",
-  },
-  {
-    id: "fish",
-    date: "December 17",
-    title: "First vertebrates",
-    description:
-      "Early vertebrate lineages appear, beginning branches that eventually lead to fishes, birds, mammals, and humans.",
-    yearsAgo: "530 million years ago",
-  },
-  {
-    id: "dinosaurs",
-    date: "December 25",
-    title: "Age of Dinosaurs",
-    description:
-      "Dinosaurs emerge and become the dominant large land vertebrates across much of the Mesozoic Era, while many other lineages continue alongside them.",
-    yearsAgo: "230 million years ago",
-  },
-  {
-    id: "extinction",
-    date: "December 30",
-    title: "The great extinction",
-    description:
-      "An asteroid impact triggers severe global disruption and contributes to a mass extinction, including the loss of all non-avian dinosaurs. Surviving mammal lineages later diversify.",
-    yearsAgo: "66 million years ago",
-  },
-  {
-    id: "humans",
-    date: "Dec 31, 11:48 PM",
-    title: "Modern humans appear",
-    description:
-      "Homo sapiens emerge. Tool-makers, storytellers, question-askers. The cosmos looks at itself and wonders.",
-    yearsAgo: "300,000 years ago",
-  },
-  {
-    id: "civilization",
-    date: "Dec 31, 11:59:33 PM",
-    title: "Settled societies expand",
-    description:
-      "Agriculture and permanent settlements spread; cities and writing follow in several regions. Human art and ritual traditions are much older.",
-    yearsAgo: "12,000 years ago",
-  },
-];
-
-const DEEP_TIME_SOURCE_BY_ID: Record<
-  string,
-  readonly [ScientificSourceId, ...ScientificSourceId[]]
-> = {
-  "big-bang": ["nasaBigBang", "nasaGlossary"],
-  "milky-way": ["nasaMilkyWay", "nasaGalaxies"],
-  "solar-system": ["nasaSolarSystemFormation"],
-  earth: ["nasaSolarSystemFormation", "nasaMoonFormation"],
-  life: ["nasaAstrobiologyStrategy"],
-  oxygen: ["nasaAstrobiologyStrategy"],
-  multicellular: ["nasaAstrobiologyStrategy"],
-  fish: ["smithsonianDeepTime"],
-  dinosaurs: ["smithsonianDeepTime"],
-  extinction: ["smithsonianDeepTime"],
-  humans: ["smithsonianHumanOrigins"],
-  civilization: ["smithsonianHumanOrigins"],
-};
-
-export const DEEP_TIME_CALENDAR: DeepTimeEvent[] = DEEP_TIME_CALENDAR_BASE.map(
-  (event) => ({
-    ...event,
-    science: scientificMeta({
-      classification: "estimate",
-      reviewedAt: CONTENT_REVIEWED_AT,
-      sourceIds: DEEP_TIME_SOURCE_BY_ID[event.id],
-      precisionNote:
-        "Cosmic-calendar dates compress rounded scientific estimates into one illustrative year.",
-    }),
-  }),
-);
 
 const COSMIC_EVENTS_BASE: CosmicEventBase[] = [
   {
