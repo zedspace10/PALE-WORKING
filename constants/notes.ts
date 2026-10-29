@@ -180,9 +180,9 @@ export function kmTravelled(sentAt: number, now: number): number {
   return Math.max(0, (now - sentAt) / 1000) * C_KM_S;
 }
 
-// Voyager 1 is one light day from Earth in mid November 2026 and moves outwards at about 17 km/s,
+// Voyager 1 is one light day from Earth on 18 November 2026 and moves outwards at about 17 km/s,
 // so its distance is worked out for the moment asked rather than fixed.
-const VOYAGER_LIGHT_DAY_AT = Date.UTC(2026, 10, 15);
+const VOYAGER_LIGHT_DAY_AT = Date.UTC(2026, 10, 18);
 const VOYAGER_KM_S = 16.9;
 
 /** How far Voyager 1 is from Earth at a moment, in light seconds. */
