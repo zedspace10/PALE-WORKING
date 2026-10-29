@@ -1,4 +1,3 @@
-import { formatUniverseAgeEstimate } from "@/constants/personalInsights";
 import { SOLAR_STATE_LABELS, SolarState } from "@/constants/solar";
 
 export interface MomentLine {
@@ -7,14 +6,15 @@ export interface MomentLine {
   style?: "primary" | "muted";
 }
 
-function localSolarLine(solarState: SolarState | null): string {
-  if (!solarState) {
-    return "PALE has not verified the Sun's position for your location.";
-  }
-  if (solarState === "daylight") {
-    return "At your recent location, the Sun is above the horizon.";
-  }
-  return `At your recent location, it is ${SOLAR_STATE_LABELS[solarState]}.`;
+// What the Sun is doing where the person last was. Said only when it has been worked out from a
+// real location; otherwise the line is left out rather than guessed.
+function localSolarLines(solarState: SolarState | null): MomentLine[] {
+  if (!solarState) return [];
+  const text =
+    solarState === "daylight"
+      ? "Where you are, the Sun is up."
+      : `Where you are, it is ${SOLAR_STATE_LABELS[solarState]}.`;
+  return [{ text, delay: 2200, style: "muted" }];
 }
 
 export function getMomentLines(
@@ -35,14 +35,10 @@ export function getMomentLines(
 
   if (hour >= 21 || hour <= 4) {
     return [
+      { text: "It's late.", delay: 1400, style: "primary" },
+      ...localSolarLines(solarState),
       {
-        text: "Your device clock says it is late.",
-        delay: 1400,
-        style: "primary",
-      },
-      { text: localSolarLine(solarState), delay: 2600, style: "muted" },
-      {
-        text: "The sky you can actually see still depends on clouds, light, and your surroundings.",
+        text: "Whether or not you can see them tonight, the stars are still there.",
         delay: 1200,
         style: "muted",
       },
@@ -51,8 +47,8 @@ export function getMomentLines(
 
   if (hour >= 5 && hour <= 8) {
     return [
-      { text: "Morning by your device clock.", delay: 1400, style: "primary" },
-      { text: localSolarLine(solarState), delay: 2400, style: "muted" },
+      { text: "Good morning.", delay: 1400, style: "primary" },
+      ...localSolarLines(solarState),
       { text: "This one is yours.", delay: 1400, style: "primary" },
     ];
   }
@@ -65,20 +61,19 @@ export function getMomentLines(
         style: "primary",
       },
       {
-        text: "PALE cannot tell whether sunlight is reaching you indoors or through cloud.",
+        text: "Everything you see, you see a moment after it happened.",
         delay: 1800,
         style: "muted",
       },
-      { text: localSolarLine(solarState), delay: 1200, style: "muted" },
     ];
   }
 
   if (hour >= 17 && hour <= 20) {
     return [
-      { text: "Evening by your device clock.", delay: 1400, style: "primary" },
-      { text: localSolarLine(solarState), delay: 2200, style: "muted" },
+      { text: "Good evening.", delay: 1400, style: "primary" },
+      ...localSolarLines(solarState),
       {
-        text: "Star visibility depends on twilight and local observing conditions.",
+        text: "When it gets dark, look up.",
         delay: 1200,
         style: "muted",
       },
@@ -88,7 +83,7 @@ export function getMomentLines(
   return [
     { text: "Right now", delay: 1200, style: "muted" },
     {
-      text: `the universe is ${formatUniverseAgeEstimate()}.`,
+      text: "the universe is about 13.8 billion years old.",
       delay: 1000,
       style: "primary",
     },

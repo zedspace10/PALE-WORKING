@@ -41,10 +41,10 @@ export default function ExploreScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.foreground }]}>
-              Traverse the Universe
+              Places in the universe
             </Text>
             <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-              Journey to the far reaches of everything
+              From the Moon to the edge of what we can see
             </Text>
           </View>
         }

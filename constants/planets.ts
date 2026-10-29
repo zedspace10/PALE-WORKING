@@ -178,3 +178,42 @@ export function formatLightTime(minutes: number): string {
   const hours = `${h} ${h === 1 ? "hour" : "hours"}`;
   return rem === 0 ? hours : `${hours} ${rem} minutes`;
 }
+
+export type SkyPlacement = "evening" | "morning" | "all-night" | "in-glare";
+
+/**
+ * Where a planet sits in the sky relative to the Sun, which needs no location: east of the Sun it
+ * follows the Sun down and shows after sunset, west of it it rises before dawn, opposite the Sun it
+ * is up all night, and too close to the Sun it is lost in the glare.
+ */
+export function getPlanetSkyPlacement(
+  planet: PlanetId,
+  date: Date = new Date(),
+): { elongation: number; placement: SkyPlacement } {
+  const d = dayNumber(date);
+  const p = heliocentric(ELEMENTS[planet], d);
+  // The "earth" elements give the Sun as seen from Earth.
+  const s = heliocentric(ELEMENTS.earth, d);
+  const g = { x: p.x + s.x, y: p.y + s.y, z: p.z };
+
+  const dot = g.x * s.x + g.y * s.y + g.z * s.z;
+  const gl = Math.hypot(g.x, g.y, g.z);
+  const sl = Math.hypot(s.x, s.y, s.z);
+  const elongation =
+    Math.acos(Math.max(-1, Math.min(1, dot / (gl * sl)))) / DEG;
+
+  // Positive when the planet is east of the Sun along the ecliptic.
+  const east =
+    rev(Math.atan2(g.y, g.x) / DEG - Math.atan2(s.y, s.x) / DEG) < 180;
+
+  const glare = planet === "mercury" ? 18 : 15;
+  const placement: SkyPlacement =
+    elongation < glare
+      ? "in-glare"
+      : elongation > 145
+        ? "all-night"
+        : east
+          ? "evening"
+          : "morning";
+  return { elongation, placement };
+}

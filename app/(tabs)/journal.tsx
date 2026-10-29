@@ -19,12 +19,19 @@ import { useColors } from "@/hooks/useColors";
 import { EntryType, JournalEntry, useJournal } from "@/hooks/useJournal";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
+// Reflection first: it is what most entries are, and the screen should not open on a worry.
 const TYPE_LABELS: Record<EntryType, string> = {
-  worry: "WORRY",
-  reflection: "REFLECTION",
-  goal: "GOAL",
-  thought: "THOUGHT",
+  reflection: "Reflection",
+  thought: "Thought",
+  goal: "Goal",
+  worry: "Worry",
 };
+
+// Honest about where entries live, without alarming anyone about to write something personal.
+// Entries are kept in the app's own storage on the phone. They are not encrypted by PALE.
+const PRIVACY_SHORT = "Only on this phone, never sent to us";
+const PRIVACY_FULL =
+  "Entries are not encrypted, so anyone who can open your phone, or a backup of it, could read them.";
 
 const TYPE_COLORS: Record<EntryType, string> = {
   worry: "#A995FF",
@@ -121,6 +128,7 @@ export default function JournalScreen() {
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [write, setWrite] = useState<WriteState>({ active: false });
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const handleSave = async () => {
     if (!write.active || !write.text.trim()) return;
     try {
@@ -201,7 +209,7 @@ export default function JournalScreen() {
             Journal
           </Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-            stored locally · unencrypted
+            Only on this phone
           </Text>
         </View>
         {!write.active && (
@@ -235,11 +243,25 @@ export default function JournalScreen() {
           <Text style={[styles.writePrompt, { color: colors.mutedForeground }]}>
             What's on your mind?
           </Text>
-          <Text style={[styles.privacyText, { color: colors.mutedForeground }]}>
-            Entries stay in unencrypted app storage on this device and are not
-            sent to a PALE service. Device backups or anyone with device access
-            may still expose them.
-          </Text>
+          <TouchableOpacity
+            onPress={() => setPrivacyOpen((o) => !o)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: privacyOpen }}
+            style={styles.privacyRow}
+          >
+            <Text
+              style={[styles.privacyText, { color: colors.mutedForeground }]}
+            >
+              {PRIVACY_SHORT}.{" "}
+              {privacyOpen ? (
+                PRIVACY_FULL
+              ) : (
+                <Text style={{ color: colors.primary }}>
+                  How it&apos;s kept
+                </Text>
+              )}
+            </Text>
+          </TouchableOpacity>
 
           <View style={styles.typeRow}>
             {(Object.keys(TYPE_LABELS) as EntryType[]).map((t) => {
@@ -277,7 +299,7 @@ export default function JournalScreen() {
             onChangeText={(text) =>
               setWrite((w) => (w.active ? { ...w, text } : w))
             }
-            placeholder="Write freely. Stored locally on this device."
+            placeholder="Write freely."
             placeholderTextColor={colors.mutedForeground + "60"}
             style={[
               styles.textArea,
@@ -419,14 +441,13 @@ export default function JournalScreen() {
               <Text
                 style={[styles.emptyMoon, { color: colors.mutedForeground }]}
               >
-                Each entry records the moon phase and the age of the universe as
-                approximate context, not an exact astronomical snapshot.
+                Each entry quietly keeps the Moon's phase from the night you
+                wrote it.
               </Text>
               <Text
                 style={[styles.emptyMoon, { color: colors.mutedForeground }]}
               >
-                Entries are stored locally in unencrypted app storage and are
-                not sent to a PALE service.
+                {PRIVACY_SHORT}. {PRIVACY_FULL}
               </Text>
               <TouchableOpacity
                 onPress={() =>
@@ -637,6 +658,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 2,
   },
+  privacyRow: { minHeight: 32, justifyContent: "center" },
   privacyText: {
     fontSize: 12,
     lineHeight: 19,

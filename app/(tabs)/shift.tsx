@@ -20,14 +20,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CalmPressable } from "@/components/CalmPressable";
 import { CardArtwork } from "@/components/CardArtwork";
-import {
-  HomeLocationSphere,
-  type JourneySphereVariant,
-} from "@/components/HomeHeroScene";
+import { HomeLocationSphere } from "@/components/HomeHeroScene";
 import { IllustrationDisclosure } from "@/components/IllustrationDisclosure";
 import { MagicalAction } from "@/components/MagicalSurface";
+import { ShiftZoomScene } from "@/components/ShiftZoomScene";
 import { StarField } from "@/components/StarField";
 import { SHIFT_STAGES } from "@/constants/cosmicData";
+import { SHIFT_MAX_ZOOM } from "@/constants/shiftZoom";
 import { getTonightsEvent } from "@/constants/skyEvents";
 import { calmSpace, calmTypography } from "@/constants/ui";
 import { useShiftCount } from "@/hooks/useBirthday";
@@ -35,20 +34,13 @@ import { useColors } from "@/hooks/useColors";
 import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-const SPHERE_BODY_SIZE = 88;
-const ENTRY_SPHERE_SIZE = 88;
 // Each stage carries about 1.3s of animation overhead on top of these.
 // Weighted so the setup moves and the closing line is given room.
 const STAGE_DURATIONS_MS = [6000, 6500, 7000, 7500, 8000, 8800];
 const FADE_MS = 900;
-const SHIFT_SPHERE_VARIANTS: readonly JourneySphereVariant[] = [
-  "earth",
-  "solar",
-  "galaxy",
-  "cluster",
-  "cosmos",
-  "return",
-];
+// How long the camera takes to pull back from one picture to the next, and to fly home at the end.
+const ZOOM_OUT_MS = 2600;
+const ZOOM_HOME_MS = 4200;
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
@@ -92,23 +84,14 @@ export default function ShiftScreen() {
     }),
     [colors.glass, colors.luminousBorder],
   );
-  const stageSphereSizes = useMemo(() => {
-    const width = Math.max(viewportWidth, 320);
-    return [20, 70, 150, 280, width * 1.2, width * 2.2];
-  }, [viewportWidth]);
-  const stageSphereOffsets = useMemo(
-    () => [
-      -170,
-      -190,
-      -230,
-      Math.round(viewportHeight * 0.26 + 140),
-      Math.round(viewportHeight * 0.26 + viewportWidth * 0.6),
-      Math.round(viewportHeight * 0.18 + viewportWidth * 1.1),
-    ],
-    [viewportHeight, viewportWidth],
+
+  // The pictures sit below the words, as large as the screen allows.
+  const sceneSize = Math.min(viewportWidth * 0.9, viewportHeight * 0.46, 540);
+  const sceneCenterY = Math.max(
+    topPad + 290 + sceneSize / 2 - 50,
+    viewportHeight * 0.635,
   );
-  const entrySphereTop = Math.max(topPad + 48, viewportHeight * 0.1);
-  const journeySphereTop = viewportHeight / 2 - 47;
+  const stageTextTop = topPad + 56;
 
   const [journeyActive, setJourneyActive] = useState(false);
   const [stage, setStage] = useState(0);
@@ -121,11 +104,8 @@ export default function ShiftScreen() {
   const [tonight, setTonight] = useState<string | null>(null);
 
   const stageOpacity = useRef(new Animated.Value(0)).current;
-  const journeySphereSize = useRef(
-    new Animated.Value(ENTRY_SPHERE_SIZE),
-  ).current;
-  const journeyProgress = useRef(new Animated.Value(0)).current;
-  const journeySphereDrift = useRef(new Animated.Value(0.5)).current;
+  // 0 is Earth, 1 the solar system, 2 the Milky Way, 3 the Local Group, 4 everything we can see.
+  const zoom = useRef(new Animated.Value(0)).current;
   const welcomeBackOpacity = useRef(new Animated.Value(0)).current;
   const welcomeSubOpacity = useRef(new Animated.Value(0)).current;
   const screenFade = useRef(new Animated.Value(1)).current;
@@ -158,39 +138,13 @@ export default function ShiftScreen() {
     return () => navigation.setOptions({ tabBarStyle: undefined });
   }, [journeyActive, navigation, visibleTabBarStyle]);
 
-  useEffect(() => {
-    journeySphereDrift.stopAnimation();
-    journeySphereDrift.setValue(ambientMotionActive && journeyActive ? 0 : 0.5);
-
-    if (!ambientMotionActive || !journeyActive) return;
-
-    const drift = Animated.loop(
-      Animated.sequence([
-        Animated.timing(journeySphereDrift, {
-          toValue: 1,
-          duration: 7_000,
-          easing: easeInOut,
-          useNativeDriver: true,
-        }),
-        Animated.timing(journeySphereDrift, {
-          toValue: 0,
-          duration: 7_000,
-          easing: easeInOut,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-
-    drift.start();
-    return () => drift.stop();
-  }, [ambientMotionActive, journeyActive, journeySphereDrift]);
-
+  // At the end, the camera flies all the way home to Earth before the welcome.
   const runReturnSequence = useCallback(() => {
     setCompleted(true);
     setCompletionPhase("contracting");
 
     if (reduceMotion) {
-      journeySphereSize.setValue(stageSphereSizes[0]);
+      zoom.setValue(0);
       welcomeBackOpacity.setValue(1);
       welcomeSubOpacity.setValue(1);
       endButtonsOpacity.setValue(1);
@@ -198,9 +152,9 @@ export default function ShiftScreen() {
       return;
     }
 
-    Animated.timing(journeySphereSize, {
-      toValue: stageSphereSizes[0],
-      duration: 3000,
+    Animated.timing(zoom, {
+      toValue: 0,
+      duration: ZOOM_HOME_MS,
       easing: easeInOut,
       useNativeDriver: true,
     }).start(() => {
@@ -236,12 +190,11 @@ export default function ShiftScreen() {
       });
     });
   }, [
-    journeySphereSize,
     endButtonsOpacity,
     reduceMotion,
-    stageSphereSizes,
     welcomeBackOpacity,
     welcomeSubOpacity,
+    zoom,
   ]);
 
   const runStage = useCallback(
@@ -268,12 +221,12 @@ export default function ShiftScreen() {
         return;
       }
 
-      const targetSize = stageSphereSizes[idx] ?? ENTRY_SPHERE_SIZE;
+      // The last stage stays on the whole observable universe.
+      const target = Math.min(idx, SHIFT_MAX_ZOOM);
 
       if (reduceMotion) {
         setStage(idx);
-        stageRef.current = idx;
-        journeySphereSize.setValue(targetSize);
+        zoom.setValue(target);
         stageOpacity.setValue(1);
         return;
       }
@@ -284,9 +237,9 @@ export default function ShiftScreen() {
           duration: idx === 0 ? 0 : FADE_MS,
           useNativeDriver: true,
         }),
-        Animated.timing(journeySphereSize, {
-          toValue: targetSize,
-          duration: 2200,
+        Animated.timing(zoom, {
+          toValue: target,
+          duration: idx === 0 ? 0 : ZOOM_OUT_MS,
           easing: easeInOut,
           useNativeDriver: true,
         }),
@@ -307,21 +260,14 @@ export default function ShiftScreen() {
         });
       });
     },
-    [
-      stageOpacity,
-      journeySphereSize,
-      incrementCount,
-      reduceMotion,
-      runReturnSequence,
-      stageSphereSizes,
-    ],
+    [incrementCount, reduceMotion, runReturnSequence, stageOpacity, zoom],
   );
 
   const skipStage = () => {
     if (stageRef.current >= SHIFT_STAGES.length) return;
     clearStageTimer();
     stageOpacity.stopAnimation();
-    journeySphereSize.stopAnimation();
+    zoom.stopAnimation();
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -333,10 +279,8 @@ export default function ShiftScreen() {
     stageRef.current = 0;
     setTonight(readTonight());
     stageOpacity.setValue(0);
-    journeyProgress.stopAnimation();
-    journeySphereSize.stopAnimation();
-    journeyProgress.setValue(0);
-    journeySphereSize.setValue(ENTRY_SPHERE_SIZE);
+    zoom.stopAnimation();
+    zoom.setValue(0);
     welcomeBackOpacity.setValue(0);
     welcomeSubOpacity.setValue(0);
     endButtonsOpacity.setValue(0);
@@ -346,23 +290,14 @@ export default function ShiftScreen() {
     setCompletionPhase(null);
     setJourneyActive(true);
     if (reduceMotion) {
-      journeyProgress.setValue(1);
       runStage(0);
     } else {
-      Animated.parallel([
-        Animated.timing(screenFade, {
-          toValue: 1,
-          duration: 520,
-          easing: easeInOut,
-          useNativeDriver: true,
-        }),
-        Animated.timing(journeyProgress, {
-          toValue: 1,
-          duration: 820,
-          easing: easeInOut,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
+      Animated.timing(screenFade, {
+        toValue: 1,
+        duration: 620,
+        easing: easeInOut,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
         if (finished) runStage(0);
       });
     }
@@ -377,8 +312,7 @@ export default function ShiftScreen() {
     setCompletionPhase(null);
     setStage(0);
     stageOpacity.setValue(0);
-    journeyProgress.setValue(0);
-    journeySphereSize.setValue(ENTRY_SPHERE_SIZE);
+    zoom.setValue(0);
     welcomeBackOpacity.setValue(0);
     welcomeSubOpacity.setValue(0);
     endButtonsOpacity.setValue(0);
@@ -390,42 +324,24 @@ export default function ShiftScreen() {
     clearStageTimer();
     stageRunId.current += 1;
     stageOpacity.stopAnimation();
-    journeyProgress.stopAnimation();
-    journeySphereSize.stopAnimation();
+    zoom.stopAnimation();
 
     if (reduceMotion) {
       finishExit(onDone);
       return;
     }
 
-    Animated.parallel([
-      Animated.timing(screenFade, {
-        toValue: 0,
-        duration: 320,
-        useNativeDriver: true,
-      }),
-      Animated.timing(journeyProgress, {
-        toValue: 0,
-        duration: 720,
-        easing: easeInOut,
-        useNativeDriver: true,
-      }),
-      Animated.timing(journeySphereSize, {
-        toValue: ENTRY_SPHERE_SIZE,
-        duration: 720,
-        easing: easeInOut,
-        useNativeDriver: true,
-      }),
-    ]).start(({ finished }) => {
+    Animated.timing(screenFade, {
+      toValue: 0,
+      duration: 360,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
       if (finished) finishExit(onDone);
     });
   };
 
   const currentStage = SHIFT_STAGES[stage];
-  const stageTextTop =
-    stage <= 2
-      ? Math.max(topPad + 50, viewportHeight / 2 - 115)
-      : Math.max(topPad + 36, viewportHeight * 0.16);
+  const lastStage = stage === SHIFT_STAGES.length - 1;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -437,7 +353,12 @@ export default function ShiftScreen() {
             { paddingTop: topPad, paddingBottom: bottomPad + 80 },
           ]}
         >
-          <View style={styles.orbCenter} />
+          <View style={styles.orbCenter}>
+            <HomeLocationSphere
+              active={ambientMotionActive}
+              testID="shift-entry-sphere"
+            />
+          </View>
 
           <Text style={[styles.youAreHere, { color: colors.foreground }]}>
             You are here.
@@ -455,7 +376,7 @@ export default function ShiftScreen() {
             >
               <CardArtwork name="shift" />
               <Text style={[styles.beginText, { color: colors.foreground }]}>
-                BEGIN THE SHIFT
+                Begin the Shift
               </Text>
               <Text
                 style={[styles.beginSub, { color: colors.mutedForeground }]}
@@ -484,76 +405,21 @@ export default function ShiftScreen() {
           ]}
         >
           <StarField
-            key={`shift-stage-stars-${stage}`}
-            count={completed ? 80 : 60 + stage * 40}
-            containerOpacity={0.48 + stage * 0.055}
-            drift={14 + stage * 5}
+            count={90}
+            containerOpacity={0.55}
+            drift={reduceMotion ? 0 : 16}
+          />
+          <ShiftZoomScene
+            zoom={zoom}
+            size={sceneSize}
+            centerX={viewportWidth / 2}
+            centerY={sceneCenterY}
+            ambientMotion={ambientMotionActive}
+            pulse={!completed && lastStage}
+            testID="shift-zoom-scene"
           />
         </Animated.View>
       ) : null}
-
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.continuousSpherePosition,
-          {
-            opacity: Animated.add(
-              journeyProgress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [1, 0],
-              }),
-              Animated.multiply(
-                journeyProgress,
-                journeySphereSize.interpolate({
-                  inputRange: stageSphereSizes,
-                  outputRange: [0.96, 0.86, 0.68, 0.48, 0.3, 0.18],
-                  extrapolate: "clamp",
-                }),
-              ),
-            ),
-            transform: [
-              {
-                translateY: Animated.add(
-                  journeyProgress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [entrySphereTop, journeySphereTop],
-                  }),
-                  Animated.multiply(
-                    journeyProgress,
-                    Animated.add(
-                      journeySphereSize.interpolate({
-                        inputRange: stageSphereSizes,
-                        outputRange: stageSphereOffsets,
-                        extrapolate: "clamp",
-                      }),
-                      journeySphereDrift.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [5, -5],
-                      }),
-                    ),
-                  ),
-                ),
-              },
-            ],
-          },
-        ]}
-      >
-        <Animated.View
-          style={{
-            transform: [
-              {
-                scale: Animated.divide(journeySphereSize, SPHERE_BODY_SIZE),
-              },
-            ],
-          }}
-        >
-          <HomeLocationSphere
-            active={ambientMotionActive}
-            testID="shift-continuous-sphere"
-            variant={journeyActive ? SHIFT_SPHERE_VARIANTS[stage] : "earth"}
-          />
-        </Animated.View>
-      </Animated.View>
 
       {journeyActive ? (
         <Animated.View
@@ -579,12 +445,12 @@ export default function ShiftScreen() {
           {!completed && (count > 0 || reduceMotion) && (
             <TouchableOpacity
               onPress={skipStage}
-              style={styles.skipBtn}
+              style={[styles.skipBtn, { bottom: bottomPad + 28 }]}
               accessibilityRole="button"
               accessibilityLabel="Skip to the next stage"
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <Text style={styles.skipText}>SKIP</Text>
+              <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
           )}
 
@@ -597,7 +463,7 @@ export default function ShiftScreen() {
             >
               {currentStage.hint ? (
                 <Text
-                  style={[styles.stageHint, { color: colors.primary + "80" }]}
+                  style={[styles.stageHint, { color: colors.primary + "99" }]}
                 >
                   {currentStage.hint}
                 </Text>
@@ -613,12 +479,12 @@ export default function ShiftScreen() {
               >
                 {currentStage.subtitle}
               </Text>
-              <IllustrationDisclosure explanation="Sphere sizes and transition speeds are a perspective device, not one physical scale." />
+              <IllustrationDisclosure explanation="Sizes and distances are squeezed so each step fits on screen, not one physical scale." />
             </Animated.View>
           )}
 
           {completed && (
-            <View style={styles.completeWrap}>
+            <View style={[styles.completeWrap, { top: stageTextTop + 24 }]}>
               <Animated.Text
                 style={[
                   styles.welcomeBack,
@@ -641,7 +507,10 @@ export default function ShiftScreen() {
 
           {completionPhase === "done" && (
             <Animated.View
-              style={[styles.endActions, { opacity: endButtonsOpacity }]}
+              style={[
+                styles.endActions,
+                { opacity: endButtonsOpacity, bottom: bottomPad + 40 },
+              ]}
             >
               {tonight && (
                 <Text
@@ -660,7 +529,7 @@ export default function ShiftScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Return to Shift"
               >
-                <Text style={styles.returnText}>RETURN</Text>
+                <Text style={styles.returnText}>Return</Text>
               </CalmPressable>
 
               <CalmPressable
@@ -671,7 +540,7 @@ export default function ShiftScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Go and look up"
               >
-                <Text style={styles.universeLinkText}>GO AND LOOK UP</Text>
+                <Text style={styles.universeLinkText}>Go and look up</Text>
               </CalmPressable>
             </Animated.View>
           )}
@@ -719,7 +588,6 @@ const styles = StyleSheet.create({
   },
   beginText: {
     ...calmTypography.cardTitle,
-    letterSpacing: 0.8,
     position: "relative",
     zIndex: 1,
   },
@@ -745,17 +613,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 4,
-  },
-  continuousSpherePosition: {
-    alignItems: "center",
-    height: 94,
-    justifyContent: "center",
-    left: "50%",
-    marginLeft: -55,
-    position: "absolute",
-    top: 0,
-    width: 110,
-    zIndex: 3,
   },
   stageTextWrap: {
     position: "absolute",
@@ -785,7 +642,6 @@ const styles = StyleSheet.create({
   },
   completeWrap: {
     position: "absolute",
-    top: "44%",
     alignItems: "center",
     gap: 14,
     paddingHorizontal: 40,
@@ -806,16 +662,15 @@ const styles = StyleSheet.create({
   },
   skipBtn: {
     position: "absolute",
-    bottom: 56,
     right: 28,
     paddingVertical: 8,
     paddingHorizontal: 10,
     zIndex: 200,
   },
   skipText: {
-    color: "rgba(169,149,255,0.58)",
-    fontSize: 10,
-    letterSpacing: 3,
+    color: "rgba(169,149,255,0.7)",
+    fontSize: 13,
+    letterSpacing: 0.4,
     fontFamily: "Inter_400Regular",
   },
   tonightLine: {
@@ -828,7 +683,6 @@ const styles = StyleSheet.create({
   },
   endActions: {
     position: "absolute",
-    bottom: 120,
     maxWidth: 340,
     alignSelf: "center",
     alignItems: "center",
@@ -847,7 +701,7 @@ const styles = StyleSheet.create({
   returnText: {
     color: "#C4B8FF",
     ...calmTypography.button,
-    letterSpacing: 2,
+    letterSpacing: 0.3,
   },
   universeLink: {
     alignSelf: "center",
@@ -857,6 +711,6 @@ const styles = StyleSheet.create({
   universeLinkText: {
     color: "#A995FF",
     ...calmTypography.button,
-    letterSpacing: 2.1,
+    letterSpacing: 0.3,
   },
 });

@@ -58,6 +58,14 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "PALE switches on your phone's torch to send your note out as real light. It never takes photos or video.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {

@@ -160,8 +160,8 @@ export default function TimeMachineScreen() {
           ]}
         >
           <Text style={[styles.bannerText, { color: colors.foreground }]}>
-            About 13.8 billion years of cosmic history — and everything that
-            came after. Tap any moment to travel there.
+            About 13.8 billion years of cosmic history, and what may come next.
+            Tap any moment to travel there.
           </Text>
         </View>
 
