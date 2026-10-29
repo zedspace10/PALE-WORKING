@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { DEEP_TIME_CALENDAR, LOCATIONS } from "@/constants/cosmicData";
+import { LOCATIONS } from "@/constants/cosmicData";
 import { TIME_MACHINE_EVENTS } from "@/constants/cosmicTimeMachine";
 import { OBSERVATORY_ENTRIES } from "@/constants/observatory";
 import {
@@ -17,16 +17,13 @@ function textFor(value: unknown): string {
 
 describe("audited scientific corrections", () => {
   it("uses current early-universe wording", () => {
-    const calendarBigBang = DEEP_TIME_CALENDAR.find(
-      (event) => event.id === "big-bang",
-    );
     const bigBang = TIME_MACHINE_EVENTS.find(
       (event) => event.id === "big-bang",
     );
     const darkAges = TIME_MACHINE_EVENTS.find(
       (event) => event.id === "dark-ages",
     );
-    expect(textFor([calendarBigBang, bigBang])).not.toMatch(
+    expect(textFor([bigBang])).not.toMatch(
       /single point|point of infinite density|protons and neutrons form/i,
     );
     expect(bigBang?.description).toMatch(/light atomic nuclei/i);

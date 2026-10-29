@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  COSMIC_EVENTS,
-  DEEP_TIME_CALENDAR,
-  LOCATIONS,
-  SHIFT_STAGES,
-} from "@/constants/cosmicData";
+import { COSMIC_EVENTS, LOCATIONS, SHIFT_STAGES } from "@/constants/cosmicData";
 import { TIME_MACHINE_EVENTS } from "@/constants/cosmicTimeMachine";
 import { OBSERVATORY_ENTRIES } from "@/constants/observatory";
 import {
@@ -19,7 +14,6 @@ import { FIXED_NOW } from "@/tests/fixtures";
 
 const COLLECTIONS: [string, readonly ScientificItem[]][] = [
   ["locations", LOCATIONS],
-  ["deep-time-calendar", DEEP_TIME_CALENDAR],
   ["cosmic-events", COSMIC_EVENTS],
   ["shift-stages", SHIFT_STAGES],
   ["time-machine", TIME_MACHINE_EVENTS],
@@ -94,10 +88,6 @@ describe("scientific content provenance", () => {
       TIME_MACHINE_EVENTS.find((event) => event.id === "first-life")?.science
         .sourceIds,
     ).toContain("nasaAstrobiologyStrategy");
-    expect(
-      DEEP_TIME_CALENDAR.find((event) => event.id === "dinosaurs")?.science
-        .sourceIds,
-    ).toContain("smithsonianDeepTime");
     expect(
       OBSERVATORY_ENTRIES.find((entry) => entry.id === "kepler-442b")?.science
         .sourceIds,

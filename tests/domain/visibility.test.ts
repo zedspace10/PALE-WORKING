@@ -21,7 +21,7 @@ describe("conservative observing guidance", () => {
       opticalAid: "telescope",
     });
     expect(guidance.unaidedEligible).toBe(false);
-    expect(guidance.qualifier).toMatch(/not expected to be visible unaided/i);
+    expect(guidance.qualifier).toMatch(/too faint to see without/i);
   });
 
   it("allows a bright high point source with a standing condition note", () => {

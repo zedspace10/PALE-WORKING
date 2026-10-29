@@ -17,7 +17,7 @@ export interface ObservationGuidance {
 export const MINIMUM_GUIDANCE_ALTITUDE = 10;
 export const CONSERVATIVE_NAKED_EYE_MAGNITUDE = 5.5;
 export const LOCAL_CONDITIONS_NOTE =
-  "Cloud, haze, light pollution, atmospheric conditions, and a blocked horizon can prevent a sighting.";
+  "Cloud, haze, streetlights or a building in the way can still hide it.";
 
 export function getObservationGuidance(
   input: VisibilityInput,
@@ -29,7 +29,7 @@ export function getObservationGuidance(
     return {
       eligibleForCard: false,
       unaidedEligible: false,
-      qualifier: "This object is too low for reliable guidance at the moment.",
+      qualifier: "It is too low in the sky to find right now.",
     };
   }
 
@@ -37,7 +37,7 @@ export function getObservationGuidance(
     return {
       eligibleForCard: true,
       unaidedEligible: false,
-      qualifier: `Its pattern or glow may be detectable from a dark site. ${LOCAL_CONDITIONS_NOTE}`,
+      qualifier: `Easiest to see from somewhere dark. ${LOCAL_CONDITIONS_NOTE}`,
     };
   }
 
@@ -51,13 +51,13 @@ export function getObservationGuidance(
     return {
       eligibleForCard: true,
       unaidedEligible: false,
-      qualifier: `This target is not expected to be visible unaided; ${aid} may be required. ${LOCAL_CONDITIONS_NOTE}`,
+      qualifier: `Too faint to see without ${aid}. ${LOCAL_CONDITIONS_NOTE}`,
     };
   }
 
   return {
     eligibleForCard: true,
     unaidedEligible: true,
-    qualifier: `It may be visible unaided from the estimated direction. ${LOCAL_CONDITIONS_NOTE}`,
+    qualifier: `Bright enough to see without help. ${LOCAL_CONDITIONS_NOTE}`,
   };
 }

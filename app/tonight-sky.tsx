@@ -111,7 +111,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "People across cultures have watched the Moon throughout recorded history.",
     instruction:
-      "If it is above your horizon, look for the Moon along the direction shown. Its phase changes how easy it is to find.",
+      "Look along the direction shown. It is the brightest thing in the night sky, so it is usually the easiest to find.",
   },
   {
     id: "venus",
@@ -123,7 +123,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "What you are seeing is sunlight that bounced off Venus and carried on to your eyes.",
     instruction:
-      "Look in the indicated direction for an exceptionally bright, steady planet. Other bright objects can be present too.",
+      "Look in the direction shown for a very bright, steady point of light. After the Moon, nothing in the night sky is brighter.",
   },
   {
     id: "jupiter",
@@ -135,7 +135,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "You are not seeing Jupiter as it is. You are seeing it as it was when the light set off.",
     instruction:
-      "Look for the indicated bright point. Planets usually appear steadier than stars, though atmospheric turbulence near the horizon can still make them shimmer.",
+      "Look in the direction shown for a bright, steady point. Planets twinkle less than stars, though near the horizon they can still shimmer.",
   },
   {
     id: "saturn",
@@ -147,7 +147,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "The light reaching you from Saturn set off while you were doing something else entirely.",
     instruction:
-      "Look for the indicated pale-gold point. It usually appears steadier than nearby stars when well above the horizon.",
+      "Look in the direction shown for a pale gold point. It usually looks steadier than the stars around it.",
   },
   {
     id: "mars",
@@ -215,7 +215,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Carl Sagan chose Vega as the fictional source of the signal in his novel Contact. The literary choice is not evidence of a planet or civilisation there.",
     instruction:
-      "Vega is one of the brightest stars in the summer sky. Look for a brilliant blue-white point high overhead.",
+      "Vega is one of the brightest stars in the summer sky. Look for a brilliant blue white point in the direction shown.",
   },
   {
     id: "arcturus",
@@ -229,7 +229,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Its warm orange appearance comes from a cooler surface temperature than the Sun's, not from a nearby fire-like glow.",
     instruction:
-      "Follow the curve of the Big Dipper's handle and it will arc to Arcturus, a warm orange star.",
+      "Follow the curve of the Plough's handle and it will arc to Arcturus, a warm orange star.",
   },
   {
     id: "milkyway",
@@ -260,17 +260,17 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
   },
   {
     id: "ursamajor",
-    name: "The Big Dipper",
+    name: "The Plough",
     ra: 165,
     dec: 57,
     type: "constellation",
     color: "#E8F0FF",
     truth:
-      "Five of the seven stars in the Big Dipper are moving through space together. They were born from the same cloud of gas and are travelling in the same direction. They will eventually drift apart over millions of years.",
+      "Five of the seven stars in the Plough are moving through space together. They were born from the same cloud of gas and are travelling in the same direction. They will eventually drift apart over millions of years.",
     wonder:
-      "The two stars at the end of the Big Dipper's bowl form a useful guide toward Polaris. Northern navigators have long used the surrounding sky for orientation.",
+      "The two stars at the end of the Plough's bowl form a useful guide toward Polaris. Northern navigators have long used the surrounding sky for orientation.",
     instruction:
-      "The Big Dipper is one of the most recognisable patterns in the northern sky. Look for seven stars in the shape of a ladle.",
+      "The Plough, called the Big Dipper in North America, is one of the most recognisable patterns in the northern sky. Look for seven stars in the shape of a saucepan.",
   },
   {
     id: "polaris",
@@ -284,7 +284,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Polaris has long been used for northern navigation. It traces a small circle around the celestial pole rather than remaining perfectly fixed.",
     instruction:
-      "Find the North Star by following the two stars at the end of the Big Dipper's bowl. They point straight to Polaris.",
+      "Find the North Star by following the two stars at the end of the Plough's bowl. They point straight to Polaris.",
   },
   {
     id: "scorpius",
@@ -1433,6 +1433,17 @@ export default function TonightSkyScreen() {
     });
   }, [pagerWidth]);
 
+  const goToPage = (index: number) => {
+    if (pagerWidth <= 0) return;
+    pageRef.current = index;
+    setPage(index);
+    scrollRef.current?.scrollTo({
+      x: index * pagerWidth,
+      y: 0,
+      animated: !reduceMotion,
+    });
+  };
+
   const updatePageForOffset = (offsetX: number) => {
     if (pagerWidth <= 0) return;
     const nextPage = Math.max(
@@ -1535,7 +1546,7 @@ export default function TonightSkyScreen() {
           </Text>
           {state.solarState !== "astronomical-darkness" && (
             <Text style={styles.twilightNote}>
-              Twilight reduces contrast; directions are estimates.{" "}
+              It is not properly dark yet, so fainter things may not show.{" "}
               {LOCAL_CONDITIONS_NOTE}
             </Text>
           )}
@@ -1548,6 +1559,44 @@ export default function TonightSkyScreen() {
                 color={GOLD}
               />
             )}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chips}
+            accessibilityLabel="What is in your sky tonight"
+          >
+            {[...allCards.map((o) => o.name.split(",")[0]), "Beyond"].map(
+              (label, i) => {
+                const on = i === page;
+                return (
+                  <TouchableOpacity
+                    key={label + i}
+                    onPress={() => goToPage(i)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                    style={[
+                      styles.chip,
+                      {
+                        borderColor: on ? GOLD : "rgba(141,235,255,0.22)",
+                        backgroundColor: on
+                          ? "rgba(141,235,255,0.10)"
+                          : "transparent",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.chipText,
+                        { color: on ? GOLD : "rgba(245,250,255,0.7)" },
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              },
+            )}
+          </ScrollView>
         </View>
 
         <ScrollView
@@ -1586,21 +1635,6 @@ export default function TonightSkyScreen() {
             <EndCard bottomPadding={bottomPad} pageWidth={pagerWidth} />
           )}
         </ScrollView>
-
-        <View style={[styles.dots, { bottom: bottomPad + 20 }]}>
-          {[...allCards, { id: "_end" }].map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor: i === page ? GOLD : "rgba(141,235,255,0.3)",
-                  width: i === page ? 16 : 4,
-                },
-              ]}
-            />
-          ))}
-        </View>
       </Animated.View>
     </View>
   );
@@ -1817,20 +1851,15 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     fontFamily: "Inter_600SemiBold",
   },
-  dots: {
-    position: "absolute",
-    bottom: 20,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
+  chips: { gap: 8, paddingVertical: 2, paddingRight: 24 },
+  chip: {
+    borderRadius: 18,
+    borderWidth: 1,
     justifyContent: "center",
-    alignItems: "center",
-    gap: 6,
+    minHeight: 36,
+    paddingHorizontal: 14,
   },
-  dot: {
-    height: 4,
-    borderRadius: 2,
-  },
+  chipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   loadingText: {
     color: "rgba(141,235,255,0.5)",
     fontSize: 13,

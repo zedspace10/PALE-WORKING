@@ -92,14 +92,6 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
             animation: "fade",
           }}
         />
-        <Stack.Screen
-          name="universe"
-          options={{
-            headerShown: false,
-            presentation: "fullScreenModal",
-            animation: "fade",
-          }}
-        />
       </Stack>
 
       {!dismissed && momentSolarState !== undefined && (

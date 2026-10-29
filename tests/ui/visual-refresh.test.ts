@@ -108,7 +108,6 @@ describe("refreshed screen contracts", () => {
       "app/(tabs)/shift.tsx",
       "app/(tabs)/deeptime.tsx",
       "app/location/[id].tsx",
-      "app/universe.tsx",
       "app/tonight-sky.tsx",
     ]) {
       expect(read(screen)).not.toContain("SourceDisclosure");
