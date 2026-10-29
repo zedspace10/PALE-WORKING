@@ -108,7 +108,9 @@ describe("honest personal metrics", () => {
       "utf8",
     );
     expect(source).toMatch(/first moments\s+after the Big Bang/i);
-    expect(source).toMatch(/inside stars/i);
+    expect(source).toMatch(/13\.8 billion years old/);
+    // No mention of stars dying anywhere in the reflection.
+    expect(source).not.toMatch(/died|dying|death/i);
     expect(source).not.toMatch(/hydrogen atoms[^\n]+formed 13\.8/i);
   });
 });

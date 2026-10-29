@@ -274,9 +274,8 @@ export default function YouScreen() {
           </Text>
           <Text style={[styles.quoteText, { color: colors.foreground }]}>
             Most of the hydrogen in your body was made in the first moments
-            after the Big Bang. Much of the rest, like the carbon in your cells
-            and the iron in your blood, was made inside stars that lived and
-            died before the Sun was born.
+            after the Big Bang. Every glass of water you drink holds atoms about
+            13.8 billion years old.
           </Text>
           <Text style={[styles.quoteNote, { color: colors.primary }]}>
             You are ancient.
