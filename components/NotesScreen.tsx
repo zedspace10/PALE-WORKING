@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LightSignal } from "@/components/LightSignal";
+import { JOURNAL_STORAGE_KEY } from "@/constants/journal";
 import { StarField } from "@/components/StarField";
 import {
   LOCATION_CACHE_KEY,
@@ -41,6 +42,7 @@ import {
   type Note,
 } from "@/constants/notes";
 import { useColors } from "@/hooks/useColors";
+import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
 // A location a few weeks old is still good enough to say which way to face.
 const AIM_LOCATION_MAX_AGE_MS = 30 * 86_400_000;
@@ -77,12 +79,17 @@ type Stage = "compose" | "sent" | "aim" | "light";
 const capitalise = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
-export default function NoteScreen() {
+/**
+ * Send a note to the universe: the Notes tab. Earlier journal entries stay reachable from the
+ * bottom of this screen, so nobody loses what they wrote before the Journal became Notes.
+ */
+export function NotesScreen() {
   const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 24 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  // Room for the tab bar under the last note
+  const bottomPad = (Platform.OS === "web" ? 34 : insets.bottom) + 70;
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [line, setLine] = useState("");
@@ -92,10 +99,18 @@ export default function NoteScreen() {
   const [aim, setAim] = useState<Aim | null | "none">(null);
   const [now, setNow] = useState(Date.now());
   const scrollRef = useRef<ScrollView>(null);
+  useResetScrollOnFocus(scrollRef);
+  const [journalCount, setJournalCount] = useState(0);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTES_STORAGE_KEY)
       .then((raw) => setNotes(parseNotes(raw)))
+      .catch(() => undefined);
+    AsyncStorage.getItem(JOURNAL_STORAGE_KEY)
+      .then((raw) => {
+        const entries = raw ? JSON.parse(raw) : [];
+        setJournalCount(Array.isArray(entries) ? entries.length : 0);
+      })
       .catch(() => undefined);
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
@@ -156,15 +171,6 @@ export default function NoteScreen() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          style={styles.back}
-        >
-          <Text style={{ color: colors.primary, fontSize: 22 }}>←</Text>
-        </TouchableOpacity>
-
         {stage === "compose" && (
           <View style={styles.section}>
             <Text style={[styles.title, { color: colors.foreground }]}>
@@ -407,6 +413,24 @@ export default function NoteScreen() {
             })}
           </View>
         )}
+        {journalCount > 0 && stage === "compose" && (
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/journal")}
+            accessibilityRole="button"
+            style={[styles.noteRow, { borderColor: colors.border }]}
+          >
+            <Text style={[styles.label, { color: colors.mutedForeground }]}>
+              Your journal
+            </Text>
+            <Text style={[styles.noteMeta, { color: colors.mutedForeground }]}>
+              {journalCount} {journalCount === 1 ? "entry" : "entries"} from
+              before, still only on this phone.
+            </Text>
+            <Text style={[styles.link, { color: colors.primary }]}>
+              Open your journal
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
@@ -421,7 +445,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     width: "100%",
   },
-  back: { alignSelf: "flex-start", marginLeft: -12, padding: 12 },
   section: { gap: 14 },
   actions: { gap: 12, marginTop: 8 },
   title: {

@@ -75,13 +75,27 @@ function PersonStarsIcon({ color }: { color: string }) {
   );
 }
 
-function MoonIcon({ color }: { color: string }) {
+// A note leaving Earth for a star
+function NoteIcon({ color }: { color: string }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
+      <Circle cx={6} cy={16} r={3} fill={color} />
       <Path
-        d="M15 11 A6 6 0 1 1 9 5 A4.5 4.5 0 0 0 15 11 Z"
-        fill={color}
-        opacity={0.9}
+        d="M9 13 L16.5 5.5"
+        stroke={color}
+        strokeWidth={1.2}
+        strokeLinecap="round"
+        strokeDasharray="1.5 2.2"
+      />
+      <Circle cx={18} cy={4} r={1.6} fill={color} />
+      <Circle
+        cx={18}
+        cy={4}
+        r={3.2}
+        stroke={color}
+        strokeWidth={0.7}
+        fill="none"
+        opacity={0.45}
       />
     </Svg>
   );
@@ -178,10 +192,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="journal"
+        name="notes"
         options={{
-          title: "Journal",
-          tabBarIcon: ({ color }) => <MoonIcon color={color} />,
+          title: "Notes",
+          tabBarIcon: ({ color }) => <NoteIcon color={color} />,
         }}
       />
       <Tabs.Screen
@@ -193,6 +207,8 @@ export default function TabLayout() {
       />
       {/* Reached from the home screen rather than the tab bar */}
       <Tabs.Screen name="deeptime" options={{ href: null }} />
+      {/* The Journal became Notes; earlier entries open from the Notes tab */}
+      <Tabs.Screen name="journal" options={{ href: null }} />
     </Tabs>
   );
 }

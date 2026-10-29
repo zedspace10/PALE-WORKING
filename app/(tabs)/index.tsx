@@ -345,7 +345,7 @@ export default function HomeScreen() {
           </MagicalAction>
 
           <CalmPressable
-            onPress={() => router.push("/note")}
+            onPress={() => router.push("/(tabs)/notes")}
             accessibilityRole="button"
             accessibilityLabel="Send a note to the universe"
             style={[
