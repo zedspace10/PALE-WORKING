@@ -56,9 +56,9 @@ describe("calm-space visual foundation", () => {
 });
 
 describe("Explore artwork coverage", () => {
-  it("maps all eight destinations to unique, bundled JPEG artwork", () => {
-    expect(LOCATIONS).toHaveLength(8);
-    expect(new Set(LOCATIONS.map((location) => location.id)).size).toBe(8);
+  it("maps all nine destinations to unique, bundled JPEG artwork", () => {
+    expect(LOCATIONS).toHaveLength(9);
+    expect(new Set(LOCATIONS.map((location) => location.id)).size).toBe(9);
     expect(new Set(LOCATIONS.map((location) => location.artworkKey))).toEqual(
       new Set(EXPLORE_ARTWORK_KEYS),
     );

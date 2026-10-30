@@ -2,10 +2,11 @@ export const EXPLORE_ARTWORK_KEYS = [
   "moon",
   "mars",
   "saturn",
+  "voyager-1",
+  "proxima-centauri",
+  "orion-nebula",
   "galactic-center",
   "andromeda",
-  "pillars-of-creation",
-  "sagittarius-a-star",
   "observable-edge",
 ] as const;
 

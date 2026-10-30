@@ -81,18 +81,19 @@ describe("magical-space visual system", () => {
 });
 
 describe("protected Explore composition", () => {
-  it("retains the existing two-column artwork-led list and detail cover", () => {
+  it("keeps the outward list with artwork rows and the detail cover", () => {
     const explore = read("app/(tabs)/explore.tsx");
     const card = read("components/LocationCard.tsx");
     const detail = read("app/location/[id].tsx");
 
-    expect(explore).toContain("numColumns={2}");
     expect(explore).toContain("<LocationCard");
+    expect(explore).not.toContain("numColumns");
     expect(card).toContain("EXPLORE_ARTWORK[location.artworkKey]");
-    expect(card).toContain("minHeight: 206");
-    expect(card).toContain('justifyContent: "flex-start"');
+    expect(card).toContain("location.jump");
     expect(detail).toContain("EXPLORE_ARTWORK[location.artworkKey]");
     expect(detail).toContain("bounces={false}");
     expect(detail).toContain('overScrollMode="never"');
+    expect(detail).toContain("Next, further out");
+    expect(detail).toContain("Illustration");
   });
 });
