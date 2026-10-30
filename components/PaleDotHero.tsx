@@ -117,9 +117,9 @@ export function PaleDotHero({ days, reduceMotion, onSetBirthday }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: "center", alignSelf: "stretch", gap: 18 },
+  wrap: { alignItems: "center", alignSelf: "stretch", gap: 6 },
   sky: {
-    height: 190,
+    height: 120,
     alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
@@ -150,13 +150,13 @@ const styles = StyleSheet.create({
   },
   here: {
     position: "absolute",
-    top: 95 + 18,
+    top: 60 + 16,
     fontSize: 13,
     lineHeight: 18,
     fontFamily: "Inter_500Medium",
     letterSpacing: 0.2,
   },
-  words: { alignItems: "center", gap: 14, maxWidth: 360 },
+  words: { alignItems: "center", gap: 8, maxWidth: 360 },
   line: {
     fontSize: 19,
     lineHeight: 28,

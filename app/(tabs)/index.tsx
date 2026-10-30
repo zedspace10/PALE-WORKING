@@ -128,7 +128,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero: the pale blue dot. It scrolls with the page, so the cards below always have room. */}
-        <View style={[styles.hero, { paddingTop: topPad + 34 }]}>
+        <View style={[styles.hero, { paddingTop: topPad + 16 }]}>
           <PaleDotHero
             days={userDays}
             reduceMotion={reduceMotion}
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     overflow: "hidden",
-    paddingBottom: 30,
+    paddingBottom: 22,
     paddingHorizontal: 24,
     position: "relative",
     width: "100%",
