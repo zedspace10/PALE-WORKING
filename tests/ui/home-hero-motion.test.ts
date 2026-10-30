@@ -106,18 +106,18 @@ describe("Home hero scene contracts", () => {
     expect(lifecycle).toContain("shouldRunHomeHeroMotion");
   });
 
-  it("replaces the old Home dot while preserving the hero flow", () => {
+  it("opens Home on a single pale blue point rather than a globe", () => {
     const home = read("app/(tabs)/index.tsx");
-    expect(home).toContain("<HomeHeroStars");
-    expect(home).toContain("<HomeLocationSphere");
-    expect(home).toContain("useHomeHeroMotionActive(reduceMotion)");
+    const hero = read("components/PaleDotHero.tsx");
+    expect(home).toContain("<PaleDotHero");
+    expect(home).not.toContain("<HomeLocationSphere");
     expect(home).toContain(
-      "<StarField count={58} containerOpacity={0.3} drift={10}",
+      "<StarField count={90} containerOpacity={0.85} drift={10}",
     );
     expect(home).toContain("useResetScrollOnFocus(scrollRef)");
-    expect(home).toContain("You are here.");
-    expect(home).not.toContain("styles.dotGlow");
-    expect(home).not.toContain("styles.dotWrap");
+    expect(hero).toContain("You are here");
+    expect(hero).toContain("13.8 billion years old.");
+    expect(hero).toContain("reduceMotion");
   });
 
   it("zooms out through nested pictures in Shift, then flies home", () => {

@@ -8,24 +8,21 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CalmPressable } from "@/components/CalmPressable";
 import { CardArtwork } from "@/components/CardArtwork";
-import { HomeHeroStars, HomeLocationSphere } from "@/components/HomeHeroScene";
 import { MagicalAction } from "@/components/MagicalSurface";
+import { PaleDotHero } from "@/components/PaleDotHero";
 import { StarField } from "@/components/StarField";
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
 import { areNotificationsEnabled } from "@/constants/notifications";
 import { getTodaysEntry } from "@/constants/observatory";
-import { formatUniverseAgeEstimate } from "@/constants/personalInsights";
 import { calmSpace, calmSurface, calmTypography } from "@/constants/ui";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
-import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
@@ -34,10 +31,6 @@ import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 const REMINDER_HINT_KEY = "@pale_reminder_hint_views";
 const REMINDER_HINT_LIMIT = 3;
 
-function formatBig(n: number): string {
-  return Math.floor(n).toLocaleString("en-US");
-}
-
 export default function HomeScreen() {
   const colors = useColors();
   const todaysEntry = getTodaysEntry();
@@ -45,7 +38,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { birthday } = useBirthday();
   const reduceMotion = useReducedMotion();
-  const ambientMotionActive = useHomeHeroMotionActive(reduceMotion);
   const scrollRef = useRef<ScrollView>(null);
   useResetScrollOnFocus(scrollRef);
 
@@ -126,11 +118,9 @@ export default function HomeScreen() {
     return () => fadeIn.stop();
   }, [counterOpacity, reduceMotion, youAreHereOpacity]);
 
-  const universeDisplay = formatUniverseAgeEstimate();
-
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StarField count={58} containerOpacity={0.3} drift={10} />
+      <StarField count={90} containerOpacity={0.85} drift={10} />
 
       <ScrollView
         ref={scrollRef}
@@ -138,72 +128,12 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero: the pale blue dot. It scrolls with the page, so the cards below always have room. */}
-        <View style={[styles.hero, { paddingTop: topPad + 34 }]}>
-          {/* The Dot */}
-          <HomeHeroStars active={ambientMotionActive} />
-          <HomeLocationSphere
-            active={ambientMotionActive}
-            testID="home-location-sphere"
+        <View style={[styles.hero, { paddingTop: topPad + 16 }]}>
+          <PaleDotHero
+            days={userDays}
+            reduceMotion={reduceMotion}
+            onSetBirthday={() => router.push("/(tabs)/you")}
           />
-
-          {/* "You are here." */}
-          <Animated.Text
-            style={[
-              styles.youAreHere,
-              { color: colors.foreground, opacity: youAreHereOpacity },
-            ]}
-          >
-            You are here.
-          </Animated.Text>
-
-          {/* Counters */}
-          <Animated.View style={[styles.counters, { opacity: counterOpacity }]}>
-            <Text style={[styles.counterMain, { color: colors.foreground }]}>
-              {universeDisplay}
-            </Text>
-            <Text
-              style={[styles.counterLabel, { color: colors.mutedForeground }]}
-            >
-              since the universe began
-            </Text>
-            {userDays !== null ? (
-              <>
-                <Text
-                  style={[styles.counterSub, { color: colors.primaryStrong }]}
-                >
-                  {formatBig(userDays)}
-                </Text>
-                <Text
-                  style={[
-                    styles.counterLabel,
-                    { color: colors.mutedForeground },
-                  ]}
-                >
-                  days since you were born
-                </Text>
-              </>
-            ) : (
-              <TouchableOpacity
-                onPress={() => router.push("/(tabs)/you")}
-                accessibilityRole="button"
-                style={styles.promptButton}
-              >
-                <Text
-                  style={[
-                    styles.counterPrompt,
-                    { color: colors.mutedForeground },
-                  ]}
-                >
-                  Set your birthday to see your place in time
-                </Text>
-                <Feather
-                  name="arrow-right"
-                  size={14}
-                  color={colors.primaryStrong}
-                />
-              </TouchableOpacity>
-            )}
-          </Animated.View>
         </View>
 
         <View
@@ -377,7 +307,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     overflow: "hidden",
-    paddingBottom: 30,
+    paddingBottom: 22,
     paddingHorizontal: 24,
     position: "relative",
     width: "100%",

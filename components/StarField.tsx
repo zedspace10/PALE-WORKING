@@ -20,8 +20,14 @@ const generateStars = (count: number): Star[] =>
     layer: i % 3,
     x: Math.random() * W,
     y: Math.random() * H,
-    size: Math.random() * 1.8 + 0.4,
-    baseOpacity: Math.random() * 0.5 + 0.1,
+    // Mostly small, crisp points, a few brighter ones, so the sky reads clearly without crowding.
+    size: (() => {
+      const r = Math.random();
+      if (r < 0.06) return 2.2 + Math.random() * 0.6;
+      if (r < 0.3) return 1.4 + Math.random() * 0.6;
+      return 0.8 + Math.random() * 0.6;
+    })(),
+    baseOpacity: Math.random() * 0.45 + 0.5,
   }));
 
 interface StarFieldProps {
@@ -150,7 +156,7 @@ export function StarField({
                   backgroundColor: "#FFFFFF",
                   opacity: twinkleAnims[index].interpolate({
                     inputRange: [0, 1],
-                    outputRange: [star.baseOpacity * 0.22, star.baseOpacity],
+                    outputRange: [star.baseOpacity * 0.55, star.baseOpacity],
                   }),
                 }}
               />
