@@ -14,6 +14,18 @@ export type ExploreSkyTarget =
   | { kind: "too-faint" }
   | { kind: "everywhere" };
 
+/** How home looks from a place: the drawing used by Look back. */
+export type LookBackScene =
+  | "earth-large"
+  | "blue-star"
+  | "dot-near-sun"
+  | "pixel-in-sunlight"
+  | "sun-a-star"
+  | "sun-too-faint"
+  | "sun-lost"
+  | "galaxy-smudge"
+  | "first-glow";
+
 interface LocationBase {
   id: string;
   name: string;
@@ -35,6 +47,10 @@ interface LocationBase {
   sky: ExploreSkyTarget;
   /** What to say about it in the sky when PALE does not know where the person is. */
   skyWithoutLocation: { chip: string; line: string };
+  /** How home would look from here. */
+  lookBack: { scene: LookBackScene; line: string };
+  /** What to say after holding to travel and letting go, when the person could never get there. */
+  neverArrive?: string;
   /** The Notes destination with the same id, when there is one. */
   noteTo?: string;
   artworkKey: ExploreArtworkKey;
@@ -119,6 +135,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       chip: "",
       line: "Tonight's Sky can show you exactly where to look.",
     },
+    lookBack: {
+      scene: "earth-large",
+      line: "From the Moon, Earth hangs in a black sky, nearly four times wider than the full Moon looks to us. It does not rise or set. It stays where it is, slowly turning.",
+    },
     artworkKey: "moon",
   },
   {
@@ -136,6 +156,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       "Somewhere on its surface, robots we built are still at work tonight.",
     sky: { kind: "planet", planet: "mars" },
     skyWithoutLocation: { chip: "", line: "" },
+    lookBack: {
+      scene: "blue-star",
+      line: "From Mars, Earth is a bright blue star in the evening or morning sky. Everyone you know is inside that point of light.",
+    },
     artworkKey: "mars",
   },
   {
@@ -153,6 +177,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       "Its rings may not last forever. We happen to be here while they are.",
     sky: { kind: "planet", planet: "saturn" },
     skyWithoutLocation: { chip: "", line: "" },
+    lookBack: {
+      scene: "dot-near-sun",
+      line: "From Saturn, Earth is a tiny point close to the Sun's glare. In 2013 the Cassini spacecraft photographed it from there, and people on Earth went outside to wave.",
+    },
     artworkKey: "saturn",
   },
   {
@@ -172,6 +200,10 @@ const LOCATIONS_BASE: LocationBase[] = [
     skyWithoutLocation: {
       chip: "Too faint to see",
       line: "Far too faint to see. It is heading out towards the constellation Ophiuchus.",
+    },
+    lookBack: {
+      scene: "pixel-in-sunlight",
+      line: "From Voyager 1, Earth is far smaller than a single pixel, lost in the glare of the Sun. In 1990 it turned its camera around and found us anyway.",
     },
     artworkKey: "voyager-1",
   },
@@ -193,6 +225,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       line: "It never rises from Britain. It sits in the southern sky, close to Alpha Centauri, and is too faint to see without a telescope.",
     },
     noteTo: "proxima",
+    lookBack: {
+      scene: "sun-a-star",
+      line: "From Proxima Centauri, Earth is gone. The Sun is just a bright star in the constellation Cassiopeia, one point among many.",
+    },
     artworkKey: "proxima-centauri",
   },
   {
@@ -213,6 +249,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       line: "From Britain it is best on winter evenings: a small misty patch below Orion's belt.",
     },
     noteTo: "orion",
+    lookBack: {
+      scene: "sun-too-faint",
+      line: "From the Orion Nebula, you would need a telescope to find the Sun at all. Everything that has ever happened to us happens inside a point too faint to see.",
+    },
     artworkKey: "orion-nebula",
   },
   {
@@ -234,6 +274,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       line: "From Britain it hangs low in the south on summer evenings, hidden behind dust.",
     },
     noteTo: "centre",
+    lookBack: {
+      scene: "sun-lost",
+      line: "From the centre of the galaxy, the Sun is lost among billions of stars and hidden behind clouds of dust. Nobody there could pick us out.",
+    },
     artworkKey: "galactic-center",
   },
   {
@@ -255,6 +299,10 @@ const LOCATIONS_BASE: LocationBase[] = [
       line: "From Britain it is high on autumn evenings. From somewhere dark it is a faint smudge.",
     },
     noteTo: "andromeda",
+    lookBack: {
+      scene: "galaxy-smudge",
+      line: "From Andromeda, our whole galaxy is a faint smudge, about as faint as Andromeda looks to us. Every person who has ever lived is somewhere inside it.",
+    },
     artworkKey: "andromeda",
   },
   {
@@ -275,6 +323,12 @@ const LOCATIONS_BASE: LocationBase[] = [
       chip: "Everywhere",
       line: "Everywhere. In every direction you look, this is as far as light has had time to come.",
     },
+    lookBack: {
+      scene: "first-glow",
+      line: "Anyone looking our way from there would see this part of space as it was at the very beginning: a warm glow, with no Milky Way, no Sun and no Earth yet.",
+    },
+    neverArrive:
+      "You could hold on forever and never arrive. Space is stretching faster than light can cross it, so the edge keeps moving away.",
     artworkKey: "observable-edge",
   },
 ];
