@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Linking,
@@ -98,7 +98,20 @@ export function NotesScreen() {
   const [current, setCurrent] = useState<Note | null>(null);
   const [aim, setAim] = useState<Aim | null | "none">(null);
   const [now, setNow] = useState(Date.now());
+
   const scrollRef = useRef<ScrollView>(null);
+
+  // Explore can open Notes with a star already chosen ("Send a note here").
+  const params = useLocalSearchParams<{ to?: string }>();
+  useEffect(() => {
+    const wanted = typeof params.to === "string" ? params.to : undefined;
+    if (wanted && DESTINATIONS.some((d) => d.id === wanted)) {
+      setTo(wanted);
+      setCurrent(null);
+      setStage("compose");
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    }
+  }, [params.to]);
   useResetScrollOnFocus(scrollRef);
   const [journalCount, setJournalCount] = useState(0);
 

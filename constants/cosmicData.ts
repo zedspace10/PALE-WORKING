@@ -6,15 +6,37 @@ import {
 } from "@/constants/scientificContent";
 import type { ExploreArtworkKey } from "@/constants/exploreArtwork";
 
+/** Where a place sits in the sky, so Explore can say whether it is up tonight. */
+export type ExploreSkyTarget =
+  | { kind: "moon" }
+  | { kind: "planet"; planet: "mars" | "saturn" }
+  | { kind: "fixed"; ra: number; dec: number }
+  | { kind: "too-faint" }
+  | { kind: "everywhere" };
+
 interface LocationBase {
   id: string;
   name: string;
+  /** A few words on what it is, shown above the name. */
   subtitle: string;
   distance: string;
-  distanceRaw: string;
+  /** How long its light takes to reach us, as words: "1.3 seconds", "26,000 years". */
+  light: string;
+  /** Light travel time in years, for the personal lines. */
+  lightYears: number;
+  /** How much further it is than the place before, or empty for the first. */
+  jump: string;
+  /** One human sized comparison. */
+  far: string;
+  /** When the light we see left, matched to what was happening on Earth. "{when}" is filled in with the season and year it set off. */
+  lightLeft: string;
+  /** A short reflective line, kept apart from the science. */
   reflection: string;
-  scale: string;
-  gradientColors: [string, string];
+  sky: ExploreSkyTarget;
+  /** What to say about it in the sky when PALE does not know where the person is. */
+  skyWithoutLocation: { chip: string; line: string };
+  /** The Notes destination with the same id, when there is one. */
+  noteTo?: string;
   artworkKey: ExploreArtworkKey;
 }
 
@@ -76,101 +98,183 @@ const SHIFT_STAGES_BASE: ShiftStageBase[] = [
   },
 ];
 
+// In order outwards from Earth, so scrolling the list is a journey. Each jump is how much further
+// light has to travel than for the place before.
 const LOCATIONS_BASE: LocationBase[] = [
   {
     id: "moon",
     name: "The Moon",
-    subtitle: "Earth's ancient companion",
-    distance: "384,400 km",
-    distanceRaw: "1.3 light seconds",
+    subtitle: "Our companion",
+    distance: "384,400 km away",
+    light: "1.3 seconds",
+    lightYears: 1.28 / 31_557_600,
+    jump: "",
+    far: "The Apollo astronauts took three days to get there.",
+    lightLeft:
+      "1.3 seconds ago. The Moon you see is always a little over a second in the past.",
     reflection:
-      "Twelve people walked on the Moon between 1969 and 1972. Their footprints can persist for very long periods because the Moon has no weather like Earth's, though micrometeorites slowly alter the surface.",
-    scale: "3,474 km across, a little narrower than Australia",
-    gradientColors: ["#1A1D2E", "#2D324F"],
+      "Every person who has ever lived has looked up at this same Moon.",
+    sky: { kind: "moon" },
+    skyWithoutLocation: {
+      chip: "",
+      line: "Tonight's Sky can show you exactly where to look.",
+    },
     artworkKey: "moon",
   },
   {
     id: "mars",
     name: "Mars",
     subtitle: "The red world",
-    distance: "225 million km",
-    distanceRaw: "12.5 light minutes",
+    distance: "225 million km away on average",
+    light: "12.5 minutes",
+    lightYears: 750 / 31_557_600,
+    jump: "About 600 times further",
+    far: "A photo sent home by a rover takes between 3 and 22 minutes to arrive, depending on where the two planets are.",
+    lightLeft:
+      "About 12 minutes ago. Close enough that what you see is, in effect, now.",
     reflection:
-      "Mars formed early in Solar System history and has a day only a little longer than Earth's. Its rust-coloured surface records billions of years of geological change.",
-    scale: "6,779 km across, about half as wide as Earth",
-    gradientColors: ["#2D1A14", "#5C3020"],
+      "Somewhere on its surface, robots we built are still at work tonight.",
+    sky: { kind: "planet", planet: "mars" },
+    skyWithoutLocation: { chip: "", line: "" },
     artworkKey: "mars",
   },
   {
     id: "saturn",
     name: "Saturn",
     subtitle: "The ringed giant",
-    distance: "1.4 billion km",
-    distanceRaw: "80 light minutes",
+    distance: "1.4 billion km away",
+    light: "80 minutes",
+    lightYears: 4_770 / 31_557_600,
+    jump: "About 6 times further",
+    far: "If the Sun were as tall as a front door, Saturn would be a small melon 2 kilometres away.",
+    lightLeft:
+      "About 80 minutes ago. The Saturn you see tonight is the Saturn of earlier this evening.",
     reflection:
-      "Saturn's rings are mostly ice, with rock and dust. Their origin and age remain debated; ring material is gradually falling into Saturn, and models suggest the rings could change substantially over hundreds of millions of years.",
-    scale: "116,460 km across, about nine Earths side by side",
-    gradientColors: ["#2A2510", "#4A4020"],
+      "Its rings may not last forever. We happen to be here while they are.",
+    sky: { kind: "planet", planet: "saturn" },
+    skyWithoutLocation: { chip: "", line: "" },
     artworkKey: "saturn",
+  },
+  {
+    id: "voyager",
+    name: "Voyager 1",
+    subtitle: "The farthest thing we have made",
+    distance: "About 26 billion km away",
+    light: "about a day",
+    lightYears: 1 / 365.25,
+    jump: "About 18 times further",
+    far: "It has been travelling since 1977 and has covered less than a thousandth of the way to the nearest star.",
+    lightLeft:
+      "Its radio signals take about a day to reach us, and every message we send takes a day to reach it. In November 2026 it reaches a full light day from Earth, the first spacecraft ever to do so.",
+    reflection:
+      "It carries a golden record of sounds and pictures from Earth, in case anyone ever finds it.",
+    sky: { kind: "too-faint" },
+    skyWithoutLocation: {
+      chip: "Too faint to see",
+      line: "Far too faint to see. It is heading out towards the constellation Ophiuchus.",
+    },
+    artworkKey: "voyager-1",
+  },
+  {
+    id: "proxima",
+    name: "Proxima Centauri",
+    subtitle: "The nearest star",
+    distance: "4.24 light years away, about 40 trillion km",
+    light: "4 years 3 months",
+    lightYears: 4.24,
+    jump: "About 1,500 times further",
+    far: "At Voyager 1's speed, the journey would take about 75,000 years.",
+    lightLeft: "The light reaching Earth tonight left in {when}.",
+    reflection:
+      "The nearest star is a small red one you will never see without a telescope. Most stars are like it.",
+    sky: { kind: "fixed", ra: 217.43, dec: -62.68 },
+    skyWithoutLocation: {
+      chip: "Not seen from Britain",
+      line: "It never rises from Britain. It sits in the southern sky, close to Alpha Centauri, and is too faint to see without a telescope.",
+    },
+    noteTo: "proxima",
+    artworkKey: "proxima-centauri",
+  },
+  {
+    id: "orion",
+    name: "The Orion Nebula",
+    subtitle: "Where stars are being born",
+    distance: "1,344 light years away",
+    light: "1,344 years",
+    lightYears: 1344,
+    jump: "About 300 times further",
+    far: "It is 24 light years across. Light from one side takes 24 years to reach the other.",
+    lightLeft: "In the 7th century, when Anglo Saxon kingdoms ruled England.",
+    reflection:
+      "Hubble has seen discs of dust around its young stars, where planets may be forming. Our solar system began like this.",
+    sky: { kind: "fixed", ra: 83.82, dec: -5.39 },
+    skyWithoutLocation: {
+      chip: "Winter evenings",
+      line: "From Britain it is best on winter evenings: a small misty patch below Orion's belt.",
+    },
+    noteTo: "orion",
+    artworkKey: "orion-nebula",
   },
   {
     id: "galactic-center",
     name: "The Galactic Centre",
-    subtitle: "Heart of the Milky Way",
-    distance: "26,000 light years",
-    distanceRaw: "26,000 light years",
+    subtitle: "The heart of the Milky Way",
+    distance: "26,000 light years away",
+    light: "26,000 years",
+    lightYears: 26_000,
+    jump: "About 20 times further",
+    far: "The Sun takes about 230 million years to circle it once. Last time we were here, the first dinosaurs were appearing.",
+    lightLeft:
+      "26,000 years ago, near the coldest part of the last ice age, when people in Europe were already painting caves.",
     reflection:
-      "At the centre of our galaxy lies Sagittarius A*, a black hole about four million times the mass of our Sun. Nearby stars orbit it while hot gas in the region varies over time.",
-    scale: "The densest region of our galaxy",
-    gradientColors: ["#1A0A25", "#3D1550"],
+      "Every star you can see tonight is circling this point with us.",
+    sky: { kind: "fixed", ra: 266.42, dec: -29.01 },
+    skyWithoutLocation: {
+      chip: "Summer evenings",
+      line: "From Britain it hangs low in the south on summer evenings, hidden behind dust.",
+    },
+    noteTo: "centre",
     artworkKey: "galactic-center",
   },
   {
     id: "andromeda",
-    name: "Andromeda",
+    name: "The Andromeda Galaxy",
     subtitle: "Our nearest major galactic neighbour",
-    distance: "2.5 million light years",
-    distanceRaw: "2.5 million light years",
+    distance: "2.5 million light years away",
+    light: "2.5 million years",
+    lightYears: 2_500_000,
+    jump: "About 100 times further",
+    far: "In long photographs it spans about six full Moons across the sky. It is heading our way, though current models no longer make a future collision certain.",
+    lightLeft:
+      "2.5 million years ago, when early humans were making some of the first stone tools.",
     reflection:
-      "The light reaching us from Andromeda left before modern humans existed. The two galaxies are approaching, but current models no longer make a future collision certain.",
-    scale: "Perhaps a trillion stars, though counts vary widely",
-    gradientColors: ["#0A1530", "#1A2D5A"],
+      "It holds around a trillion stars, and from there our whole galaxy is a faint smudge too.",
+    sky: { kind: "fixed", ra: 10.68, dec: 41.27 },
+    skyWithoutLocation: {
+      chip: "Autumn evenings",
+      line: "From Britain it is high on autumn evenings. From somewhere dark it is a faint smudge.",
+    },
+    noteTo: "andromeda",
     artworkKey: "andromeda",
   },
   {
-    id: "nebula",
-    name: "Pillars of Creation",
-    subtitle: "Where stars are born",
-    distance: "6,500 light years",
-    distanceRaw: "6,500 light years",
-    reflection:
-      "These towering columns of gas and dust are stellar nurseries where new stars are forming. We see them as they were about 6,500 years before the light reached Earth.",
-    scale: "About 4 light years tall, some 38 trillion km",
-    gradientColors: ["#0D1A25", "#143040"],
-    artworkKey: "pillars-of-creation",
-  },
-  {
-    id: "black-hole",
-    name: "Sagittarius A*",
-    subtitle: "The black hole at the heart of our galaxy",
-    distance: "26,000 light years",
-    distanceRaw: "26,000 light years",
-    reflection:
-      "Beyond the event horizon, light cannot return to the outside universe. A distant observer sees an infalling clock appear to slow, while the falling object crosses the horizon in its own finite time.",
-    scale: "25 million km across, about eighteen times the width of the Sun",
-    gradientColors: ["#06060A", "#0F0F1E"],
-    artworkKey: "sagittarius-a-star",
-  },
-  {
     id: "edge",
-    name: "The Observable Edge",
-    subtitle: "As far as light can reach",
-    distance: "46 billion light years",
-    distanceRaw: "46 billion light years",
+    name: "The edge of what we can see",
+    subtitle: "The observable universe",
+    distance: "46 billion light years away",
+    light: "13.8 billion years",
+    lightYears: 13.8e9,
+    jump: "About 18,000 times further",
+    far: "Space has stretched while the light travelled, so the place it left is now 46 billion light years away.",
+    lightLeft:
+      "13.8 billion years ago, nine billion years before the Earth formed.",
     reflection:
-      "Light from beyond our current observable horizon has not had time to reach us. The horizon is not a physical edge, and what can influence or be observed changes over cosmic time.",
-    scale: "The present horizon of the observable universe",
-    gradientColors: ["#08051A", "#100838"],
+      "It is not a wall. It is only as far as we can see from here, and every place in the universe has its own.",
+    sky: { kind: "everywhere" },
+    skyWithoutLocation: {
+      chip: "Everywhere",
+      line: "Everywhere. In every direction you look, this is as far as light has had time to come.",
+    },
     artworkKey: "observable-edge",
   },
 ];
@@ -197,10 +301,11 @@ const LOCATION_SOURCES: Record<
   moon: ["nasaMoonPhases", "nasaMoonFormation"],
   mars: ["nasaSolarSystem"],
   saturn: ["nasaSolarSystem"],
+  voyager: ["nasaVoyager"],
+  proxima: ["nasaProxima"],
+  orion: ["nasaNebulae"],
   "galactic-center": ["nasaMilkyWay", "nasaBlackHoles"],
   andromeda: ["nasaAndromeda"],
-  nebula: ["nasaNebulae"],
-  "black-hole": ["nasaBlackHoles"],
   edge: ["nasaUniverseOverview"],
 };
 

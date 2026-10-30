@@ -79,7 +79,7 @@ describe("audited scientific corrections", () => {
   it("corrects audited location and Tonight's Sky copy", () => {
     const andromeda = LOCATIONS.find((location) => location.id === "andromeda");
     expect(andromeda?.subtitle).toMatch(/nearest major/i);
-    expect(andromeda?.reflection).toMatch(
+    expect(andromeda?.far).toMatch(
       /no longer make a future collision certain/i,
     );
 
