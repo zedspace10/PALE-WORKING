@@ -15,12 +15,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 
 import { CalmPressable } from "@/components/CalmPressable";
+import { FindIt } from "@/components/FindIt";
+import { LookBack } from "@/components/LookBack";
+import { TravelThere } from "@/components/TravelThere";
 import { SkyChip } from "@/components/LocationCard";
 import { StarField } from "@/components/StarField";
 import { LOCATIONS } from "@/constants/cosmicData";
 import { EXPLORE_ARTWORK } from "@/constants/exploreArtworkAssets";
 import {
   birthdayLine,
+  canFindNow,
   lightLeftFor,
   noteFor,
   noteLine,
@@ -47,6 +51,7 @@ export default function LocationScreen() {
   const topPad = Platform.OS === "web" ? 0 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
   const [imageFailed, setImageFailed] = useState(false);
+  const [moment, setMoment] = useState<"look" | "travel" | "find" | null>(null);
 
   const index = LOCATIONS.findIndex((l) => l.id === id);
   const location = index >= 0 ? LOCATIONS[index] : undefined;
@@ -54,6 +59,7 @@ export default function LocationScreen() {
 
   useEffect(() => {
     setImageFailed(false);
+    setMoment(null);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [id]);
 
@@ -74,6 +80,7 @@ export default function LocationScreen() {
   }
 
   const sky = skyFor(location, where, now);
+  const findable = canFindNow(location, where, now);
   const note = noteFor(location, notes);
   const personalNote = note ? noteLine(note, now.getTime()) : null;
   const personalAge = birthdayLine(location, birthday, now);
@@ -151,6 +158,41 @@ export default function LocationScreen() {
           </View>
         </View>
 
+        <View style={styles.moments}>
+          <TouchableOpacity
+            onPress={() => setMoment("look")}
+            accessibilityRole="button"
+            style={[
+              styles.moment,
+              {
+                borderColor: colors.primary + "66",
+                backgroundColor: colors.glass,
+              },
+            ]}
+          >
+            <Feather name="rotate-ccw" size={18} color={colors.primary} />
+            <Text style={[styles.momentText, { color: colors.foreground }]}>
+              Look back at Earth
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setMoment("travel")}
+            accessibilityRole="button"
+            style={[
+              styles.moment,
+              {
+                borderColor: colors.primary + "66",
+                backgroundColor: colors.glass,
+              },
+            ]}
+          >
+            <Feather name="navigation" size={18} color={colors.primary} />
+            <Text style={[styles.momentText, { color: colors.foreground }]}>
+              Hold to travel there
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.details}>
           <View style={card}>
             <View style={styles.cardHead}>
@@ -164,6 +206,18 @@ export default function LocationScreen() {
             <Text style={[styles.cardText, { color: colors.foreground }]}>
               {sky.line}
             </Text>
+            {findable ? (
+              <TouchableOpacity
+                onPress={() => setMoment("find")}
+                accessibilityRole="button"
+                style={[styles.find, { borderColor: colors.primary }]}
+              >
+                <Feather name="compass" size={16} color={colors.primary} />
+                <Text style={[styles.findText, { color: colors.foreground }]}>
+                  Find it
+                </Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
 
           <View style={card}>
@@ -301,6 +355,25 @@ export default function LocationScreen() {
       >
         <Feather name="arrow-left" size={20} color={colors.foreground} />
       </TouchableOpacity>
+
+      <LookBack
+        place={location}
+        visible={moment === "look"}
+        onClose={() => setMoment(null)}
+      />
+      <TravelThere
+        place={location}
+        visible={moment === "travel"}
+        onClose={() => setMoment(null)}
+      />
+      {where ? (
+        <FindIt
+          place={location}
+          where={where}
+          visible={moment === "find"}
+          onClose={() => setMoment(null)}
+        />
+      ) : null}
     </View>
   );
 }
@@ -350,6 +423,37 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     marginTop: 2,
   },
+  moments: {
+    alignSelf: "center",
+    maxWidth: 760,
+    width: "100%",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    gap: 10,
+  },
+  moment: {
+    flex: 1,
+    minHeight: 76,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 14,
+    gap: 8,
+    justifyContent: "center",
+  },
+  momentText: { fontSize: 14, lineHeight: 19, fontFamily: "Inter_600SemiBold" },
+  find: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    alignSelf: "flex-start",
+    minHeight: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    paddingHorizontal: 18,
+    marginTop: 4,
+  },
+  findText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   details: {
     alignSelf: "center",
     maxWidth: 760,

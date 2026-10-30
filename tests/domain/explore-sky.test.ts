@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import { LOCATIONS } from "@/constants/cosmicData";
 import {
   birthdayLine,
+  canFindNow,
+  heldWords,
+  travelSummary,
   departureWords,
   lightLeftFor,
   noteFor,
@@ -113,5 +116,37 @@ describe("personal lines", () => {
       /^Your note “Hello from London” has travelled 25\.9 billion km so far\. It arrives in the year 2031\.$/,
     );
     expect(noteFor(place("saturn"), [sent])).toBeNull();
+  });
+});
+
+describe("moments on each place", () => {
+  it("gives every place a way to look back at home, with no star death", () => {
+    for (const l of LOCATIONS) {
+      expect(l.lookBack.line.length).toBeGreaterThan(40);
+      expect(l.lookBack.line).not.toMatch(
+        /supernova|dying|white dwarf|explode/i,
+      );
+    }
+  });
+
+  it("arrives at the Moon in a breath, and says how long the stars would take", () => {
+    expect(travelSummary(place("moon"), 1.3)).toBe(
+      "You reached the Moon in 1.3 seconds. Light makes this journey all the time.",
+    );
+    expect(travelSummary(place("proxima"), 12)).toBe(
+      "You travelled 3,597,509 km in 12 seconds. To reach Proxima Centauri you would have to hold on for 4 years 3 months, without letting go.",
+    );
+    expect(travelSummary(place("edge"), 5)).toMatch(/never arrive/);
+    expect(heldWords(754)).toBe("12 minutes 34 seconds");
+  });
+
+  it("only offers Find it when it is up, dark, and the location is known", () => {
+    const night = new Date("2026-10-30T21:00:00Z");
+    const noon = new Date("2026-10-30T12:00:00Z");
+    expect(canFindNow(place("andromeda"), london, night)).toBe(true);
+    expect(canFindNow(place("andromeda"), null, night)).toBe(false);
+    expect(canFindNow(place("andromeda"), london, noon)).toBe(false);
+    expect(canFindNow(place("proxima"), london, night)).toBe(false);
+    expect(canFindNow(place("voyager"), london, night)).toBe(false);
   });
 });
