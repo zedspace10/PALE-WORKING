@@ -207,8 +207,6 @@ export default function TabLayout() {
       />
       {/* Reached from the home screen rather than the tab bar */}
       <Tabs.Screen name="deeptime" options={{ href: null }} />
-      {/* The Journal became Notes; earlier entries open from the Notes tab */}
-      <Tabs.Screen name="journal" options={{ href: null }} />
     </Tabs>
   );
 }

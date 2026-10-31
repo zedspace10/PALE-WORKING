@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarField } from "@/components/StarField";
+import { TravelBack } from "@/components/TravelBack";
 import {
   ERA_LABELS,
   ERA_ORDER,
@@ -19,6 +20,7 @@ import {
   TimeMachineEra,
   TimeMachineEvent,
 } from "@/constants/cosmicTimeMachine";
+import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
@@ -105,6 +107,8 @@ export default function TimeMachineScreen() {
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   const [activeEra, setActiveEra] = useState<TimeMachineEra | "all">("all");
+  const [travelling, setTravelling] = useState(false);
+  const { birthday } = useBirthday();
 
   const filteredEvents =
     activeEra === "all"
@@ -161,9 +165,28 @@ export default function TimeMachineScreen() {
         >
           <Text style={[styles.bannerText, { color: colors.foreground }]}>
             About 13.8 billion years of cosmic history, and what may come next.
-            Tap any moment to travel there.
+            Tap any moment to read about it.
           </Text>
         </View>
+
+        <TouchableOpacity
+          onPress={() => setTravelling(true)}
+          accessibilityRole="button"
+          style={[
+            styles.travel,
+            { borderColor: colors.primary, backgroundColor: colors.glass },
+          ]}
+        >
+          <Feather name="rewind" size={18} color={colors.primary} />
+          <View style={styles.travelCopy}>
+            <Text style={[styles.travelTitle, { color: colors.foreground }]}>
+              Hold to travel back in time
+            </Text>
+            <Text style={[styles.travelSub, { color: colors.mutedForeground }]}>
+              From now to the beginning, in about half a minute
+            </Text>
+          </View>
+        </TouchableOpacity>
 
         {/* Era filter */}
         <ScrollView
@@ -214,11 +237,33 @@ export default function TimeMachineScreen() {
           ))}
         </View>
       </ScrollView>
+      <TravelBack
+        visible={travelling}
+        birthday={birthday}
+        onClose={() => setTravelling(false)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  travel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    minHeight: 68,
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  travelCopy: { flex: 1, gap: 2 },
+  travelTitle: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontFamily: "Inter_600SemiBold",
+  },
+  travelSub: { fontSize: 13, lineHeight: 18, fontFamily: "Inter_400Regular" },
   container: { flex: 1 },
   content: { gap: 18 },
   header: {
