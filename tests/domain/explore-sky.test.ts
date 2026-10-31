@@ -4,7 +4,11 @@ import { LOCATIONS } from "@/constants/cosmicData";
 import {
   birthdayLine,
   canFindNow,
+  heldToCover,
   heldWords,
+  lightSeconds,
+  passedOnTheWay,
+  rateWords,
   travelSummary,
   departureWords,
   lightLeftFor,
@@ -129,15 +133,38 @@ describe("moments on each place", () => {
     }
   });
 
-  it("arrives at the Moon in a breath, and says how long the stars would take", () => {
-    expect(travelSummary(place("moon"), 1.3)).toBe(
-      "You reached the Moon in 1.3 seconds. Light makes this journey all the time.",
+  it("arrives at the Moon in real time, then speeds up so far places can be reached", () => {
+    expect(travelSummary(place("moon"), 1.28)).toBe(
+      "You reached the Moon in 1.3 seconds, at the true speed of light. Light makes this journey all the time.",
     );
+    // Everything in the list is reachable in about half a minute of holding.
+    const held = (id: string) => heldToCover(lightSeconds(place(id)));
+    expect(held("mars")).toBeGreaterThan(5);
+    expect(held("mars")).toBeLessThan(12);
+    expect(held("proxima")).toBeGreaterThan(14);
+    expect(held("proxima")).toBeLessThan(22);
+    expect(held("andromeda")).toBeGreaterThan(24);
+    expect(held("andromeda")).toBeLessThan(36);
+    expect(travelSummary(place("andromeda"), held("andromeda"))).toMatch(
+      /^You held on for \d+ seconds\. At the true speed of light, this journey takes 2\.5 million years\./,
+    );
+  });
+
+  it("says how far you got when you let go early", () => {
     expect(travelSummary(place("proxima"), 12)).toBe(
-      "You travelled 3,597,509 km in 12 seconds. To reach Proxima Centauri you would have to hold on for 4 years 3 months, without letting go.",
+      "You held on for 12 seconds, and covered 23 hours of light travel. At the true speed of light, the whole journey to Proxima Centauri takes 4 years 3 months.",
     );
-    expect(travelSummary(place("edge"), 5)).toMatch(/never arrive/);
+    expect(travelSummary(place("edge"), 40)).toMatch(/never arrive/);
     expect(heldWords(754)).toBe("12 minutes 34 seconds");
+  });
+
+  it("tells you how fast time is running, and what you have passed", () => {
+    expect(rateWords(1)).toBe("Travelling at the real speed of light.");
+    expect(rateWords(12)).toMatch(/a day of travel\.$/);
+    expect(
+      passedOnTheWay(place("andromeda"), lightSeconds(place("proxima")) + 1),
+    ).toBe("Proxima Centauri");
+    expect(passedOnTheWay(place("mars"), 10)).toBe("the Moon");
   });
 
   it("only offers Find it when it is up, dark, and the location is known", () => {

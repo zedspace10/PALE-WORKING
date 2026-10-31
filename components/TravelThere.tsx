@@ -15,8 +15,16 @@ import Svg, { Line } from "react-native-svg";
 
 import { StarField } from "@/components/StarField";
 import type { Location } from "@/constants/cosmicData";
-import { heldWords, lightSeconds, travelSummary } from "@/constants/exploreSky";
-import { formatKm } from "@/constants/notes";
+import {
+  heldToCover,
+  heldWords,
+  lightCovered,
+  lightSeconds,
+  passedOnTheWay,
+  rateWords,
+  travelledDistance,
+  travelSummary,
+} from "@/constants/exploreSky";
 import { useColors } from "@/hooks/useColors";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -26,13 +34,11 @@ interface Props {
   onClose: () => void;
 }
 
-const C_KM_S = 299_792.458;
-
 // Streaks of starlight around the centre, the same every time.
 const STREAKS = Array.from({ length: 48 }, (_, i) => {
   const a = (i * 137.5 * Math.PI) / 180;
-  const inner = 40 + ((i * 53) % 90);
-  const length = 30 + ((i * 29) % 70);
+  const inner = 112 + ((i * 53) % 40);
+  const length = 20 + ((i * 29) % 40);
   return {
     x1: 180 + Math.cos(a) * inner,
     y1: 180 + Math.sin(a) * inner,
@@ -41,12 +47,6 @@ const STREAKS = Array.from({ length: 48 }, (_, i) => {
     o: 0.35 + ((i * 17) % 50) / 100,
   };
 });
-
-function passedWords(seconds: number): string {
-  if (seconds >= 499) return "Further than the Sun";
-  if (seconds >= 1.28) return "Past the Moon";
-  return "Leaving Earth";
-}
 
 /**
  * Hold to travel there at the speed of light. The person's own waiting does what numbers cannot:
@@ -67,7 +67,9 @@ export function TravelThere({ place, visible, onClose }: Props) {
   const drift = useRef(new Animated.Value(0)).current;
 
   const target = lightSeconds(place);
-  const arrived = !place.neverArrive && elapsed >= target;
+  const covered = lightCovered(elapsed);
+  const arrived = !place.neverArrive && covered >= target;
+  const passed = passedOnTheWay(place, covered);
 
   useEffect(() => {
     if (!visible) {
@@ -116,7 +118,9 @@ export function TravelThere({ place, visible, onClose }: Props) {
     timer.current = setInterval(() => {
       const seconds = (Date.now() - startedAt.current) / 1000;
       setElapsed(seconds);
-      if (!place.neverArrive && seconds >= target) stop(target);
+      if (!place.neverArrive && lightCovered(seconds) >= target) {
+        stop(heldToCover(target));
+      }
     }, 50);
   };
 
@@ -190,14 +194,25 @@ export function TravelThere({ place, visible, onClose }: Props) {
                 style={[styles.km, { color: colors.foreground }]}
                 accessibilityLiveRegion="polite"
               >
-                {formatKm(elapsed * C_KM_S)}
+                {travelledDistance(covered)}
               </Text>
               <Text style={[styles.held, { color: colors.mutedForeground }]}>
-                {elapsed > 0 ? heldWords(elapsed) : "Not moving yet"}
+                {elapsed > 0
+                  ? `Held for ${heldWords(elapsed)}`
+                  : "Not moving yet"}
               </Text>
               {elapsed > 0 ? (
                 <Text style={[styles.passed, { color: colors.primary }]}>
-                  {arrived ? "You're there." : passedWords(elapsed)}
+                  {arrived
+                    ? "You're there."
+                    : passed
+                      ? `Past ${passed}`
+                      : "Leaving Earth"}
+                </Text>
+              ) : null}
+              {elapsed > 0 && !arrived ? (
+                <Text style={[styles.rate, { color: colors.mutedForeground }]}>
+                  {rateWords(elapsed)}
                 </Text>
               ) : null}
             </View>
@@ -212,7 +227,7 @@ export function TravelThere({ place, visible, onClose }: Props) {
               <Text style={[styles.hint, { color: colors.mutedForeground }]}>
                 {holding
                   ? "Keep holding."
-                  : "Press and hold anywhere. Let go when you are ready."}
+                  : "Press and hold anywhere. The first seconds are real. After that, time speeds up the longer you hold."}
               </Text>
             )}
           </View>
@@ -265,6 +280,13 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
   },
   passed: { fontSize: 14, lineHeight: 20, fontFamily: "Inter_600SemiBold" },
+  rate: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontFamily: "Inter_400Regular",
+    textAlign: "center",
+    marginTop: 6,
+  },
   bottom: {
     flex: 1,
     alignSelf: "stretch",
