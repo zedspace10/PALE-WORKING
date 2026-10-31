@@ -1,3 +1,5 @@
+> **Retired (31 October 2026).** The Journal was removed from PALE in version 1.3.0; Notes replaced it. Entries already saved stay untouched in the phone's storage under `@pale_journal`, and nothing reads, sends or deletes them.
+
 # Journal Data Integrity and Privacy Specification
 
 ## Purpose

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Linking,
@@ -15,7 +15,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LightSignal } from "@/components/LightSignal";
-import { JOURNAL_STORAGE_KEY } from "@/constants/journal";
 import { StarField } from "@/components/StarField";
 import {
   LOCATION_CACHE_KEY,
@@ -80,12 +79,10 @@ const capitalise = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
 /**
- * Send a note to the universe: the Notes tab. Earlier journal entries stay reachable from the
- * bottom of this screen, so nobody loses what they wrote before the Journal became Notes.
+ * Send a note to the universe: the Notes tab.
  */
 export function NotesScreen() {
   const colors = useColors();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 24 : insets.top;
   // Room for the tab bar under the last note
@@ -113,17 +110,10 @@ export function NotesScreen() {
     }
   }, [params.to]);
   useResetScrollOnFocus(scrollRef);
-  const [journalCount, setJournalCount] = useState(0);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTES_STORAGE_KEY)
       .then((raw) => setNotes(parseNotes(raw)))
-      .catch(() => undefined);
-    AsyncStorage.getItem(JOURNAL_STORAGE_KEY)
-      .then((raw) => {
-        const entries = raw ? JSON.parse(raw) : [];
-        setJournalCount(Array.isArray(entries) ? entries.length : 0);
-      })
       .catch(() => undefined);
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
@@ -444,24 +434,6 @@ export function NotesScreen() {
               );
             })}
           </View>
-        )}
-        {journalCount > 0 && stage === "compose" && (
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/journal")}
-            accessibilityRole="button"
-            style={[styles.noteRow, { borderColor: colors.border }]}
-          >
-            <Text style={[styles.label, { color: colors.mutedForeground }]}>
-              Your journal
-            </Text>
-            <Text style={[styles.noteMeta, { color: colors.mutedForeground }]}>
-              {journalCount} {journalCount === 1 ? "entry" : "entries"} from
-              before, still only on this phone.
-            </Text>
-            <Text style={[styles.link, { color: colors.primary }]}>
-              Open your journal
-            </Text>
-          </TouchableOpacity>
         )}
       </ScrollView>
     </View>

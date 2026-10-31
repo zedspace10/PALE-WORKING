@@ -168,7 +168,6 @@ describe("refreshed screen contracts", () => {
     for (const screen of [
       "app/(tabs)/index.tsx",
       "app/(tabs)/you.tsx",
-      "app/(tabs)/journal.tsx",
       "app/(tabs)/explore.tsx",
       "app/(tabs)/deeptime.tsx",
     ]) {

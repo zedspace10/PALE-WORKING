@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MomentCard } from "@/components/MomentCard";
+import { ONBOARDED_KEY, Onboarding } from "@/components/Onboarding";
 import { useNotificationSchedule } from "@/hooks/useNotificationSchedule";
 import { useOpenCount } from "@/hooks/useOpenCount";
 import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
@@ -39,6 +40,42 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
   const [momentSolarState, setMomentSolarState] = useState<
     SolarState | null | undefined
   >(undefined);
+
+  // The three opening screens, shown once. Someone already using PALE (anything saved from an
+  // earlier version) goes straight in.
+  const [onboarded, setOnboarded] = useState<boolean | undefined>(undefined);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const keys = await AsyncStorage.getAllKeys().catch(() => [] as string[]);
+      const seen =
+        keys.includes(ONBOARDED_KEY) ||
+        keys.some((k) =>
+          [
+            "@pale_birthday",
+            "@pale_notes",
+            "@pale_shift_count",
+            "@pale_journal",
+            "@pale_reminder_hint_views",
+            LOCATION_CACHE_KEY,
+          ].includes(k),
+        );
+      if (seen && !keys.includes(ONBOARDED_KEY)) {
+        AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => undefined);
+      }
+      if (active) setOnboarded(seen);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const finishOnboarding = () => {
+    AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => undefined);
+    setOnboarded(true);
+    // The opening screens stand in for today's moment card.
+    setDismissed(true);
+  };
 
   useEffect(() => {
     let active = true;
@@ -68,7 +105,6 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="journal" options={{ headerShown: false }} />
         <Stack.Screen
           name="shift"
           options={{
@@ -94,7 +130,9 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
         />
       </Stack>
 
-      {!dismissed && momentSolarState !== undefined && (
+      {onboarded === false && <Onboarding onDone={finishOnboarding} />}
+
+      {onboarded === true && !dismissed && momentSolarState !== undefined && (
         <MomentCard
           hour={hour}
           openCount={openCount}

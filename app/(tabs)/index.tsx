@@ -16,6 +16,8 @@ import { CalmPressable } from "@/components/CalmPressable";
 import { CardArtwork } from "@/components/CardArtwork";
 import { MagicalAction } from "@/components/MagicalSurface";
 import { PaleDotHero } from "@/components/PaleDotHero";
+import { eveningLine } from "@/constants/eveningLine";
+import { useExploreContext } from "@/hooks/useExploreContext";
 import { StarField } from "@/components/StarField";
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
 import { areNotificationsEnabled } from "@/constants/notifications";
@@ -87,6 +89,10 @@ export default function HomeScreen() {
     ? Math.max(0, Math.floor((Date.now() - birthday.getTime()) / 86_400_000))
     : null;
 
+  // After dark, one line about the best thing to look at tonight.
+  const { where, now } = useExploreContext();
+  const tonightLine = eveningLine(where, now);
+
   // Animations
   const youAreHereOpacity = useRef(new Animated.Value(0)).current;
   const counterOpacity = useRef(new Animated.Value(0)).current;
@@ -133,6 +139,8 @@ export default function HomeScreen() {
             days={userDays}
             reduceMotion={reduceMotion}
             onSetBirthday={() => router.push("/(tabs)/you")}
+            tonight={tonightLine}
+            onTonight={() => router.push("/tonight-sky")}
           />
         </View>
 

@@ -16,13 +16,22 @@ interface Props {
   days: number | null;
   reduceMotion: boolean;
   onSetBirthday: () => void;
+  /** After dark, one line about the best thing to look at tonight. */
+  tonight?: string | null;
+  onTonight?: () => void;
 }
 
 /**
  * The opening of PALE: one faint blue point in a field of stars, the way Earth looked to Voyager 1.
  * No globe and no big numbers; two quiet sentences underneath.
  */
-export function PaleDotHero({ days, reduceMotion, onSetBirthday }: Props) {
+export function PaleDotHero({
+  days,
+  reduceMotion,
+  onSetBirthday,
+  tonight,
+  onTonight,
+}: Props) {
   const colors = useColors();
   const breath = useRef(new Animated.Value(reduceMotion ? 1 : 0.6)).current;
   const words = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
@@ -111,6 +120,24 @@ export function PaleDotHero({ days, reduceMotion, onSetBirthday }: Props) {
             />
           </TouchableOpacity>
         )}
+        {tonight ? (
+          <TouchableOpacity
+            onPress={onTonight}
+            accessibilityRole="button"
+            accessibilityHint="Opens Tonight's Sky"
+            style={[styles.tonight, { borderColor: colors.primary + "40" }]}
+          >
+            <Feather name="moon" size={14} color={colors.primary} />
+            <Text style={[styles.tonightText, { color: colors.foreground }]}>
+              {tonight}
+            </Text>
+            <Feather
+              name="chevron-right"
+              size={14}
+              color={colors.mutedForeground}
+            />
+          </TouchableOpacity>
+        ) : null}
       </Animated.View>
     </View>
   );
@@ -118,6 +145,17 @@ export function PaleDotHero({ days, reduceMotion, onSetBirthday }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { alignItems: "center", alignSelf: "stretch", gap: 6 },
+  tonight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    marginTop: 8,
+  },
+  tonightText: { fontSize: 14, lineHeight: 19, fontFamily: "Inter_500Medium" },
   sky: {
     height: 120,
     alignSelf: "stretch",
