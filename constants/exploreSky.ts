@@ -5,7 +5,7 @@
  * Everything here is worked out on the phone. A location is only used if the person has already
  * shared one in Tonight's Sky or Notes; Explore never asks for it.
  */
-import type { Location } from "@/constants/cosmicData";
+import { LOCATIONS, type Location } from "@/constants/cosmicData";
 import {
   equatorialToHorizontal,
   getMoonIllumination,
@@ -318,18 +318,131 @@ export function heldWords(seconds: number): string {
   return `${h} ${h === 1 ? "hour" : "hours"} ${String(m % 60).padStart(2, "0")} minutes`;
 }
 
-/** What to say when the person lets go after holding to travel towards a place. */
-export function travelSummary(place: Location, heldSeconds: number): string {
-  const km = formatKm(heldSeconds * 299_792.458);
+// ── Holding to travel ───────────────────────────────────────────────────────
+// The first seconds run at the true speed of light, so the Moon arrives in 1.3 seconds. After that
+// time speeds up the longer you hold, so any place in the list can be reached in about half a
+// minute; the summary then sets the time you held against the real journey.
+export const TRAVEL_REAL_SECONDS = 2;
+const TRAVEL_GROWTH = 1.15;
+const TRAVEL_MAX_RATE = 1e14;
+const TRAVEL_CAP_AT =
+  TRAVEL_REAL_SECONDS + Math.log(TRAVEL_MAX_RATE) / TRAVEL_GROWTH;
+
+/** How many seconds of light travel each held second is worth, after holding for `held` seconds. */
+export function travelRate(held: number): number {
+  if (held <= TRAVEL_REAL_SECONDS) return 1;
+  if (held >= TRAVEL_CAP_AT) return TRAVEL_MAX_RATE;
+  return Math.exp(TRAVEL_GROWTH * (held - TRAVEL_REAL_SECONDS));
+}
+
+/** Seconds of light travel covered after holding for `held` real seconds. */
+export function lightCovered(held: number): number {
+  if (held <= TRAVEL_REAL_SECONDS) return held;
+  const grow = (t: number) =>
+    TRAVEL_REAL_SECONDS +
+    (Math.exp(TRAVEL_GROWTH * (t - TRAVEL_REAL_SECONDS)) - 1) / TRAVEL_GROWTH;
+  if (held <= TRAVEL_CAP_AT) return grow(held);
+  return grow(TRAVEL_CAP_AT) + TRAVEL_MAX_RATE * (held - TRAVEL_CAP_AT);
+}
+
+const RATE_STEPS: [number, string][] = [
+  [1e6 * 31_557_600, "a million years"],
+  [1e5 * 31_557_600, "a hundred thousand years"],
+  [1e4 * 31_557_600, "ten thousand years"],
+  [1e3 * 31_557_600, "a thousand years"],
+  [100 * 31_557_600, "a century"],
+  [10 * 31_557_600, "ten years"],
+  [31_557_600, "a year"],
+  [2_629_800, "a month"],
+  [604_800, "a week"],
+  [86_400, "a day"],
+  [3_600, "an hour"],
+  [60, "a minute"],
+];
+
+/** "Each second you hold is now a year of travel", or the real pace at the start. */
+export function rateWords(held: number): string {
+  const rate = travelRate(held);
+  if (rate <= 1) return "Travelling at the real speed of light.";
+  if (rate < 30) return "Time is starting to speed up.";
+  // The step nearest the real rate, judged on a log scale, so 50 minutes reads as an hour.
+  let best = RATE_STEPS[0];
+  for (const step of RATE_STEPS) {
+    if (Math.abs(Math.log(rate / step[0])) < Math.abs(Math.log(rate / best[0])))
+      best = step;
+  }
+  return `Each second you hold is now ${best[1]} of travel.`;
+}
+
+/** A span of light travel in plain words: "1.3 seconds", "4 days", "26,000 years". */
+export function travelledWords(seconds: number): string {
+  const year = 31_557_600;
+  if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
+  if (seconds < 3_600) return `${Math.floor(seconds / 60)} minutes`;
+  if (seconds < 86_400) return `${Math.floor(seconds / 3_600)} hours`;
+  if (seconds < year) return `${Math.floor(seconds / 86_400)} days`;
+  const years = seconds / year;
+  if (years < 10) return `${years.toFixed(1)} years`;
+  if (years < 1e6) return `${Math.round(years).toLocaleString("en-GB")} years`;
+  if (years < 1e9)
+    return `${(years / 1e6).toLocaleString("en-GB", { maximumFractionDigits: 1 })} million years`;
+  return `${(years / 1e9).toLocaleString("en-GB", { maximumFractionDigits: 1 })} billion years`;
+}
+
+/** The distance light covers in that time: km nearby, light years further out. */
+export function travelledDistance(seconds: number): string {
+  const year = 31_557_600;
+  if (seconds < year) return formatKm(seconds * 299_792.458);
+  return `${travelledWords(seconds).replace(/ years?$/, "")} light years`;
+}
+
+/** The furthest place in the Explore list that light has passed on the way to `place`. */
+export function passedOnTheWay(
+  place: Location,
+  covered: number,
+): string | null {
+  let passed: string | null = null;
+  for (const other of LOCATIONS) {
+    if (other.id === place.id) break;
+    if (covered >= lightSeconds(other)) passed = lowerThe(other.name);
+  }
+  return passed;
+}
+
+/** What to say when the person lets go, or arrives. */
+export function travelSummary(place: Location, held: number): string {
+  const covered = lightCovered(held);
+  const name = lowerThe(place.name);
+  const heldFor = `You held on for ${heldWords(held)}`;
   if (place.neverArrive) {
-    return `You travelled ${km} in ${heldWords(heldSeconds)}. ${place.neverArrive}`;
+    return `${heldFor}, and travelled ${travelledDistance(covered)}. ${place.neverArrive}`;
   }
-  if (heldSeconds >= lightSeconds(place)) {
-    return `You reached ${lowerThe(place.name)} in ${place.light}. Light makes this journey all the time.`;
+  if (covered >= lightSeconds(place)) {
+    if (held <= TRAVEL_REAL_SECONDS) {
+      return `You reached ${name} in ${place.light}, at the true speed of light. Light makes this journey all the time.`;
+    }
+    const why =
+      place.id === "voyager"
+        ? "That is how long its radio signals take to reach us."
+        : "That is how long the light you see from it has been travelling.";
+    return `${heldFor}. At the true speed of light, this journey takes ${place.light}. ${why}`;
   }
-  return `You travelled ${km} in ${heldWords(heldSeconds)}. To reach ${lowerThe(place.name)} you would have to hold on for ${place.light}, without letting go.`;
+  return `${heldFor}, and covered ${travelledWords(covered)} of light travel. At the true speed of light, the whole journey to ${name} takes ${place.light}.`;
 }
 
 function lowerThe(name: string): string {
   return name.startsWith("The ") ? `the ${name.slice(4)}` : name;
+}
+
+/** How long someone has to hold to cover this much light travel. */
+export function heldToCover(seconds: number): number {
+  if (seconds <= TRAVEL_REAL_SECONDS) return seconds;
+  let lo = TRAVEL_REAL_SECONDS;
+  let hi = 600;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (lightCovered(mid) < seconds) lo = mid;
+    else hi = mid;
+  }
+  return hi;
 }
