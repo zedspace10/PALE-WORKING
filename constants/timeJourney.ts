@@ -130,7 +130,7 @@ function heldPhrase(held: number): string {
 export function timeSummary(markers: TimeMarker[], held: number): string {
   const years = yearsBack(held);
   if (years >= UNIVERSE_AGE_YEARS) {
-    return `You held on for ${heldPhrase(held)} and went back 13.8 billion years, to the beginning. Everything that has ever happened fits inside that half a minute.`;
+    return `You held on for ${heldPhrase(held)} and went back 13.8 billion years, to the beginning.`;
   }
   const passed = passedMarker(markers, years);
   const went = `You held on for ${heldPhrase(held)} and went back ${yearsAgoWords(years).replace(/ ago$/, "")}`;

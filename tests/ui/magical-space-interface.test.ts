@@ -93,7 +93,7 @@ describe("protected Explore composition", () => {
     expect(detail).toContain("EXPLORE_ARTWORK[location.artworkKey]");
     expect(detail).toContain("bounces={false}");
     expect(detail).toContain('overScrollMode="never"');
-    expect(detail).toContain("Next, further out");
+    expect(detail).toContain("Next: {next.name}");
     expect(detail).toContain("Illustration");
   });
 });

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LocationCard } from "@/components/LocationCard";
 import { StarField } from "@/components/StarField";
 import { LOCATIONS, Location } from "@/constants/cosmicData";
-import { noteFor, skyFor } from "@/constants/exploreSky";
+import { skyFor } from "@/constants/exploreSky";
 import { calmTypography } from "@/constants/ui";
 import { useColors } from "@/hooks/useColors";
 import { useExploreContext } from "@/hooks/useExploreContext";
@@ -22,16 +22,15 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<FlatList<Location>>(null);
   useResetScrollOnFocus(scrollRef);
-  const { where, notes, now } = useExploreContext();
+  const { where, now } = useExploreContext();
 
   const rows = useMemo(
     () =>
       LOCATIONS.map((location) => ({
         location,
-        sky: skyFor(location, where, now),
-        hasNote: noteFor(location, notes) !== null,
+        upTonight: where !== null && skyFor(location, where, now).tone === "up",
       })),
-    [where, notes, now],
+    [where, now],
   );
 
   const topPad = Platform.OS === "web" ? 0 : insets.top;
@@ -57,7 +56,7 @@ export default function ExploreScreen() {
               Places in the universe
             </Text>
             <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-              Scroll outwards. At every step, light takes longer to reach us.
+              From the Moon to the edge of what we can see.
             </Text>
           </View>
         }
@@ -66,19 +65,11 @@ export default function ExploreScreen() {
           return (
             <LocationCard
               location={row.location}
-              sky={row.sky}
-              hasNote={row.hasNote}
+              upTonight={row.upTonight}
               onPress={() => router.push(`/location/${row.location.id}`)}
             />
           );
         }}
-        ListFooterComponent={
-          <Text style={[styles.footer, { color: colors.mutedForeground }]}>
-            {where
-              ? "Tonight's sky is worked out on your phone from the location you last shared."
-              : "Share your location in Tonight's Sky to see exactly where each one is tonight."}
-          </Text>
-        }
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -105,12 +96,5 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...calmTypography.body,
-  },
-  footer: {
-    fontSize: 12,
-    lineHeight: 18,
-    fontFamily: "Inter_400Regular",
-    marginTop: 24,
-    paddingHorizontal: 2,
   },
 });

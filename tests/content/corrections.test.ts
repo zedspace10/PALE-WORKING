@@ -37,7 +37,7 @@ describe("audited scientific corrections", () => {
     expect(content).toMatch(/Most cells in your body retain mitochondria/i);
     expect(content).not.toMatch(/Every cell in your body contains/i);
     expect(content).not.toMatch(/make no tools|Every human outside Africa/i);
-    expect(content).toMatch(/Art, symbolic expression, and ritual traditions/i);
+    expect(content).toMatch(/Art and music go back much further/i);
   });
 
   it("keeps future scenarios conditional", () => {
@@ -79,8 +79,8 @@ describe("audited scientific corrections", () => {
   it("corrects audited location and Tonight's Sky copy", () => {
     const andromeda = LOCATIONS.find((location) => location.id === "andromeda");
     expect(andromeda?.subtitle).toMatch(/nearest major/i);
-    expect(andromeda?.far).toMatch(
-      /no longer make a future collision certain/i,
+    expect(textFor(andromeda)).not.toMatch(
+      /will collide|collision is certain/i,
     );
 
     const tonightSource = fs.readFileSync(

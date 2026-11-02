@@ -210,11 +210,11 @@ export function LightSignal({ line, onDone }: Props) {
           {phase === "done" && (
             <View style={styles.modalBlock}>
               <Text style={[styles.title, { color: colors.foreground }]}>
-                The light has left.
+                Sent.
               </Text>
               <Text style={[styles.body, { color: colors.mutedForeground }]}>
-                Much of it scattered in the air. The rest is travelling away
-                from Earth at 300,000 km every second, and it will not stop.
+                Most of the light scattered in the air. The rest is heading away
+                from Earth at about 300,000 km a second.
               </Text>
               <TouchableOpacity
                 onPress={() => onDone(true)}

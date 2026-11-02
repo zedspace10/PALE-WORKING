@@ -64,7 +64,7 @@ describe("travelling back in time", () => {
       "Each second you hold is now a year of history.",
     );
     expect(timeSummary(markers, heldToGoBack(UNIVERSE_AGE_YEARS))).toMatch(
-      /to the beginning\. Everything that has ever happened fits inside that half a minute\.$/,
+      /went back 13\.8 billion years, to the beginning\.$/,
     );
     expect(timeSummary(markers, heldToGoBack(7e7))).toMatch(
       /past the asteroid that ended the dinosaurs\. The beginning is still 13\.7 billion years further back\.$/,

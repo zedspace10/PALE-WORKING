@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { LOCATIONS } from "@/constants/cosmicData";
 import {
-  birthdayLine,
   canFindNow,
   heldToCover,
   heldWords,
@@ -97,16 +96,6 @@ describe("personal lines", () => {
     );
   });
 
-  it("says how old the person was when the light left, only when it makes sense", () => {
-    const birthday = new Date("1994-03-14T12:00:00Z");
-    expect(birthdayLine(place("proxima"), birthday, now)).toBe(
-      "The light you would see from it tonight left when you were 28.",
-    );
-    expect(birthdayLine(place("moon"), birthday, now)).toBeNull();
-    expect(birthdayLine(place("andromeda"), birthday, now)).toBeNull();
-    expect(birthdayLine(place("proxima"), null, now)).toBeNull();
-  });
-
   it("follows a note sent to this place", () => {
     const sent = newNote(
       "Hello from London",
@@ -135,7 +124,7 @@ describe("moments on each place", () => {
 
   it("arrives at the Moon in real time, then speeds up so far places can be reached", () => {
     expect(travelSummary(place("moon"), 1.28)).toBe(
-      "You reached the Moon in 1.3 seconds, at the true speed of light. Light makes this journey all the time.",
+      "You reached the Moon in 1.3 seconds, at the real speed of light.",
     );
     // Everything in the list is reachable in about half a minute of holding.
     const held = (id: string) => heldToCover(lightSeconds(place(id)));
@@ -146,13 +135,13 @@ describe("moments on each place", () => {
     expect(held("andromeda")).toBeGreaterThan(24);
     expect(held("andromeda")).toBeLessThan(36);
     expect(travelSummary(place("andromeda"), held("andromeda"))).toMatch(
-      /^You held on for \d+ seconds\. At the true speed of light, this journey takes 2\.5 million years\./,
+      /^You held on for \d+ seconds\. At the real speed of light, the journey takes 2\.5 million years\.$/,
     );
   });
 
   it("says how far you got when you let go early", () => {
     expect(travelSummary(place("proxima"), 12)).toBe(
-      "You held on for 12 seconds, and covered 23 hours of light travel. At the true speed of light, the whole journey to Proxima Centauri takes 4 years 3 months.",
+      "You held on for 12 seconds, and covered 23 hours of light travel. At the real speed of light, the whole journey to Proxima Centauri takes 4 years 3 months.",
     );
     expect(travelSummary(place("edge"), 40)).toMatch(/never arrive/);
     expect(heldWords(754)).toBe("12 minutes 34 seconds");

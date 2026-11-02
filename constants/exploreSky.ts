@@ -243,30 +243,6 @@ export function noteLine(note: Note, now: number): string {
   return `Your note “${note.text}” has travelled ${formatKm(kmTravelled(note.sentAt, now))} so far. ${when}`;
 }
 
-/** "The light you would see from it tonight left when you were 28", when that makes sense. */
-export function birthdayLine(
-  place: Location,
-  birthday: Date | null,
-  now: Date,
-): string | null {
-  if (!birthday) return null;
-  if (place.lightYears < 1) return null;
-  // Light that left before the person was born says nothing about their age. (Checked in years
-  // first: far places are further back than a Date can reach.)
-  const ageYears = (now.getTime() - birthday.getTime()) / YEAR_MS;
-  if (place.lightYears >= ageYears) return null;
-  const left = new Date(now.getTime() - place.lightYears * YEAR_MS);
-  let age = left.getFullYear() - birthday.getFullYear();
-  const hadBirthday =
-    left.getMonth() > birthday.getMonth() ||
-    (left.getMonth() === birthday.getMonth() &&
-      left.getDate() >= birthday.getDate());
-  if (!hadBirthday) age -= 1;
-  return age < 1
-    ? "The light you would see from it tonight left when you were a baby."
-    : `The light you would see from it tonight left when you were ${age}.`;
-}
-
 /** Right ascension and declination of a place right now, when it has a spot in the sky. */
 export function skyPosition(
   place: Location,
@@ -419,15 +395,11 @@ export function travelSummary(place: Location, held: number): string {
   }
   if (covered >= lightSeconds(place)) {
     if (held <= TRAVEL_REAL_SECONDS) {
-      return `You reached ${name} in ${place.light}, at the true speed of light. Light makes this journey all the time.`;
+      return `You reached ${name} in ${place.light}, at the real speed of light.`;
     }
-    const why =
-      place.id === "voyager"
-        ? "That is how long its radio signals take to reach us."
-        : "That is how long the light you see from it has been travelling.";
-    return `${heldFor}. At the true speed of light, this journey takes ${place.light}. ${why}`;
+    return `${heldFor}. At the real speed of light, the journey takes ${place.light}.`;
   }
-  return `${heldFor}, and covered ${travelledWords(covered)} of light travel. At the true speed of light, the whole journey to ${name} takes ${place.light}.`;
+  return `${heldFor}, and covered ${travelledWords(covered)} of light travel. At the real speed of light, the whole journey to ${name} takes ${place.light}.`;
 }
 
 function lowerThe(name: string): string {

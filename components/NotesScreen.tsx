@@ -181,10 +181,8 @@ export function NotesScreen() {
               Send a note to the universe
             </Text>
             <Text style={[styles.body, { color: colors.mutedForeground }]}>
-              Write a line and choose where it is going. From the moment you
-              send it, PALE follows how far it has gone at the speed of light.
-              You can also send it as real light from your phone, and share a
-              link so others can follow it.
+              Write a line and pick where it goes. PALE keeps track of how far
+              it has travelled at the speed of light.
             </Text>
             <TextInput
               value={line}
