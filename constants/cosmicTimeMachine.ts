@@ -39,7 +39,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "The observable universe begins in an extremely hot, dense state and space expands everywhere, without a central point. Protons and neutrons appear in the first second; during the next few minutes, some combine into the first light atomic nuclei.",
     perspective:
-      "The cosmic history that eventually produced your atoms, your world, and your thoughts begins in this hot, expanding early universe. You are part of a story roughly 13.8 billion years long.",
+      "Everything else on this timeline grows out of this hot, expanding early universe.",
     color: "#FF6B35",
     icon: "zap",
   },
@@ -63,7 +63,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "The universe enters a period of darkness. No stars yet, only clouds of hydrogen and helium slowly cooling and drifting. For a hundred million years or more, the universe is dark and silent.",
     perspective:
-      "After the cosmic background light was released, roughly one to two hundred million years passed before the first stars began to shine. Darkness preceded starlight, but not the background radiation still travelling through the universe.",
+      "For roughly one to two hundred million years there were no stars at all. The only light was the fading glow left over from the beginning.",
     color: "#3A3060",
     icon: "moon",
   },
@@ -112,7 +112,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Dust, rocks, and ice clump together over millions of years, growing larger with each collision. Earth forms as a hot young planet. Leading models propose that one or more major impacts sent mixed material into orbit, where it coalesced into the Moon; the details remain under study.",
     perspective:
-      "The Moon preserves evidence from the violent formation of Earth and the Moon. Its rocks share striking similarities with Earth's mantle, while models still investigate how material from the impactors and young Earth mixed.",
+      "Rocks brought back from the Moon are strikingly similar to rocks from Earth's mantle. That is one of the main clues to how the Moon formed.",
     color: "#7BA9F0",
     icon: "circle",
   },
@@ -123,7 +123,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "4.4 billion years ago",
     title: "The first oceans",
     description:
-      "Water, delivered by comets and asteroids, or released from volcanic activity, accumulates on Earth's surface. The oceans form. The stage is set for life.",
+      "Water, delivered by comets and asteroids, or released from volcanic activity, accumulates on Earth's surface. The oceans form.",
     perspective:
       "Earth's water has multiple possible sources, including water-rich material incorporated during formation and later delivery by small bodies. The relative contributions remain under study.",
     color: "#3D8FBF",
@@ -137,7 +137,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "The earliest widely accepted evidence of life appears in ancient rocks. These organisms were simple and single-celled, although the date and setting of life's origin remain uncertain.",
     perspective:
-      "Humans share deep common ancestry with all known life on Earth. Evolution connects us to trees, bacteria, whales, and lineages that disappeared long before our species arose.",
+      "You are distantly related to every living thing on Earth, from oak trees to bacteria.",
     color: "#4CAF50",
     icon: "activity",
   },
@@ -149,7 +149,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Oxygen produced by photosynthetic microbes begins accumulating in the atmosphere and oceans. It transforms Earth's chemistry, harms many anaerobic organisms, and helps create conditions later used by complex life; calling it Earth's first mass extinction is debated.",
     perspective:
-      "The oxygen you are breathing ultimately traces back to photosynthetic life. A gas that was hazardous to many anaerobic organisms later became central to most complex ecosystems.",
+      "The oxygen you are breathing was made by living things, first microbes and later plants.",
     color: "#80C080",
     icon: "wind",
   },
@@ -161,7 +161,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "An ancestral cell forms a lasting partnership with a bacterium that becomes the mitochondrion. This is a key step in eukaryotic evolution. Most cells in your body retain mitochondria descended from that ancient partnership; mature red blood cells are one exception.",
     perspective:
-      "The ancient partnership behind mitochondria remains built into most of your cells. At the cellular level, your body carries evidence of organisms whose lineages became interdependent.",
+      "Your mitochondria still carry a small set of their own DNA, left over from when their ancestors were free living bacteria.",
     color: "#90D4B0",
     icon: "layers",
   },
@@ -185,7 +185,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Over tens of millions of years, many major animal groups become conspicuous in the fossil record. Eyes, limbs, shells, and new predator-prey relationships spread through increasingly complex marine ecosystems.",
     perspective:
-      "The body plan you live in (two matching sides, a central nervous system, a head with eyes) is a Cambrian design. You are driving a vehicle whose basic architecture is 540 million years old.",
+      "The basic layout of your body, with two matching sides and a head with eyes at the front, was already around in animals more than 500 million years ago.",
     color: "#A0B890",
     icon: "eye",
   },
@@ -197,7 +197,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Plants spread across land and help transform bare surfaces into soils. Arthropods follow, and much later some vertebrate lineages evolve limbs and adaptations for moving and breathing on land.",
     perspective:
-      "Your arms are modified fish fins. The developmental genes that build your limbs are the same ones that built the first fins to crawl onto land. The ocean is still in you.",
+      "The bones in your arm match the bones in the fins of the fish that first moved onto land, and many of the same genes build both.",
     color: "#70A860",
     icon: "trending-up",
   },
@@ -209,7 +209,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "After the Permian mass extinction wipes out around 80% of marine species, dinosaurs emerge and come to dominate. They rule Earth for 165 million years, some 27 times longer than our own lineage has existed.",
     perspective:
-      "Dinosaurs existed for 165 million years. Our entire human lineage has existed for perhaps 6 million years. We are newcomers, not successors.",
+      "Dinosaurs lasted about 165 million years. The human lineage has been around for about 6 million.",
     color: "#8DA060",
     icon: "triangle",
   },
@@ -221,7 +221,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "An asteroid about 10 kilometres wide strikes what is now the Yucatán Peninsula, triggering global environmental disruption. About three-quarters of species go extinct, including all non-avian dinosaurs.",
     perspective:
-      "The mammals that survived that impact were small, nocturnal, and probably lived in burrows. You exist because your ancestors were small enough to hide. The event that ended the age of dinosaurs is also part of the reason we are here.",
+      "The mammals that survived the impact were mostly small, and many probably sheltered in burrows. Our ancestors were among them.",
     color: "#D08040",
     icon: "alert-triangle",
   },
@@ -233,7 +233,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "With the dinosaurs gone, mammals rapidly diversify into the ecological niches left empty. Whales return to the sea. Bats take to the air. Primates develop in the forests. The world fills with warm-blooded, social, curious animals.",
     perspective:
-      "The diversity of mammals, from blue whales to bats to humans, all emerged in the 66 million years since the asteroid. Evolution is fast when given empty space.",
+      "Blue whales, bats and humans all evolved in the 66 million years since the asteroid.",
     color: "#C09070",
     icon: "heart",
   },
@@ -258,7 +258,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Evidence suggests early humans were using fire by this broad period, although the timing of habitual control is debated. Fire offered warmth, protection, and eventually cooking; cooking may have influenced human evolution, but it is not a single proven cause of brain growth.",
     perspective:
-      "Every campfire, every candle, every electric light carries forward a relationship with fire that began a million years ago. The light you read by is a very long tradition.",
+      "Every campfire, candle and electric light carries on something early humans were already doing about a million years ago.",
     color: "#E8803A",
     icon: "zap",
   },
@@ -270,7 +270,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Homo sapiens emerges in Africa. Evidence for symbolic behaviour, ornamentation, burial practices, and visual art appears unevenly across later sites and dates, and new discoveries continue to refine that timeline.",
     perspective:
-      "Members of our species lived hundreds of thousands of years ago in social and ecological worlds very different from ours. Their inner lives cannot be observed directly, but material evidence records sophisticated behaviour and adaptation.",
+      "People like us have been around for about 300,000 years. Writing covers less than the last 2% of that.",
     color: "#C8A96E",
     icon: "users",
   },
@@ -282,7 +282,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Several dispersals of Homo sapiens leave Africa, with a major expansion contributing much of the ancestry of present-day populations outside Africa. Those groups mixed with Neanderthals, Denisovans, and other human populations along the way.",
     perspective:
-      "All living humans share deep African ancestry, while later migrations and interbreeding made population history a branching network rather than one simple journey. Every human is a cousin.",
+      "All living humans share deep African ancestry. Later migrations and mixing made our family tree more like a network than a single line.",
     color: "#B89060",
     icon: "map",
   },
@@ -294,7 +294,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Humans domesticate plants and animals and begin to build permanent settlements. Cities follow, and writing appears about 5,000 years ago. What we call 'history' begins, though our species had existed for some 295,000 years before anyone wrote anything down.",
     perspective:
-      "Agriculture and permanent settlements expanded within roughly the last 12,000 years; cities and writing came later in several regions. Art, symbolic expression, and ritual traditions reach much further into human prehistory.",
+      "Farming began about 12,000 years ago. Art and music go back much further.",
     color: "#C8A060",
     icon: "book",
   },
@@ -305,9 +305,9 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "Right now",
     title: "This moment",
     description:
-      "You are here. Most of the hydrogen in your body dates from the first moments of the universe, shaped by billions of years of evolution and all of human history.",
+      "Most of the hydrogen in your body was made in the first moments of the universe. Most of your other atoms were made inside stars.",
     perspective:
-      "This exact moment depends on an immense chain of contingencies across cosmic and biological history. It is here nonetheless.",
+      "This is where the timeline reaches today. Everything after this is a forecast.",
     color: "#C8A96E",
     icon: "radio",
   },
@@ -332,7 +332,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Earth's axis slowly wobbles, tracing a circle in the sky every 26,000 years. In about 12,000 years it will point close to Vega, which will take over from Polaris as the star that marks north.",
     perspective:
-      "Vega was last near the pole about 14,000 years ago, when people in many parts of the world were still hunting and gathering. The sky's fixed point is only fixed on a human timescale.",
+      "Vega was last near the pole about 14,000 years ago, when people everywhere were still hunting and gathering.",
     color: "#A8C8FF",
     icon: "navigation",
   },
@@ -344,7 +344,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "The Moon is drifting away from Earth by about 3.8 centimetres a year. One day it will look too small to cover the Sun completely, and total eclipses will end. Estimates put that several hundred million years from now.",
     perspective:
-      "Today the Moon and the Sun look almost exactly the same size in our sky. It is a coincidence of this moment, and we happen to live inside it.",
+      "Today the Moon and the Sun look almost exactly the same size in our sky. That is a coincidence, and it will not last.",
     color: "#C8C8D8",
     icon: "circle",
   },
@@ -356,7 +356,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Andromeda is approaching the Milky Way, but newer measurements make a direct collision within the next several billion years uncertain. If a close encounter or merger occurs, it would unfold over billions of years.",
     perspective:
-      "If a close encounter or merger occurs, the galaxies' stars could largely pass between one another because their separations are so vast, while gas and gravitational fields interact strongly. Size changes everything.",
+      "Even in a merger, the stars would almost never hit each other, because the gaps between them are so large. The gas clouds would collide.",
     color: "#9088C0",
     icon: "shuffle",
   },

@@ -21,8 +21,8 @@ describe("honest scientific presentation", () => {
     expect(shift).toMatch(/not one physical scale/i);
   });
 
-  it("visibly separates daily poetic reflection from factual copy", () => {
-    expect(read("app/(tabs)/deeptime.tsx")).toContain("POETIC REFLECTION");
+  it("visibly separates the personal line from the facts in the Time Machine", () => {
+    expect(read("app/(tabs)/deeptime.tsx")).toContain("Closer to home");
   });
 
   it("contains none of the remaining audited categorical UI claims", () => {

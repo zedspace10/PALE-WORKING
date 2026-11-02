@@ -83,7 +83,7 @@ function EventCard({
               ]}
             >
               <Text style={[styles.perspLabel, { color: colors.primary }]}>
-                POETIC REFLECTION
+                Closer to home
               </Text>
               <Text style={[styles.perspText, { color: colors.foreground }]}>
                 {event.perspective}
@@ -377,9 +377,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   perspLabel: {
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 2,
   },
   perspText: {
     fontSize: 14,

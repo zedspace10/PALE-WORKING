@@ -24,12 +24,8 @@ export function getMomentLines(
 ): MomentLine[] {
   if (openCount >= 2) {
     return [
-      { text: "You came back.", delay: 1200, style: "primary" },
-      {
-        text: "Another moment to notice where you are.",
-        delay: 3000,
-        style: "muted",
-      },
+      { text: "Welcome back.", delay: 1200, style: "primary" },
+      ...localSolarLines(solarState),
     ];
   }
 
@@ -38,7 +34,7 @@ export function getMomentLines(
       { text: "It's late.", delay: 1400, style: "primary" },
       ...localSolarLines(solarState),
       {
-        text: "Whether or not you can see them tonight, the stars are still there.",
+        text: "The stars are still there, even when you cannot see them.",
         delay: 1200,
         style: "muted",
       },
@@ -49,7 +45,11 @@ export function getMomentLines(
     return [
       { text: "Good morning.", delay: 1400, style: "primary" },
       ...localSolarLines(solarState),
-      { text: "This one is yours.", delay: 1400, style: "primary" },
+      {
+        text: "The universe is about 13.8 billion years old.",
+        delay: 1400,
+        style: "muted",
+      },
     ];
   }
 
@@ -61,7 +61,7 @@ export function getMomentLines(
         style: "primary",
       },
       {
-        text: "Everything you see, you see a moment after it happened.",
+        text: "The Sun you see is about eight minutes old.",
         delay: 1800,
         style: "muted",
       },
@@ -87,6 +87,5 @@ export function getMomentLines(
       delay: 1000,
       style: "primary",
     },
-    { text: "You are here.", delay: 2000, style: "primary" },
   ];
 }

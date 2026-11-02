@@ -277,9 +277,6 @@ export default function YouScreen() {
             after the Big Bang. Every glass of water you drink holds hydrogen
             about 13.8 billion years old.
           </Text>
-          <Text style={[styles.quoteNote, { color: colors.primary }]}>
-            You are ancient.
-          </Text>
         </View>
 
         {/* Orbit progress */}
@@ -467,11 +464,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Inter_400Regular",
     lineHeight: 22,
-  },
-  quoteNote: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.3,
   },
   orbitCard: {
     borderRadius: 20,

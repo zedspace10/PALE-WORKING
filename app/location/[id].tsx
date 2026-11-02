@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Image,
-  Linking,
   View,
   Text,
   StyleSheet,
@@ -14,16 +13,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 
-import { CalmPressable } from "@/components/CalmPressable";
 import { FindIt } from "@/components/FindIt";
 import { LookBack } from "@/components/LookBack";
 import { TravelThere } from "@/components/TravelThere";
-import { SkyChip } from "@/components/LocationCard";
 import { StarField } from "@/components/StarField";
 import { LOCATIONS } from "@/constants/cosmicData";
 import { EXPLORE_ARTWORK } from "@/constants/exploreArtworkAssets";
 import {
-  birthdayLine,
   canFindNow,
   lightLeftFor,
   noteFor,
@@ -36,9 +32,8 @@ import { useExploreContext } from "@/hooks/useExploreContext";
 const WARM = "#F3DDB0";
 
 /**
- * One place, always in the same order: where it is in your sky, how far that really is, and when
- * the light we see left. A short reflective line follows, kept apart from the science, and then the
- * next place further out.
+ * One place, kept short: its name, how far away it is, one sentence about its light, and where to
+ * look if it is up tonight. Three things to do with it, and the next place further out.
  */
 export default function LocationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -46,7 +41,7 @@ export default function LocationScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
-  const { where, notes, birthday, now } = useExploreContext();
+  const { where, notes, now } = useExploreContext();
 
   const topPad = Platform.OS === "web" ? 0 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -80,15 +75,29 @@ export default function LocationScreen() {
   }
 
   const sky = skyFor(location, where, now);
+  // Only say where it is when there is something to see tonight.
+  const skyLine =
+    where && (sky.tone === "up" || sky.tone === "later") ? sky.line : null;
   const findable = canFindNow(location, where, now);
   const note = noteFor(location, notes);
-  const personalNote = note ? noteLine(note, now.getTime()) : null;
-  const personalAge = birthdayLine(location, birthday, now);
 
-  const card = [
-    styles.card,
-    { backgroundColor: colors.glass, borderColor: colors.luminousBorder },
-  ];
+  const action = (
+    icon: React.ComponentProps<typeof Feather>["name"],
+    label: string,
+    onPress: () => void,
+  ) => (
+    <TouchableOpacity
+      key={label}
+      onPress={onPress}
+      accessibilityRole="button"
+      style={[styles.action, { borderColor: colors.border }]}
+    >
+      <Feather name={icon} size={18} color={colors.primary} />
+      <Text style={[styles.actionText, { color: colors.foreground }]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -119,12 +128,8 @@ export default function LocationScreen() {
             />
           ) : null}
           <LinearGradient
-            colors={[
-              "rgba(5,7,12,0.08)",
-              "rgba(5,7,12,0.56)",
-              colors.background,
-            ]}
-            locations={[0, 0.54, 1]}
+            colors={["rgba(5,7,12,0)", "rgba(5,7,12,0.5)", colors.background]}
+            locations={[0, 0.6, 1]}
             style={StyleSheet.absoluteFill}
           />
           <Text
@@ -135,211 +140,98 @@ export default function LocationScreen() {
           >
             Illustration
           </Text>
-          <View
-            style={[
-              styles.heroContent,
-              { paddingTop: topPad + 96, paddingBottom: 34 },
-            ]}
+        </View>
+
+        <View style={styles.body}>
+          <Text style={[styles.kind, { color: colors.primary }]}>
+            {location.subtitle}
+          </Text>
+          <Text
+            style={[styles.name, { color: colors.foreground }]}
+            accessibilityRole="header"
           >
-            <Text style={[styles.heroLabel, { color: colors.primary }]}>
-              {location.subtitle}
+            {location.name}
+          </Text>
+          <Text style={[styles.distance, { color: colors.mutedForeground }]}>
+            {location.distance}
+          </Text>
+
+          <Text style={[styles.text, { color: colors.foreground }]}>
+            {lightLeftFor(location, now)}
+          </Text>
+
+          {skyLine ? (
+            <Text style={[styles.sky, { color: colors.mutedForeground }]}>
+              <Text style={{ color: colors.primary }}>Tonight. </Text>
+              {skyLine}
             </Text>
-            <Text
-              style={[styles.heroName, { color: colors.foreground }]}
-              accessibilityRole="header"
-            >
-              {location.name}
+          ) : null}
+
+          {note ? (
+            <Text style={[styles.sky, { color: WARM }]}>
+              {noteLine(note, now.getTime())}
             </Text>
-            <Text
-              style={[styles.heroDistance, { color: colors.mutedForeground }]}
-            >
-              {location.distance}. Light takes {location.light} to get here.
-            </Text>
+          ) : null}
+
+          <View style={styles.actions}>
+            {action("rotate-ccw", "Look back", () => setMoment("look"))}
+            {action("navigation", "Travel there", () => setMoment("travel"))}
+            {findable
+              ? action("compass", "Find it", () => setMoment("find"))
+              : null}
           </View>
-        </View>
 
-        <View style={styles.moments}>
-          <TouchableOpacity
-            onPress={() => setMoment("look")}
-            accessibilityRole="button"
-            style={[
-              styles.moment,
-              {
-                borderColor: colors.primary + "66",
-                backgroundColor: colors.glass,
-              },
-            ]}
-          >
-            <Feather name="rotate-ccw" size={18} color={colors.primary} />
-            <Text style={[styles.momentText, { color: colors.foreground }]}>
-              Look back at Earth
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setMoment("travel")}
-            accessibilityRole="button"
-            style={[
-              styles.moment,
-              {
-                borderColor: colors.primary + "66",
-                backgroundColor: colors.glass,
-              },
-            ]}
-          >
-            <Feather name="navigation" size={18} color={colors.primary} />
-            <Text style={[styles.momentText, { color: colors.foreground }]}>
-              Hold to travel there
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.details}>
-          <View style={card}>
-            <View style={styles.cardHead}>
-              <Text
-                style={[styles.cardLabel, { color: colors.mutedForeground }]}
-              >
-                In your sky
-              </Text>
-              {sky.chip ? <SkyChip sky={sky} /> : null}
-            </View>
-            <Text style={[styles.cardText, { color: colors.foreground }]}>
-              {sky.line}
-            </Text>
-            {findable ? (
+          <View style={[styles.footer, { borderTopColor: colors.border }]}>
+            {location.noteTo ? (
               <TouchableOpacity
-                onPress={() => setMoment("find")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/notes",
+                    params: { to: location.noteTo },
+                  })
+                }
                 accessibilityRole="button"
-                style={[styles.find, { borderColor: colors.primary }]}
+                style={styles.link}
               >
-                <Feather name="compass" size={16} color={colors.primary} />
-                <Text style={[styles.findText, { color: colors.foreground }]}>
-                  Find it
+                <Text style={[styles.linkText, { color: colors.primary }]}>
+                  Send a note here
                 </Text>
               </TouchableOpacity>
             ) : null}
-          </View>
-
-          <View style={card}>
-            <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-              How far that really is
-            </Text>
-            <Text style={[styles.cardText, { color: colors.foreground }]}>
-              {location.far}
-            </Text>
-          </View>
-
-          <View style={card}>
-            <Text style={[styles.cardLabel, { color: colors.mutedForeground }]}>
-              When this light left
-            </Text>
-            <Text style={[styles.cardText, { color: colors.foreground }]}>
-              {lightLeftFor(location, now)}
-            </Text>
-          </View>
-
-          {personalNote || personalAge ? (
-            <View style={[styles.card, styles.personal]}>
-              <Text style={[styles.cardLabel, { color: WARM }]}>
-                Just for you
-              </Text>
-              {personalNote ? (
-                <Text style={[styles.cardText, { color: colors.foreground }]}>
-                  {personalNote}
-                </Text>
-              ) : null}
-              {personalAge ? (
-                <Text style={[styles.cardText, { color: colors.foreground }]}>
-                  {personalAge}
-                </Text>
-              ) : null}
-            </View>
-          ) : null}
-
-          <View style={[styles.thought, { borderTopColor: colors.border }]}>
-            <Text
-              style={[styles.thoughtText, { color: colors.mutedForeground }]}
-            >
-              {location.reflection}
-            </Text>
-          </View>
-
-          {location.noteTo ? (
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/(tabs)/notes",
-                  params: { to: location.noteTo },
-                })
-              }
-              accessibilityRole="button"
-              style={[styles.primary, { borderColor: colors.primary }]}
-            >
-              <Text style={[styles.primaryText, { color: colors.foreground }]}>
-                Send a note here
-              </Text>
-            </TouchableOpacity>
-          ) : null}
-
-          <TouchableOpacity
-            onPress={() =>
-              Linking.openURL("https://stellaraspace.com").catch(
-                () => undefined,
-              )
-            }
-            accessibilityRole="link"
-            style={styles.linkBtn}
-          >
-            <Text style={[styles.link, { color: colors.primary }]}>
-              See it in the 3D universe
-            </Text>
-          </TouchableOpacity>
-
-          {next ? (
-            <CalmPressable
-              onPress={() => router.replace(`/location/${next.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={`Next, further out: ${next.name}. ${next.jump}.`}
-              style={({ pressed }) => [
-                styles.next,
-                {
-                  borderColor: colors.primary + "4D",
-                  backgroundColor: pressed
-                    ? colors.cardPressed
-                    : "rgba(141,235,255,0.06)",
-                },
-              ]}
-            >
-              <View style={styles.nextCopy}>
-                <Text style={[styles.nextLabel, { color: colors.primary }]}>
-                  Next, further out
-                </Text>
-                <Text style={[styles.nextName, { color: colors.foreground }]}>
-                  {next.name}
-                </Text>
+            {next ? (
+              <TouchableOpacity
+                onPress={() => router.replace(`/location/${next.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`Next: ${next.name}`}
+                style={[styles.link, styles.nextLink]}
+              >
                 <Text
-                  style={[styles.nextJump, { color: colors.mutedForeground }]}
+                  style={[styles.linkText, { color: colors.foreground }]}
+                  numberOfLines={1}
                 >
-                  {next.jump}. Light takes {next.light}.
+                  Next: {next.name}
                 </Text>
-              </View>
-              <Feather name="arrow-right" size={20} color={colors.primary} />
-            </CalmPressable>
-          ) : (
-            <TouchableOpacity
-              onPress={() => router.back()}
-              accessibilityRole="button"
-              style={[styles.primary, { borderColor: colors.primary + "4D" }]}
-            >
-              <Text style={[styles.primaryText, { color: colors.foreground }]}>
-                As far as we can see. Back to the start
-              </Text>
-            </TouchableOpacity>
-          )}
+                <Feather
+                  name="arrow-right"
+                  size={16}
+                  color={colors.foreground}
+                />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={() => router.back()}
+                accessibilityRole="button"
+                style={[styles.link, styles.nextLink]}
+              >
+                <Text style={[styles.linkText, { color: colors.foreground }]}>
+                  Back to the start
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </ScrollView>
 
-      {/* Back button */}
       <TouchableOpacity
         onPress={() => router.back()}
         style={[
@@ -384,9 +276,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { flexGrow: 1 },
   hero: {
-    minHeight: 410,
+    height: 340,
     overflow: "hidden",
-    justifyContent: "flex-end",
   },
   heroArtwork: {
     ...StyleSheet.absoluteFillObject,
@@ -399,136 +290,74 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: "Inter_500Medium",
   },
-  heroContent: {
+  body: {
     alignSelf: "center",
-    maxWidth: 760,
+    maxWidth: 640,
     width: "100%",
     paddingHorizontal: 24,
+    marginTop: -40,
     gap: 6,
   },
-  heroLabel: {
+  kind: {
     fontSize: 14,
     fontFamily: "Inter_500Medium",
-    letterSpacing: 0.2,
   },
-  heroName: {
-    fontSize: 34,
+  name: {
+    fontSize: 32,
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.4,
-    lineHeight: 40,
+    lineHeight: 38,
   },
-  heroDistance: {
+  distance: {
     fontSize: 15,
     lineHeight: 22,
     fontFamily: "Inter_400Regular",
-    marginTop: 2,
   },
-  moments: {
-    alignSelf: "center",
-    maxWidth: 760,
-    width: "100%",
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    gap: 10,
+  text: {
+    fontSize: 17,
+    lineHeight: 26,
+    fontFamily: "Inter_400Regular",
+    marginTop: 14,
   },
-  moment: {
-    flex: 1,
-    minHeight: 76,
-    borderRadius: 18,
-    borderWidth: 1,
-    padding: 14,
-    gap: 8,
-    justifyContent: "center",
-  },
-  momentText: { fontSize: 14, lineHeight: 19, fontFamily: "Inter_600SemiBold" },
-  find: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    alignSelf: "flex-start",
-    minHeight: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    paddingHorizontal: 18,
-    marginTop: 4,
-  },
-  findText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  details: {
-    alignSelf: "center",
-    maxWidth: 760,
-    width: "100%",
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    gap: 14,
-  },
-  card: {
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 18,
-    gap: 8,
-  },
-  cardHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  cardLabel: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.2,
-  },
-  cardText: {
+  sky: {
     fontSize: 15,
     lineHeight: 23,
     fontFamily: "Inter_400Regular",
+    marginTop: 8,
   },
-  personal: {
-    borderColor: "rgba(243,221,176,0.4)",
+  actions: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 20,
   },
-  thought: {
-    borderTopWidth: 1,
-    paddingTop: 18,
-    paddingHorizontal: 2,
-  },
-  thoughtText: {
-    fontSize: 16,
-    lineHeight: 26,
-    fontFamily: "Inter_400Regular",
-    fontStyle: "italic",
-  },
-  primary: {
+  action: {
+    flex: 1,
     alignItems: "center",
-    borderRadius: 27,
-    borderWidth: 1,
     justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: 20,
-    marginTop: 4,
+    gap: 6,
+    minHeight: 64,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 6,
   },
-  primaryText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
-  linkBtn: { alignSelf: "flex-start", minHeight: 44, justifyContent: "center" },
-  link: {
-    fontSize: 14,
+  actionText: {
+    fontSize: 13,
     fontFamily: "Inter_500Medium",
-    textDecorationLine: "underline",
+    textAlign: "center",
   },
-  next: {
+  footer: {
+    marginTop: 28,
+    paddingTop: 8,
+    borderTopWidth: 1,
+  },
+  link: { minHeight: 48, justifyContent: "center" },
+  nextLink: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: 12,
-    minHeight: 80,
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
   },
-  nextCopy: { flex: 1, gap: 3 },
-  nextLabel: { fontSize: 12, lineHeight: 16, fontFamily: "Inter_600SemiBold" },
-  nextName: { fontSize: 17, lineHeight: 22, fontFamily: "Inter_600SemiBold" },
-  nextJump: { fontSize: 13, lineHeight: 18, fontFamily: "Inter_400Regular" },
+  linkText: { fontSize: 15, fontFamily: "Inter_500Medium", flexShrink: 1 },
   backBtn: {
     position: "absolute",
     left: 20,

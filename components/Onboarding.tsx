@@ -18,15 +18,15 @@ export const ONBOARDED_KEY = "@pale_onboarded";
 const PAGES = [
   {
     title: "A calm place to look up.",
-    body: "Take a minute away from everything else, and see where you are.",
+    body: "See where you are in the universe, and what is in your sky tonight.",
   },
   {
-    title: "Everything here is real.",
-    body: "The sky, the distances, the light. All of it is worked out on your phone from the science we have today.",
+    title: "Real sky, real distances.",
+    body: "Where things are tonight and how far away they are, worked out on your phone from current astronomy.",
   },
   {
     title: "Nothing about you leaves this phone.",
-    body: "No account and no tracking. Your notes and your birthday stay here, with you.",
+    body: "No account and no tracking. Your notes and your birthday stay on this phone.",
   },
 ];
 

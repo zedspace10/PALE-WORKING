@@ -461,24 +461,19 @@ export default function ShiftScreen() {
                 { opacity: stageOpacity, top: stageTextTop },
               ]}
             >
-              {currentStage.hint ? (
-                <Text
-                  style={[styles.stageHint, { color: colors.primary + "99" }]}
-                >
-                  {currentStage.hint}
-                </Text>
-              ) : null}
               <Text style={[styles.stageTitle, { color: colors.foreground }]}>
                 {currentStage.title}
               </Text>
-              <Text
-                style={[
-                  styles.stageSubtitle,
-                  { color: colors.mutedForeground },
-                ]}
-              >
-                {currentStage.subtitle}
-              </Text>
+              {currentStage.subtitle ? (
+                <Text
+                  style={[
+                    styles.stageSubtitle,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
+                  {currentStage.subtitle}
+                </Text>
+              ) : null}
               <IllustrationDisclosure explanation="Sizes and distances are squeezed so each step fits on screen, not one physical scale." />
             </Animated.View>
           )}
@@ -491,7 +486,7 @@ export default function ShiftScreen() {
                   { color: colors.foreground, opacity: welcomeBackOpacity },
                 ]}
               >
-                Welcome back.
+                Back on Earth.
               </Animated.Text>
 
               <Animated.Text
@@ -500,7 +495,7 @@ export default function ShiftScreen() {
                   { color: colors.mutedForeground, opacity: welcomeSubOpacity },
                 ]}
               >
-                You were always here.
+                That was everything we can see, in six steps.
               </Animated.Text>
             </View>
           )}
@@ -622,9 +617,6 @@ const styles = StyleSheet.create({
     maxWidth: 620,
     width: "100%",
     zIndex: 2,
-  },
-  stageHint: {
-    ...calmTypography.meta,
   },
   stageTitle: {
     fontSize: 30,

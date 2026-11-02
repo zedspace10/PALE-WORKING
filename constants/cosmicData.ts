@@ -38,12 +38,8 @@ interface LocationBase {
   lightYears: number;
   /** How much further it is than the place before, or empty for the first. */
   jump: string;
-  /** One human sized comparison. */
-  far: string;
   /** When the light we see left, matched to what was happening on Earth. "{when}" is filled in with the season and year it set off. */
   lightLeft: string;
-  /** A short reflective line, kept apart from the science. */
-  reflection: string;
   sky: ExploreSkyTarget;
   /** What to say about it in the sky when PALE does not know where the person is. */
   skyWithoutLocation: { chip: string; line: string };
@@ -71,7 +67,6 @@ export interface CosmicEvent extends CosmicEventBase, ScientificItem {
 interface ShiftStageBase {
   title: string;
   subtitle: string;
-  hint: string;
 }
 
 export interface ShiftStage extends ShiftStageBase, ScientificItem {}
@@ -79,38 +74,31 @@ export interface ShiftStage extends ShiftStageBase, ScientificItem {}
 const SHIFT_STAGES_BASE: ShiftStageBase[] = [
   {
     title: "You are here.",
-    subtitle:
-      "A pale blue dot.\nOrbiting an ordinary star.\nIn one arm of one galaxy.",
-    hint: "EARTH",
+    subtitle: "Earth, a small rocky world going round an ordinary star.",
   },
   {
-    title: "Our neighbourhood.",
+    title: "The Solar System.",
     subtitle:
-      "Eight planets.\nOne star.\nEveryone you have ever met\nlives in this small neighbourhood.",
-    hint: "SOLAR SYSTEM",
+      "Eight planets and the Sun. Everyone you have ever met lives on the third one.",
   },
   {
-    title: "Hundreds of billions of stars.",
+    title: "The Milky Way.",
     subtitle:
-      "Our Sun is one of them.\nLost in one arm.\nUnremarkable.\nEssential.",
-    hint: "THE MILKY WAY",
+      "Our Sun is one of a few hundred billion stars, about halfway out from the centre, in a small spiral arm.",
   },
   {
-    title: "A gathering of nearby galaxies.",
+    title: "The Local Group.",
     subtitle:
-      "Held together by gravity.\nDrifting as one\nthrough the cosmos.\nThe Milky Way is one\nof the two largest.",
-    hint: "LOCAL GROUP",
+      "More than 80 galaxies held together by gravity. The Milky Way and Andromeda are the two biggest.",
   },
   {
     title: "Everything we can see.",
     subtitle:
-      "Hundreds of billions of galaxies, perhaps more.\nAbout forty-six billion light years\nin every direction.\nStill expanding.",
-    hint: "THE OBSERVABLE UNIVERSE",
+      "Hundreds of billions of galaxies, perhaps more, out to about 46 billion light years in every direction.",
   },
   {
-    title: "Somewhere in all of this…",
-    subtitle: "…there is you.",
-    hint: "",
+    title: "Somewhere in all of this is you.",
+    subtitle: "",
   },
 ];
 
@@ -125,11 +113,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "1.3 seconds",
     lightYears: 1.28 / 31_557_600,
     jump: "",
-    far: "The Apollo astronauts took three days to get there.",
     lightLeft:
       "1.3 seconds ago. The Moon you see is always a little over a second in the past.",
-    reflection:
-      "Every person who has ever lived has looked up at this same Moon.",
     sky: { kind: "moon" },
     skyWithoutLocation: {
       chip: "",
@@ -137,7 +122,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     },
     lookBack: {
       scene: "earth-large",
-      line: "From the Moon, Earth hangs in a black sky, nearly four times wider than the full Moon looks to us. It does not rise or set. It stays where it is, slowly turning.",
+      line: "From the Moon, Earth looks nearly four times wider than the full Moon does to us. It never rises or sets. It stays in the same part of the sky and turns.",
     },
     artworkKey: "moon",
   },
@@ -149,16 +134,13 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "12.5 minutes",
     lightYears: 750 / 31_557_600,
     jump: "About 600 times further",
-    far: "A photo sent home by a rover takes between 3 and 22 minutes to arrive, depending on where the two planets are.",
     lightLeft:
       "About 12 minutes ago. Close enough that what you see is, in effect, now.",
-    reflection:
-      "Somewhere on its surface, robots we built are still at work tonight.",
     sky: { kind: "planet", planet: "mars" },
     skyWithoutLocation: { chip: "", line: "" },
     lookBack: {
       scene: "blue-star",
-      line: "From Mars, Earth is a bright blue star in the evening or morning sky. Everyone you know is inside that point of light.",
+      line: "From Mars, Earth looks like a bright blue star in the evening or morning sky, much as Venus looks to us.",
     },
     artworkKey: "mars",
   },
@@ -170,11 +152,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "80 minutes",
     lightYears: 4_770 / 31_557_600,
     jump: "About 6 times further",
-    far: "If the Sun were as tall as a front door, Saturn would be a small melon 2 kilometres away.",
     lightLeft:
       "About 80 minutes ago. The Saturn you see tonight is the Saturn of earlier this evening.",
-    reflection:
-      "Its rings may not last forever. We happen to be here while they are.",
     sky: { kind: "planet", planet: "saturn" },
     skyWithoutLocation: { chip: "", line: "" },
     lookBack: {
@@ -191,11 +170,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "about a day",
     lightYears: 1 / 365.25,
     jump: "About 18 times further",
-    far: "It has been travelling since 1977 and has covered less than a thousandth of the way to the nearest star.",
     lightLeft:
       "Its radio signals take about a day to reach us, and every message we send takes a day to reach it. In November 2026 it reaches a full light day from Earth, the first spacecraft ever to do so.",
-    reflection:
-      "It carries a golden record of sounds and pictures from Earth, in case anyone ever finds it.",
     sky: { kind: "too-faint" },
     skyWithoutLocation: {
       chip: "Too faint to see",
@@ -203,7 +179,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     },
     lookBack: {
       scene: "pixel-in-sunlight",
-      line: "From Voyager 1, Earth is far smaller than a single pixel, lost in the glare of the Sun. In 1990 it turned its camera around and found us anyway.",
+      line: "From Voyager 1, Earth is far smaller than a single pixel, close to the Sun's glare. In 1990 it turned its camera back and photographed Earth from about 6 billion km away.",
     },
     artworkKey: "voyager-1",
   },
@@ -215,10 +191,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "4 years 3 months",
     lightYears: 4.24,
     jump: "About 1,500 times further",
-    far: "At Voyager 1's speed, the journey would take about 75,000 years.",
     lightLeft: "The light reaching Earth tonight left in {when}.",
-    reflection:
-      "The nearest star is a small red one you will never see without a telescope. Most stars are like it.",
     sky: { kind: "fixed", ra: 217.43, dec: -62.68 },
     skyWithoutLocation: {
       chip: "Not seen from Britain",
@@ -227,7 +200,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     noteTo: "proxima",
     lookBack: {
       scene: "sun-a-star",
-      line: "From Proxima Centauri, Earth is gone. The Sun is just a bright star in the constellation Cassiopeia, one point among many.",
+      line: "From Proxima Centauri, Earth is far too faint to see. The Sun looks like an ordinary bright star in the constellation Cassiopeia.",
     },
     artworkKey: "proxima-centauri",
   },
@@ -239,10 +212,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "1,344 years",
     lightYears: 1344,
     jump: "About 300 times further",
-    far: "It is 24 light years across. Light from one side takes 24 years to reach the other.",
     lightLeft: "In the 7th century, when Anglo Saxon kingdoms ruled England.",
-    reflection:
-      "Hubble has seen discs of dust around its young stars, where planets may be forming. Our solar system began like this.",
     sky: { kind: "fixed", ra: 83.82, dec: -5.39 },
     skyWithoutLocation: {
       chip: "Winter evenings",
@@ -251,7 +221,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     noteTo: "orion",
     lookBack: {
       scene: "sun-too-faint",
-      line: "From the Orion Nebula, you would need a telescope to find the Sun at all. Everything that has ever happened to us happens inside a point too faint to see.",
+      line: "From the Orion Nebula, you would need a telescope to find the Sun at all, and there would be no way to see Earth.",
     },
     artworkKey: "orion-nebula",
   },
@@ -263,11 +233,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "26,000 years",
     lightYears: 26_000,
     jump: "About 20 times further",
-    far: "The Sun takes about 230 million years to circle it once. Last time we were here, the first dinosaurs were appearing.",
     lightLeft:
       "26,000 years ago, near the coldest part of the last ice age, when people in Europe were already painting caves.",
-    reflection:
-      "Every star you can see tonight is circling this point with us.",
     sky: { kind: "fixed", ra: 266.42, dec: -29.01 },
     skyWithoutLocation: {
       chip: "Summer evenings",
@@ -276,7 +243,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     noteTo: "centre",
     lookBack: {
       scene: "sun-lost",
-      line: "From the centre of the galaxy, the Sun is lost among billions of stars and hidden behind clouds of dust. Nobody there could pick us out.",
+      line: "From the centre of the galaxy, the Sun is one of billions of stars, and clouds of dust in between would hide it.",
     },
     artworkKey: "galactic-center",
   },
@@ -288,11 +255,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "2.5 million years",
     lightYears: 2_500_000,
     jump: "About 100 times further",
-    far: "In long photographs it spans about six full Moons across the sky. It is heading our way, though current models no longer make a future collision certain.",
     lightLeft:
       "2.5 million years ago, when early humans were making some of the first stone tools.",
-    reflection:
-      "It holds around a trillion stars, and from there our whole galaxy is a faint smudge too.",
     sky: { kind: "fixed", ra: 10.68, dec: 41.27 },
     skyWithoutLocation: {
       chip: "Autumn evenings",
@@ -301,7 +265,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     noteTo: "andromeda",
     lookBack: {
       scene: "galaxy-smudge",
-      line: "From Andromeda, our whole galaxy is a faint smudge, about as faint as Andromeda looks to us. Every person who has ever lived is somewhere inside it.",
+      line: "From Andromeda, our whole galaxy looks like a faint smudge, about as faint as Andromeda looks to us.",
     },
     artworkKey: "andromeda",
   },
@@ -313,11 +277,8 @@ const LOCATIONS_BASE: LocationBase[] = [
     light: "13.8 billion years",
     lightYears: 13.8e9,
     jump: "About 18,000 times further",
-    far: "Space has stretched while the light travelled, so the place it left is now 46 billion light years away.",
     lightLeft:
       "13.8 billion years ago, nine billion years before the Earth formed.",
-    reflection:
-      "It is not a wall. It is only as far as we can see from here, and every place in the universe has its own.",
     sky: { kind: "everywhere" },
     skyWithoutLocation: {
       chip: "Everywhere",
