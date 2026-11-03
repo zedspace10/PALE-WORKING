@@ -138,6 +138,13 @@ function RootLayoutNav({
           }}
         />
         <Stack.Screen
+          name="this-week"
+          options={{
+            headerShown: false,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
           name="tonight-sky"
           options={{
             headerShown: false,
