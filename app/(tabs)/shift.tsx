@@ -1,5 +1,6 @@
+import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useNavigation, useRouter } from "expo-router";
+import { useFocusEffect, useNavigation, useRouter } from "expo-router";
 import React, {
   useCallback,
   useEffect,
@@ -26,6 +27,13 @@ import { MagicalAction } from "@/components/MagicalSurface";
 import { ShiftZoomScene } from "@/components/ShiftZoomScene";
 import { StarField } from "@/components/StarField";
 import { SHIFT_STAGES } from "@/constants/cosmicData";
+import {
+  ENTRY_FADE_MS,
+  FADE_MS,
+  STAGE_DURATIONS_MS,
+  ZOOM_HOME_MS,
+  ZOOM_OUT_MS,
+} from "@/constants/shiftTiming";
 import { SHIFT_MAX_ZOOM } from "@/constants/shiftZoom";
 import { getTonightsEvent } from "@/constants/skyEvents";
 import { calmSpace, calmTypography } from "@/constants/ui";
@@ -33,14 +41,7 @@ import { useShiftCount } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-
-// Each stage carries about 1.3s of animation overhead on top of these.
-// Weighted so the setup moves and the closing line is given room.
-const STAGE_DURATIONS_MS = [6000, 6500, 7000, 7500, 8000, 8800];
-const FADE_MS = 900;
-// How long the camera takes to pull back from one picture to the next, and to fly home at the end.
-const ZOOM_OUT_MS = 2600;
-const ZOOM_HOME_MS = 4200;
+import { useShiftMusic } from "@/hooks/useShiftMusic";
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
@@ -68,6 +69,11 @@ export default function ShiftScreen() {
   const { count, incrementCount } = useShiftCount();
   const reduceMotion = useReducedMotion();
   const ambientMotionActive = useHomeHeroMotionActive(reduceMotion);
+  const music = useShiftMusic();
+  const stopMusic = music.stop;
+
+  // Leaving the Shift screen in any way stops the music.
+  useFocusEffect(useCallback(() => () => stopMusic(), [stopMusic]));
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -271,11 +277,13 @@ export default function ShiftScreen() {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+    music.jumpTo(stageRef.current + 1);
     runStage(stageRef.current + 1);
   };
 
   const beginJourney = () => {
     clearStageTimer();
+    music.start();
     stageRef.current = 0;
     setTonight(readTonight());
     stageOpacity.setValue(0);
@@ -294,7 +302,7 @@ export default function ShiftScreen() {
     } else {
       Animated.timing(screenFade, {
         toValue: 1,
-        duration: 620,
+        duration: ENTRY_FADE_MS,
         easing: easeInOut,
         useNativeDriver: true,
       }).start(({ finished }) => {
@@ -321,6 +329,7 @@ export default function ShiftScreen() {
   };
 
   const endJourney = (onDone?: () => void) => {
+    music.stop();
     clearStageTimer();
     stageRunId.current += 1;
     stageOpacity.stopAnimation();
@@ -440,6 +449,28 @@ export default function ShiftScreen() {
             }}
           >
             <Text style={{ color: colors.primary, fontSize: 22 }}>←</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={music.toggleSound}
+            accessibilityRole="button"
+            accessibilityLabel={
+              music.soundOn ? "Turn the music off" : "Turn the music on"
+            }
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{
+              position: "absolute",
+              top: topPad + 12,
+              right: 24,
+              zIndex: 200,
+              padding: 12,
+            }}
+          >
+            <Feather
+              name={music.soundOn ? "volume-2" : "volume-x"}
+              size={20}
+              color={colors.primary + (music.soundOn ? "CC" : "88")}
+            />
           </TouchableOpacity>
 
           {!completed && (count > 0 || reduceMotion) && (
