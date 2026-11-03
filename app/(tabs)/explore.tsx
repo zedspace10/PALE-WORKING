@@ -4,6 +4,7 @@ import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LocationCard } from "@/components/LocationCard";
+import { ThisWeekRow } from "@/components/ThisWeekRow";
 import { StarField } from "@/components/StarField";
 import { LOCATIONS, Location } from "@/constants/cosmicData";
 import { skyFor } from "@/constants/exploreSky";
@@ -11,6 +12,7 @@ import { calmTypography } from "@/constants/ui";
 import { useColors } from "@/hooks/useColors";
 import { useExploreContext } from "@/hooks/useExploreContext";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
+import { useThisWeek } from "@/hooks/useThisWeek";
 
 /**
  * Places in the universe, in order outwards from Earth. Between each one is how much further light
@@ -23,6 +25,7 @@ export default function ExploreScreen() {
   const scrollRef = useRef<FlatList<Location>>(null);
   useResetScrollOnFocus(scrollRef);
   const { where, now } = useExploreContext();
+  const thisWeek = useThisWeek();
 
   const rows = useMemo(
     () =>
@@ -58,6 +61,14 @@ export default function ExploreScreen() {
             <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
               From the Moon to the edge of what we can see.
             </Text>
+            {thisWeek ? (
+              <View style={styles.thisWeek}>
+                <ThisWeekRow
+                  pin={thisWeek}
+                  onPress={() => router.push("/this-week")}
+                />
+              </View>
+            ) : null}
           </View>
         }
         renderItem={({ index }) => {
@@ -97,4 +108,5 @@ const styles = StyleSheet.create({
   subtitle: {
     ...calmTypography.body,
   },
+  thisWeek: { marginTop: 14 },
 });
