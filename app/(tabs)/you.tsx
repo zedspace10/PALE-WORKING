@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
+import { ThisWeekToggle } from "@/components/ThisWeekToggle";
 import { MagicalAction } from "@/components/MagicalSurface";
 import { StarField } from "@/components/StarField";
 import { COSMIC_EVENTS } from "@/constants/cosmicData";
@@ -345,6 +346,8 @@ export default function YouScreen() {
         )}
 
         <NightlyReminderToggle />
+
+        <ThisWeekToggle />
 
         <TouchableOpacity
           onPress={async () => {
