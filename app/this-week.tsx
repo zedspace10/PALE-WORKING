@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Platform,
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarField } from "@/components/StarField";
 import { dateWords } from "@/constants/thisWeek";
+import { markThisWeekSeen } from "@/constants/thisWeekNotification";
 import { useColors } from "@/hooks/useColors";
 import { useThisWeek } from "@/hooks/useThisWeek";
 
@@ -29,6 +30,10 @@ export default function ThisWeekScreen() {
   const { height, width } = useWindowDimensions();
   const pin = useThisWeek();
   const [imageFailed, setImageFailed] = useState(false);
+  // Once it has been opened there is nothing left to tell them about it.
+  useEffect(() => {
+    if (pin) markThisWeekSeen(pin.id).catch(() => undefined);
+  }, [pin]);
   // The picture's own shape, once known, so the frame fits it exactly. Tall ones are capped.
   const [aspect, setAspect] = useState<number | null>(null);
   const frameWidth = Math.min(width, 640) - 48;

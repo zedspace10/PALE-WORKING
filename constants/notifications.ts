@@ -112,7 +112,7 @@ export async function setNotificationsEnabled(on: boolean): Promise<boolean> {
   return granted;
 }
 
-async function ensurePermission(): Promise<boolean> {
+export async function ensurePermission(): Promise<boolean> {
   const existing = await Notifications.getPermissionsAsync();
   if (existing.granted) return true;
   if (!existing.canAskAgain) return false;

@@ -7,9 +7,11 @@ import {
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -20,6 +22,8 @@ import { useNotificationSchedule } from "@/hooks/useNotificationSchedule";
 import { useOpenCount } from "@/hooks/useOpenCount";
 import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
 import palette from "@/constants/colors";
+// Defines the background check for a new weekly picture; must load before anything else runs.
+import "@/constants/thisWeekTask";
 import {
   classifySolarAltitude,
   getSolarAltitude,
@@ -42,6 +46,27 @@ function RootLayoutNav({
 }) {
   // Keep the nightly notifications in step with the app.
   useNotificationSchedule();
+
+  // Tapping the weekly picture's notification opens it (phones only; the web has no notifications).
+  const router = useRouter();
+  const handledResponse = useRef<string | null>(null);
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    const open = (response: Notifications.NotificationResponse | null) => {
+      if (!response) return;
+      const id = response.notification.request.identifier;
+      const url = response.notification.request.content.data?.url;
+      if (handledResponse.current === id || url !== "/this-week") return;
+      handledResponse.current = id;
+      router.push("/this-week");
+    };
+    // Opened from the notification when PALE was closed, or while it was running.
+    Notifications.getLastNotificationResponseAsync()
+      .then(open)
+      .catch(() => undefined);
+    const sub = Notifications.addNotificationResponseReceivedListener(open);
+    return () => sub.remove();
+  }, [router]);
 
   // Full moment card on the first open of the day only.
   const [dismissed, setDismissed] = useState(openCount > 1);
