@@ -75,7 +75,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "bootes-void",
     location: "The Boötes Void",
-    locationDetail: "A vast near-emptiness in the cosmic web",
+    locationDetail: "A huge, nearly empty region of the cosmic web",
     distance: "700 million light years",
     reflection:
       "The Boötes Void is a vast, unusually underdense region of the cosmic web, roughly hundreds of millions of light years across. It is not completely empty: galaxies have been observed inside it, just far fewer than in denser regions.",

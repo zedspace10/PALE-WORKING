@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -27,10 +27,19 @@ import {
 } from "@/constants/solar";
 
 SplashScreen.preventAutoHideAsync();
+// Fade out of the splash screen rather than cutting straight to the app (iOS).
+SplashScreen.setOptions({ fade: true, duration: 700 });
 
 const queryClient = new QueryClient();
 
-function RootLayoutNav({ openCount }: { openCount: number }) {
+function RootLayoutNav({
+  openCount,
+  onReady,
+}: {
+  openCount: number;
+  /** Called once the first screen is decided, so the splash screen can fade straight into it. */
+  onReady: () => void;
+}) {
   // Keep the nightly notifications in step with the app.
   useNotificationSchedule();
 
@@ -69,6 +78,14 @@ function RootLayoutNav({ openCount }: { openCount: number }) {
       active = false;
     };
   }, []);
+
+  // The first screen is known once onboarding and the moment card have both been worked out.
+  // Until then the splash stays up, so Home never flashes before the card covers it.
+  const firstScreenKnown =
+    onboarded !== undefined && momentSolarState !== undefined;
+  useEffect(() => {
+    if (firstScreenKnown) onReady();
+  }, [firstScreenKnown, onReady]);
 
   const finishOnboarding = () => {
     AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => undefined);
@@ -163,12 +180,14 @@ export default function RootLayout() {
 
   const fontsReady = fontsLoaded || fontError;
   const ready = timedOut || (fontsReady && countLoaded);
+  const [firstScreenReady, setFirstScreenReady] = useState(false);
+  const markFirstScreenReady = useCallback(() => setFirstScreenReady(true), []);
 
   useEffect(() => {
-    if (ready) {
+    if (timedOut || (ready && firstScreenReady)) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [ready]);
+  }, [ready, firstScreenReady, timedOut]);
 
   if (!ready) return null;
 
@@ -179,7 +198,10 @@ export default function RootLayout() {
           <GestureHandlerRootView
             style={{ flex: 1, backgroundColor: palette.dark.background }}
           >
-            <RootLayoutNav openCount={todayCount} />
+            <RootLayoutNav
+              openCount={todayCount}
+              onReady={markFirstScreenReady}
+            />
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
