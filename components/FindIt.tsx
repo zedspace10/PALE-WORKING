@@ -42,6 +42,9 @@ export function FindIt({ place, where, visible, onClose }: Props) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [heading, setHeading] = useState<number | null>(null);
+  // Phone compasses drift until they are calibrated. The phone says how sure it is, from 0 to 3;
+  // on an iPhone, 1 or below means the heading could be more than 35 degrees out.
+  const [uncalibrated, setUncalibrated] = useState(false);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -57,6 +60,7 @@ export function FindIt({ place, where, visible, onClose }: Props) {
         sub = await Location.watchHeadingAsync((h) => {
           const value = h.trueHeading >= 0 ? h.trueHeading : h.magHeading;
           if (Number.isFinite(value)) setHeading(value);
+          if (Number.isFinite(h.accuracy)) setUncalibrated(h.accuracy <= 1);
         });
         if (!live) sub.remove();
       } catch {
@@ -68,6 +72,7 @@ export function FindIt({ place, where, visible, onClose }: Props) {
       clearInterval(tick);
       sub?.remove();
       setHeading(null);
+      setUncalibrated(false);
     };
   }, [visible]);
 
@@ -80,7 +85,8 @@ export function FindIt({ place, where, visible, onClose }: Props) {
   if (sky && heading !== null) {
     diff = ((sky.az - heading + 540) % 360) - 180;
   }
-  const facing = diff !== null && Math.abs(diff) < 12;
+  // An uncalibrated compass could point the wrong way, so it never says "There" until it is sure.
+  const facing = !uncalibrated && diff !== null && Math.abs(diff) < 12;
   // The dial turns so that the way the phone points is always at the top.
   const dialTurn = heading ?? 0;
 
@@ -89,6 +95,9 @@ export function FindIt({ place, where, visible, onClose }: Props) {
     line = `${capital(name)} has just gone below your horizon.`;
   } else if (heading === null) {
     line = `Face ${compassWords(sky.az)}, and look ${heightPhrase(sky.alt)}.`;
+  } else if (uncalibrated) {
+    line =
+      "Move your phone slowly in a figure of eight to calibrate the compass.";
   } else if (facing) {
     line = `There. Now look ${heightPhrase(sky.alt)}.`;
   } else {
@@ -111,7 +120,11 @@ export function FindIt({ place, where, visible, onClose }: Props) {
           <Text style={[styles.hint, { color: colors.mutedForeground }]}>
             {heading === null
               ? "Use the directions below. A compass on your phone can help."
-              : "Hold your phone flat, like a compass, and turn slowly."}
+              : uncalibrated
+                ? sky && sky.alt >= 0
+                  ? `Your compass is not sure yet. Until it is, ${name} is to the ${compassWords(sky.az)}.`
+                  : "Your compass is not sure yet."
+                : "Hold your phone flat, like a compass, and turn slowly."}
           </Text>
         </View>
 
