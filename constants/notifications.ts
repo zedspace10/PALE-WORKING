@@ -12,6 +12,26 @@ const ENABLED_KEY = "pale_notifications_enabled";
 export const NOTIFICATION_IDS_KEY = "pale_observatory_notification_ids";
 const CHANNEL_ID = "observatory";
 const DAYS_AHEAD = 50;
+/** Every Observatory reminder is named for its evening, so scheduling one again replaces it. */
+export const OBSERVATORY_ID_PREFIX = "pale-observatory-";
+const OBSERVATORY_TITLE_PREFIX = "The Observatory:";
+
+export function observatoryIdFor(at: Date): string {
+  const y = at.getFullYear();
+  const m = String(at.getMonth() + 1).padStart(2, "0");
+  const d = String(at.getDate()).padStart(2, "0");
+  return `${OBSERVATORY_ID_PREFIX}${y}-${m}-${d}`;
+}
+
+// Refreshes run one at a time. Two running together (opening the app fires one on start and
+// another as it becomes active) each scheduled a full set, and one set was then never cancelled,
+// so some evenings had the reminder twice.
+let queue: Promise<unknown> = Promise.resolve();
+function oneAtATime<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.catch(() => undefined);
+  return run;
+}
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -35,10 +55,32 @@ async function storeOurNotificationIds(ids: string[]): Promise<void> {
   await AsyncStorage.setItem(NOTIFICATION_IDS_KEY, JSON.stringify(ids));
 }
 
-export async function cancelObservatoryNotifications(): Promise<void> {
-  const identifiers = await readOurNotificationIds();
+export function cancelObservatoryNotifications(): Promise<void> {
+  return oneAtATime(cancelAllObservatory);
+}
+
+/**
+ * Cancels every Observatory reminder on the phone: the ones PALE remembers, plus any left behind
+ * by an earlier version (found by name or title). Other notifications are left alone.
+ */
+async function cancelAllObservatory(): Promise<void> {
+  const identifiers = new Set(await readOurNotificationIds());
+  try {
+    const pending = await Notifications.getAllScheduledNotificationsAsync();
+    for (const request of pending ?? []) {
+      const title = request.content?.title ?? "";
+      if (
+        request.identifier.startsWith(OBSERVATORY_ID_PREFIX) ||
+        title.startsWith(OBSERVATORY_TITLE_PREFIX)
+      ) {
+        identifiers.add(request.identifier);
+      }
+    }
+  } catch {
+    // If the list cannot be read, the remembered ones are still cancelled.
+  }
   await Promise.all(
-    identifiers.map((identifier) =>
+    [...identifiers].map((identifier) =>
       Notifications.cancelScheduledNotificationAsync(identifier).catch(
         () => undefined,
       ),
@@ -78,17 +120,19 @@ async function ensurePermission(): Promise<boolean> {
 }
 
 /** Replaces only PALE Observatory notifications; unrelated notifications remain untouched. */
-export async function refreshObservatorySchedule(
-  now = new Date(),
-): Promise<number> {
+export function refreshObservatorySchedule(now = new Date()): Promise<number> {
+  return oneAtATime(() => rebuildObservatory(now));
+}
+
+async function rebuildObservatory(now: Date): Promise<number> {
   if (!(await areNotificationsEnabled())) {
-    await cancelObservatoryNotifications();
+    await cancelAllObservatory();
     return 0;
   }
 
   const permissions = await Notifications.getPermissionsAsync();
   if (!permissions.granted) {
-    await cancelObservatoryNotifications();
+    await cancelAllObservatory();
     return 0;
   }
 
@@ -105,7 +149,7 @@ export async function refreshObservatorySchedule(
     });
   }
 
-  await cancelObservatoryNotifications();
+  await cancelAllObservatory();
   const scheduledIds: string[] = [];
   try {
     for (const candidate of buildObservatorySchedule(
@@ -114,6 +158,7 @@ export async function refreshObservatorySchedule(
       DAYS_AHEAD,
     )) {
       const identifier = await Notifications.scheduleNotificationAsync({
+        identifier: observatoryIdFor(candidate.at),
         content: { title: candidate.title, body: candidate.body },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.DATE,
