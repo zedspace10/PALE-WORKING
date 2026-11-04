@@ -24,6 +24,9 @@ import {
 } from "@/constants/location";
 import {
   aimAt,
+  CATEGORIES,
+  resolveDestination,
+  type DestinationKind,
   arrivalWords,
   DEFAULT_DESTINATION,
   DESTINATIONS,
@@ -96,6 +99,13 @@ export function NotesScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [line, setLine] = useState("");
   const [to, setTo] = useState(DEFAULT_DESTINATION);
+  // Which kind of place the picker shows; follows the chosen place (Explore can choose one).
+  const kindOf = (id: string): DestinationKind =>
+    DESTINATIONS.find((d) => d.id === id)?.kind ?? "star";
+  const [kind, setKind] = useState<DestinationKind>(
+    kindOf(DEFAULT_DESTINATION),
+  );
+  useEffect(() => setKind(kindOf(to)), [to]);
   const [stage, setStage] = useState<Stage>("compose");
   const [current, setCurrent] = useState<Note | null>(null);
   const [aim, setAim] = useState<Aim | null | "none">(null);
@@ -217,15 +227,55 @@ export function NotesScreen() {
             <Text style={[styles.label, { color: colors.mutedForeground }]}>
               Follow it towards
             </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.kinds}
+              accessibilityRole="tablist"
+            >
+              {CATEGORIES.map((c) => {
+                const on = c.kind === kind;
+                return (
+                  <TouchableOpacity
+                    key={c.kind}
+                    onPress={() => setKind(c.kind)}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: on }}
+                    style={[
+                      styles.kind,
+                      {
+                        borderColor: on ? colors.primary : colors.border,
+                        backgroundColor: on
+                          ? colors.glassStrong
+                          : "transparent",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.kindText,
+                        {
+                          color: on
+                            ? colors.foreground
+                            : colors.mutedForeground,
+                        },
+                      ]}
+                    >
+                      {c.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
             <View style={styles.stars}>
-              {DESTINATIONS.map((d) => {
+              {DESTINATIONS.filter((d) => d.kind === kind).map((d) => {
                 const on = d.id === to;
                 return (
                   <TouchableOpacity
                     key={d.id}
                     onPress={() => setTo(d.id)}
                     accessibilityRole="button"
-                    accessibilityLabel={`${d.name}, ${arrivalWords(d)}`}
+                    accessibilityLabel={`${d.name}, ${arrivalWords(resolveDestination(d, now))}`}
                     accessibilityState={{ selected: on }}
                     style={[
                       styles.star,
@@ -266,7 +316,8 @@ export function NotesScreen() {
                 <Text
                   style={[styles.chosenLine, { color: colors.mutedForeground }]}
                 >
-                  {chosen.line} {capitalise(arrivalWords(chosen))}.
+                  {chosen.line}{" "}
+                  {capitalise(arrivalWords(resolveDestination(chosen, now)))}.
                 </Text>
               </View>
             )}
@@ -338,7 +389,9 @@ export function NotesScreen() {
                   <Text
                     style={[styles.body, { color: colors.mutedForeground }]}
                   >
-                    {`PALE will tell you as it passes the Sun, Jupiter, Neptune and Voyager 1${dest.ly <= 100 ? ", and when it arrives" : ""}.`}
+                    {dest.planet
+                      ? "PALE will tell you when it arrives."
+                      : `PALE will tell you as it passes each milestone on the way${dest.ly <= 100 ? ", and when it arrives" : ""}.`}
                   </Text>
                 )}
                 <TouchableOpacity
@@ -514,6 +567,15 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: 16,
   },
+  kinds: { gap: 8, paddingVertical: 2 },
+  kind: {
+    borderRadius: 18,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 36,
+    paddingHorizontal: 14,
+  },
+  kindText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   stars: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   star: {
     alignItems: "center",

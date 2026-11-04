@@ -15,7 +15,7 @@ import {
   noteLine,
   skyFor,
 } from "@/constants/exploreSky";
-import { newNote } from "@/constants/notes";
+import { DESTINATIONS, newNote } from "@/constants/notes";
 
 const london = { lat: 51.5, lng: -0.13 };
 const place = (id: string) => LOCATIONS.find((l) => l.id === id)!;
@@ -36,8 +36,9 @@ describe("the outward list", () => {
   });
 
   it("only links to note destinations the Notes screen knows", () => {
-    const known = ["proxima", "orion", "centre", "andromeda"];
+    const known = DESTINATIONS.map((d) => d.id);
     for (const l of LOCATIONS) if (l.noteTo) expect(known).toContain(l.noteTo);
+    expect(LOCATIONS.find((l) => l.id === "mars")?.noteTo).toBe("mars");
   });
 });
 

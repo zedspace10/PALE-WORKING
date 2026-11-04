@@ -2,13 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import {
   aimAt,
+  arrivalWords,
+  CATEGORIES,
   compassWords,
   DESTINATIONS,
+  destinationOf,
   morsePulses,
   newNote,
   noteLink,
   parseNotes,
   progressWords,
+  resolveDestination,
   signalSeconds,
   signalText,
   voyagerLightSeconds,
@@ -39,24 +43,71 @@ describe("notes shared with the website", () => {
     });
   });
 
-  it("only offers stars the website knows, and nothing about stars dying", () => {
+  it("offers the same places as the website, in the same order, and nothing about stars dying", () => {
+    // The website's list (cosmoscope/src/lib/notes.ts). Change both together.
     const website = [
+      "mercury",
+      "venus",
+      "mars",
+      "jupiter",
+      "saturn",
+      "uranus",
+      "neptune",
       "proxima",
       "sirius",
       "tau-ceti",
       "vega",
       "trappist",
+      "polaris",
       "pleiades",
-      "betelgeuse",
       "orion",
+      "eagle",
+      "gaia-bh1",
+      "cygnus-x1",
       "centre",
+      "m87",
+      "lmc",
       "andromeda",
+      "triangulum",
+      "sombrero",
     ];
+    expect(DESTINATIONS.map((d) => d.id)).toEqual(website);
     for (const d of DESTINATIONS) {
-      expect(website).toContain(d.id);
-      expect(d.line).not.toMatch(/end of its life|dying|death/i);
+      expect(d.line).not.toMatch(
+        /end of its life|dying|death|died|supernova|collapse/i,
+      );
+      expect(`${d.name} ${d.line}`).not.toMatch(/[\u2013\u2014]| - /);
     }
-    expect(DESTINATIONS.map((d) => d.id)).not.toContain("betelgeuse");
+    expect(CATEGORIES.map((c) => c.kind)).toEqual([
+      "planet",
+      "star",
+      "nebula",
+      "black-hole",
+      "galaxy",
+    ]);
+    for (const c of CATEGORIES) {
+      expect(DESTINATIONS.some((d) => d.kind === c.kind)).toBe(true);
+    }
+  });
+
+  it("aims a note to a planet where it will be, and gets there in minutes", () => {
+    // Checked against astropy for this moment: Mars was 11.68 light minutes away.
+    const at = Date.parse("2026-11-04T09:00:00Z");
+    const mars = resolveDestination(
+      DESTINATIONS.find((d) => d.id === "mars")!,
+      at,
+    );
+    expect(mars.ly * 525_960).toBeCloseTo(11.68, 1);
+    expect(mars.ra / 15).toBeCloseTo(9.526, 1);
+    expect(mars.dec).toBeCloseTo(16.42, 0);
+    const note = { id: "m", text: "Hi", sentAt: at, to: "mars" };
+    expect(arrivalWords(destinationOf(note))).toBe("arrives in 12 minutes");
+    expect(progressWords(note, at + 5 * 60_000)).toBe("past the Moon");
+    expect(progressWords(note, at + 20 * 60_000)).toBe("arrived at Mars");
+    const neptune = destinationOf({ ...note, to: "neptune" });
+    expect(arrivalWords(neptune)).toBe("arrives in about 4 hours");
+    // Old links to the centre of the galaxy still open, now as its black hole.
+    expect(destinationOf({ to: "centre" }).name).toBe("Sagittarius A*");
   });
 
   it("keeps saved notes readable and ignores anything malformed", () => {

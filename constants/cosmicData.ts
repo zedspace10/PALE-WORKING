@@ -142,6 +142,7 @@ const LOCATIONS_BASE: LocationBase[] = [
       scene: "blue-star",
       line: "From Mars, Earth looks like a bright blue star in the evening or morning sky, much as Venus looks to us.",
     },
+    noteTo: "mars",
     artworkKey: "mars",
   },
   {
@@ -160,6 +161,7 @@ const LOCATIONS_BASE: LocationBase[] = [
       scene: "dot-near-sun",
       line: "From Saturn, Earth is a tiny point close to the Sun's glare. In 2013 the Cassini spacecraft photographed it from there, and people on Earth went outside to wave.",
     },
+    noteTo: "saturn",
     artworkKey: "saturn",
   },
   {

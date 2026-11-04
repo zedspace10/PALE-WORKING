@@ -62,9 +62,12 @@ function spanWords(years: number): string {
 /** Every milestone still to come for one note, soonest first. */
 export function milestonesFor(note: Note, now: number): PlannedNote[] {
   const dest = destinationOf(note);
+  const arriveAt = note.sentAt + dest.ly * YEAR_MS;
   const out: PlannedNote[] = [];
   for (const m of marks(note.sentAt + 86_400_000)) {
     if (SKIP.has(m.name)) continue;
+    // A note to a planet arrives before it reaches the farther landmarks.
+    if (note.sentAt + m.seconds * 1000 >= arriveAt) continue;
     const at = note.sentAt + m.seconds * 1000;
     const extra =
       m.name === "Voyager 1" ? ", the farthest thing people have built" : "";
@@ -78,9 +81,9 @@ export function milestonesFor(note: Note, now: number): PlannedNote[] {
   if (dest.ly <= MAX_ARRIVAL_YEARS) {
     out.push({
       identifier: `${NOTE_ID_PREFIX}${note.id}-arrived`,
-      at: note.sentAt + dest.ly * YEAR_MS,
+      at: arriveAt,
       title: `Your note has reached ${dest.name}`,
-      body: `After ${spanWords(dest.ly)} at the speed of light.`,
+      body: `After ${dest.ly < 1 ? afterWords((arriveAt - note.sentAt) / 1000) : spanWords(dest.ly)} at the speed of light.`,
     });
   }
   return out.filter((p) => p.at > now + 30_000).sort((a, b) => a.at - b.at);
