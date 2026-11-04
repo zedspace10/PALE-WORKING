@@ -14,7 +14,7 @@ const read = (p: string) =>
 describe("Shift music", () => {
   it("was composed to the Shift's real timings", () => {
     // If this fails, the journey's timings changed: remake the track with
-    // scripts/audio/shift_ambient.py and update TRACK_CUES.
+    // scripts/audio/shift_piano.py and update TRACK_CUES.
     const starts = stageStartSeconds();
     expect(starts).toHaveLength(TRACK_CUES.length);
     starts.forEach((s, i) => expect(s).toBeCloseTo(TRACK_CUES[i], 1));

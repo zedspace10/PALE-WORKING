@@ -1,6 +1,6 @@
 /**
  * The Shift's timings, shared by the journey and its music. The music was composed to these
- * exact times (scripts/audio/shift_ambient.py), so if any of them change, remake the track and
+ * exact times (scripts/audio/shift_piano.py), so if any of them change, remake the track and
  * update TRACK_CUES; a test checks the two still agree.
  */
 
