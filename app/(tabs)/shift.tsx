@@ -390,17 +390,9 @@ export default function ShiftScreen() {
               <Text
                 style={[styles.beginSub, { color: colors.mutedForeground }]}
               >
-                sixty seconds to the edge of everything
+                About a minute, from Earth to everything we can see
               </Text>
             </MagicalAction>
-
-            {count > 0 ? (
-              <Text
-                style={[styles.countText, { color: colors.mutedForeground }]}
-              >
-                {count} {count === 1 ? "journey" : "journeys"} completed
-              </Text>
-            ) : null}
           </View>
         </View>
       ) : null}
@@ -623,11 +615,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     position: "relative",
     zIndex: 1,
-  },
-  countText: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    letterSpacing: 0.5,
   },
   journeyBackdrop: {
     ...StyleSheet.absoluteFillObject,

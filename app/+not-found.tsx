@@ -1,6 +1,7 @@
 import { Link, Stack } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
+import { StarField } from "@/components/StarField";
 import { useColors } from "@/hooks/useColors";
 
 export default function NotFoundScreen() {
@@ -8,15 +9,18 @@ export default function NotFoundScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Oops!" }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <StarField count={60} containerOpacity={0.5} />
         <Text style={[styles.title, { color: colors.foreground }]}>
-          This screen doesn&apos;t exist.
+          Nothing here
         </Text>
-
-        <Link href="/" style={styles.link}>
+        <Text style={[styles.body, { color: colors.mutedForeground }]}>
+          This page does not exist.
+        </Text>
+        <Link href="/" style={styles.link} accessibilityRole="link">
           <Text style={[styles.linkText, { color: colors.primary }]}>
-            Go to home screen!
+            Back to Home
           </Text>
         </Link>
       </View>
@@ -29,17 +33,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: 24,
+    gap: 8,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
-    fontSize: 14,
-  },
+  title: { fontSize: 22, lineHeight: 28, fontFamily: "Inter_600SemiBold" },
+  body: { fontSize: 15, lineHeight: 22, fontFamily: "Inter_400Regular" },
+  link: { marginTop: 12, paddingVertical: 12 },
+  linkText: { fontSize: 15, fontFamily: "Inter_500Medium" },
 });

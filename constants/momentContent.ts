@@ -73,7 +73,7 @@ export function getMomentLines(
       { text: "Good evening.", delay: 1400, style: "primary" },
       ...localSolarLines(solarState),
       {
-        text: "When it gets dark, look up.",
+        text: "If the sky is clear tonight, look up.",
         delay: 1200,
         style: "muted",
       },

@@ -79,7 +79,7 @@ describe("Home hero scene contracts", () => {
     expect(scene).not.toMatch(/<Image|https?:\/\/|require\(/);
   });
 
-  it("uses generated calm-space artwork instead of utility icons on home cards", () => {
+  it("draws each home card's picture in code, with no stock or generated images", () => {
     const home = read("app/(tabs)/index.tsx");
     const artwork = read("components/CardArtwork.tsx");
     const shift = read("app/(tabs)/shift.tsx");
@@ -89,10 +89,8 @@ describe("Home hero scene contracts", () => {
     expect(home).toContain('<CardArtwork name="timeMachine"');
     expect(home).toContain('<CardArtwork name="tonightsSky"');
     expect(shift).toContain('<CardArtwork name="shift" />');
-    expect(artwork).toContain("assets/images/home/observatory.jpg");
-    expect(artwork).toContain("assets/images/home/shift.jpg");
-    expect(artwork).toContain("assets/images/home/time-machine.jpg");
-    expect(artwork).toContain("assets/images/home/tonights-sky.jpg");
+    expect(artwork).toContain("react-native-svg");
+    expect(artwork).not.toMatch(/require\(|\.jpg|\.png/);
   });
 
   it("keeps the scene decorative and lifecycle-aware", () => {

@@ -145,10 +145,7 @@ export default function TimeMachineScreen() {
           </TouchableOpacity>
           <View style={styles.titleSection}>
             <Text style={[styles.title, { color: colors.foreground }]}>
-              Cosmic Time Machine
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-              from the Big Bang to what may come
+              Time Machine
             </Text>
           </View>
         </View>
@@ -278,12 +275,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.4,
-  },
-  subtitle: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    fontStyle: "italic",
-    lineHeight: 20,
   },
   banner: {
     borderRadius: 20,

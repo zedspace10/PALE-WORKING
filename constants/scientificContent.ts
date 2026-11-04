@@ -290,12 +290,6 @@ export function scientificMeta(
   return meta;
 }
 
-export function getScientificSources(
-  meta: ScientificContentMeta,
-): ScientificSource[] {
-  return meta.sourceIds.map((id) => SCIENTIFIC_SOURCES[id]);
-}
-
 export function getSourceAccessibilityLabel(source: ScientificSource): string {
   return `Open source: ${source.title}, ${source.publisher}`;
 }

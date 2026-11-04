@@ -125,14 +125,3 @@ export function findEveningSolarCrossing(
   }
   return { kind: "crossing", at: new Date(highMs), threshold };
 }
-
-/** Compatibility helper. Prefer findEveningSolarCrossing when polar states matter. */
-export function findDusk(
-  lat: number,
-  lng: number,
-  day: Date,
-  targetAltitude = DARK_ALTITUDE,
-): Date | null {
-  const result = findEveningSolarCrossing(lat, lng, day, targetAltitude);
-  return result.kind === "crossing" ? result.at : null;
-}

@@ -21,7 +21,7 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ["scripts/**/*.js", "server/**/*.js"],
+    files: ["scripts/**/*.js"],
     languageOptions: {
       globals: {
         __dirname: "readonly",

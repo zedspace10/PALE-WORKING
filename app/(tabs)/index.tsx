@@ -238,7 +238,7 @@ export default function HomeScreen() {
                 <Text
                   style={[styles.navSub, { color: colors.mutedForeground }]}
                 >
-                  a minute to the edge of everything
+                  From Earth to everything we can see
                 </Text>
               </View>
             </MagicalAction>
@@ -259,7 +259,7 @@ export default function HomeScreen() {
                 <Text
                   style={[styles.navSub, { color: colors.mutedForeground }]}
                 >
-                  the story of everything
+                  13.8 billion years, moment by moment
                 </Text>
               </View>
             </MagicalAction>
