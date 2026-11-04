@@ -1,45 +1,49 @@
 # PALE
 
-PALE is an Expo/React Native reflection app built around carefully qualified astronomy and cosmic-history content.
+PALE is an iOS app from Stellara: a calm place to look up. It shows where you are in the universe
+and what is in your sky tonight, with real distances and positions worked out on the phone.
 
-## Requirements
+Built with Expo (SDK 54), React Native and expo-router, in TypeScript.
 
-- Node.js 22.13 or newer
-- npm 10 or newer
-- A current OpenSpec CLI when changing or archiving specifications
+## What is in it
 
-## Setup
+- **Home**: the pale blue dot, tonight's Observatory entry, and a line about what is up after dark.
+- **Shift**: about a minute zooming out from Earth to everything we can see, with original music.
+- **Explore**: places from the Moon to the edge of what we can see, and this week's Hubble or Webb
+  picture from stellaraspace.com.
+- **Notes**: a line sent towards a planet, star, nebula, black hole or galaxy, followed at the
+  speed of light. The same journeys open on stellaraspace.com.
+- **Time Machine** and **Tonight's Sky**.
+
+PALE has no accounts and collects no data. Everything is stored on the phone; notifications are
+set on the phone itself.
+
+## Working on it
 
 ```powershell
 npm ci
-```
-
-## Development
-
-```powershell
 npm start
 ```
 
-Use `npm run android` or `npm run ios` to target a native development environment.
+Before a release, run `npm run verify`: formatting, lint, types, tests, content checks, and exports
+for every platform.
 
-## Verification
+## Releasing
 
-The normal local release gate is:
-
-```powershell
-npm run verify
-```
-
-It checks formatting, lint, TypeScript, the complete unit-test suite, scientific-content validation, and Expo exports for every configured platform. The individual commands are also available as `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:coverage`, `npm run verify:content`, and `npm run build`.
-
-Before completing an OpenSpec change, validate its artifacts separately:
+Builds are made with EAS and go to TestFlight:
 
 ```powershell
-npx --yes @fission-ai/openspec@1.13.0 validate <change-name> --strict
+npx eas-cli@latest build --platform ios --profile production --auto-submit
 ```
 
-Also run the SDK and dependency health checks documented in the active change's task list. Do not use forced dependency upgrades to silence audit output; investigate reachability and compatibility first.
+## Kept in step with the website
 
-## Content standards
+The note destinations (`constants/notes.ts`) and planet positions (`constants/ephemeris.ts`) match
+the Stellara website (`cosmoscope/src/lib/notes.ts` and `cosmoscope/src/lib/ephemeris.ts`). Change
+them together. The Shift music is made by `scripts/audio/shift_piano.py` and is timed to
+`constants/shiftTiming.ts`.
 
-Scientific copy must identify its evidence level, cite a primary source, and state uncertainty or observing conditions where relevant. Poetic reflection is welcome, but it must remain distinguishable from measurement or live observational guidance.
+## Content
+
+Scientific copy cites a source and says where it is uncertain. Reflection is kept apart from fact.
+No content about the death of stars, and no copyrighted quotes.

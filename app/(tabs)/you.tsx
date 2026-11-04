@@ -90,9 +90,7 @@ export default function YouScreen() {
             gap: 20,
           }}
         >
-          <Text style={[styles.title, { color: colors.foreground }]}>
-            Your place
-          </Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>You</Text>
           <Text style={[styles.onboardText, { color: colors.mutedForeground }]}>
             Add your birthday to see how far you have travelled around the Sun
             since you were born, and what we have discovered about the universe
@@ -176,12 +174,7 @@ export default function YouScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.sectionHeader}>
-          <Text style={[styles.title, { color: colors.foreground }]}>
-            Your place
-          </Text>
-          <Text style={[styles.titleSub, { color: colors.mutedForeground }]}>
-            in the cosmos
-          </Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>You</Text>
         </View>
 
         {/* Distance travelled, in real time */}
@@ -381,11 +374,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.4,
   },
-  titleSub: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    letterSpacing: 0.5,
-  },
   onboardText: {
     fontSize: 15,
     fontFamily: "Inter_400Regular",
@@ -437,8 +425,8 @@ const styles = StyleSheet.create({
   },
   bigNote: {
     fontSize: 12,
+    lineHeight: 17,
     fontFamily: "Inter_400Regular",
-    fontStyle: "italic",
     marginTop: 4,
   },
   row: { flexDirection: "row", gap: 12 },

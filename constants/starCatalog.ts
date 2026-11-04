@@ -571,11 +571,6 @@ export function findStarByAge(ageYears: number): Star {
   return closest;
 }
 
-// Backward compatibility
-export function findStarForAge(ageYears: number): Star {
-  return findStarByAge(ageYears);
-}
-
 export function getMoonPhase(date: Date): string {
   const refNewMoon = new Date("2000-01-06T18:14:00Z").getTime();
   const synodic = 29.53059 * 24 * 60 * 60 * 1000;
@@ -594,10 +589,4 @@ export function getMoonPhase(date: Date): string {
     "Last Quarter",
     "Waning Crescent",
   ][slice];
-}
-
-export function formatLargeInt(n: number): string {
-  return Math.floor(n)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

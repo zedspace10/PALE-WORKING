@@ -5,7 +5,6 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
@@ -33,8 +32,6 @@ import {
 SplashScreen.preventAutoHideAsync();
 // Fade out of the splash screen rather than cutting straight to the app (iOS).
 SplashScreen.setOptions({ fade: true, duration: 700 });
-
-const queryClient = new QueryClient();
 
 function RootLayoutNav({
   openCount,
@@ -229,16 +226,14 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView
-            style={{ flex: 1, backgroundColor: palette.dark.background }}
-          >
-            <RootLayoutNav
-              openCount={todayCount}
-              onReady={markFirstScreenReady}
-            />
-          </GestureHandlerRootView>
-        </QueryClientProvider>
+        <GestureHandlerRootView
+          style={{ flex: 1, backgroundColor: palette.dark.background }}
+        >
+          <RootLayoutNav
+            openCount={todayCount}
+            onReady={markFirstScreenReady}
+          />
+        </GestureHandlerRootView>
       </ErrorBoundary>
     </SafeAreaProvider>
   );

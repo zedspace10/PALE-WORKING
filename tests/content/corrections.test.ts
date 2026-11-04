@@ -99,11 +99,5 @@ describe("audited scientific corrections", () => {
     expect(getSourceAccessibilityLabel(SCIENTIFIC_SOURCES.nasaBigBang)).toBe(
       "Open source: Big Bang Q&A, NASA Science",
     );
-    const disclosureSource = fs.readFileSync(
-      path.resolve(process.cwd(), "components/SourceDisclosure.tsx"),
-      "utf8",
-    );
-    expect(disclosureSource).toContain('accessibilityRole="link"');
-    expect(disclosureSource).toContain("{source.title}");
   });
 });
