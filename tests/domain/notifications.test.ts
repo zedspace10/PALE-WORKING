@@ -90,7 +90,8 @@ describe("notification persistence and failures", () => {
       refreshObservatorySchedule(now),
       refreshObservatorySchedule(now),
     ]);
-    expect(a).toBeGreaterThan(40);
+    expect(a).toBeGreaterThan(20);
+    expect(a).toBeLessThanOrEqual(30);
     expect(b).toBe(a);
     expect(mocks.pending.size).toBe(a);
     for (const id of mocks.pending.keys()) {

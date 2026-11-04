@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
+import { NoteMilestonesToggle } from "@/components/NoteMilestonesToggle";
 import { ThisWeekToggle } from "@/components/ThisWeekToggle";
 import { MagicalAction } from "@/components/MagicalSurface";
 import { StarField } from "@/components/StarField";
@@ -346,6 +347,8 @@ export default function YouScreen() {
         )}
 
         <NightlyReminderToggle />
+
+        <NoteMilestonesToggle />
 
         <ThisWeekToggle />
 
