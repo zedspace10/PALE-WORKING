@@ -104,6 +104,18 @@ describe("Note milestone notifications", () => {
     );
   });
 
+  it("for a planet, only what comes before it arrives, then the arrival", () => {
+    // Mars was 11.7 light minutes away: past the Sun's distance (8 minutes), then there.
+    const at = Date.parse("2026-11-04T09:00:00Z");
+    const plan = milestonesFor(note("m", "mars", at), at);
+    expect(plan.map((p) => p.identifier)).toEqual([
+      "pale-note-m-sun",
+      "pale-note-m-arrived",
+    ]);
+    expect(plan[1].title).toBe("Your note has reached Mars");
+    expect(plan[1].body).toBe("After 12 minutes at the speed of light.");
+  });
+
   it("never puts the note's own words on the lock screen", () => {
     for (const p of milestonesFor(note("a", "proxima"), sent)) {
       expect(`${p.title} ${p.body}`).not.toContain("Something private");

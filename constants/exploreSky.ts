@@ -236,10 +236,16 @@ export function noteFor(place: Location, notes: Note[]): Note | null {
 export function noteLine(note: Note, now: number): string {
   const dest = destinationOf(note);
   const arrival = note.sentAt + dest.ly * YEAR_MS;
+  // A note to a planet gets there within hours.
+  if (now >= arrival) {
+    return `Your note “${note.text}” reached ${dest.name.replace(/^The /, "the ")} on ${new Date(arrival).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.`;
+  }
   const when =
     dest.ly < 100_000
       ? `It arrives in the year ${new Date(arrival).getFullYear().toLocaleString("en-GB", { useGrouping: false })}.`
-      : `It arrives in about ${(dest.ly / 1e6).toLocaleString("en-GB", { maximumFractionDigits: 1 })} million years.`;
+      : dest.ly < 1e6
+        ? `It arrives in about ${Math.round(dest.ly).toLocaleString("en-GB")} years.`
+        : `It arrives in about ${(dest.ly / 1e6).toLocaleString("en-GB", { maximumFractionDigits: 1 })} million years.`;
   return `Your note “${note.text}” has travelled ${formatKm(kmTravelled(note.sentAt, now))} so far. ${when}`;
 }
 

@@ -8,6 +8,8 @@
  */
 import { equatorialToHorizontal } from "@/constants/astronomy";
 import type { Coordinates } from "@/constants/location";
+import { heliocentric } from "@/constants/ephemeris";
+import type { PlanetId } from "@/constants/planets";
 
 export const NOTES_STORAGE_KEY = "@pale_notes";
 export const MAX_NOTE_LINE = 120;
@@ -15,101 +17,254 @@ export const C_KM_S = 299_792.458;
 const YEAR_MS = 365.25 * 86_400_000;
 const WEBSITE = "https://stellaraspace.com";
 
+export type DestinationKind =
+  "planet" | "star" | "nebula" | "black-hole" | "galaxy";
+
 export interface Destination {
   id: string;
   name: string;
-  /** A short name for the star picker. */
+  /** A short name for the picker. */
   short: string;
+  kind: DestinationKind;
   /** Right ascension and declination in degrees. */
   ra: number;
   dec: number;
   ly: number;
   line: string;
+  /** For a planet: which one. Its direction and distance depend on when the note is sent. */
+  planet?: PlanetId;
 }
 
-// The same stars, in the same order, as the website, so a link from either opens the same journey.
+export const CATEGORIES: { kind: DestinationKind; label: string }[] = [
+  { kind: "planet", label: "Planets" },
+  { kind: "star", label: "Stars" },
+  { kind: "nebula", label: "Nebulae and clusters" },
+  { kind: "black-hole", label: "Black holes" },
+  { kind: "galaxy", label: "Galaxies" },
+];
+
+const planet = (id: PlanetId, name: string, line: string): Destination => ({
+  id,
+  name,
+  short: name,
+  kind: "planet",
+  planet: id,
+  ra: 0,
+  dec: 0,
+  ly: 0,
+  line,
+});
+const place = (
+  id: string,
+  kind: DestinationKind,
+  name: string,
+  short: string,
+  raHours: number,
+  dec: number,
+  ly: number,
+  line: string,
+): Destination => ({ id, kind, name, short, ra: raHours * 15, dec, ly, line });
+
+// The same places, ids and order as the website (src/lib/notes.ts in the Stellara repository), so
+// a link from either opens the same journey. Planets move, so they are worked out when sent.
 export const DESTINATIONS: Destination[] = [
-  {
-    id: "proxima",
-    short: "Proxima Centauri",
-    name: "Proxima Centauri",
-    ra: 14.4953 * 15,
-    dec: -62.679,
-    ly: 4.24,
-    line: "The nearest star to the Sun.",
-  },
-  {
-    id: "sirius",
-    short: "Sirius",
-    name: "Sirius",
-    ra: 6.7525 * 15,
-    dec: -16.716,
-    ly: 8.6,
-    line: "The brightest star in the night sky.",
-  },
-  {
-    id: "tau-ceti",
-    short: "Tau Ceti",
-    name: "Tau Ceti",
-    ra: 1.7345 * 15,
-    dec: -15.937,
-    ly: 11.9,
-    line: "A quiet star much like the Sun.",
-  },
-  {
-    id: "vega",
-    short: "Vega",
-    name: "Vega",
-    ra: 18.6156 * 15,
-    dec: 38.784,
-    ly: 25,
-    line: "A bright blue white star, once the North Star.",
-  },
-  {
-    id: "trappist",
-    short: "TRAPPIST-1",
-    name: "TRAPPIST-1",
-    ra: 23.1081 * 15,
-    dec: -5.041,
-    ly: 40.7,
-    line: "A small star with seven rocky planets.",
-  },
-  {
-    id: "pleiades",
-    short: "The Pleiades",
-    name: "The Pleiades",
-    ra: 3.7908 * 15,
-    dec: 24.117,
-    ly: 444,
-    line: "The Seven Sisters, a cluster of young stars.",
-  },
-  {
-    id: "orion",
-    short: "Orion Nebula",
-    name: "The Orion Nebula",
-    ra: 5.5881 * 15,
-    dec: -5.391,
-    ly: 1344,
-    line: "A cloud where new stars are being born.",
-  },
-  {
-    id: "centre",
-    short: "Galactic centre",
-    name: "The centre of the Milky Way",
-    ra: 17.7611 * 15,
-    dec: -29.008,
-    ly: 26000,
-    line: "The heart of our galaxy.",
-  },
-  {
-    id: "andromeda",
-    short: "Andromeda",
-    name: "The Andromeda Galaxy",
-    ra: 0.7123 * 15,
-    dec: 41.269,
-    ly: 2.5e6,
-    line: "The nearest big galaxy.",
-  },
+  planet(
+    "mercury",
+    "Mercury",
+    "The smallest planet, and the closest to the Sun.",
+  ),
+  planet("venus", "Venus", "The brightest planet in our sky."),
+  planet(
+    "mars",
+    "Mars",
+    "The red planet, home to the tallest volcano we know of.",
+  ),
+  planet(
+    "jupiter",
+    "Jupiter",
+    "The largest planet, with a storm wider than Earth.",
+  ),
+  planet("saturn", "Saturn", "The ringed planet. Its rings are mostly ice."),
+  planet(
+    "uranus",
+    "Uranus",
+    "An ice giant that rolls around the Sun on its side.",
+  ),
+  planet(
+    "neptune",
+    "Neptune",
+    "The farthest planet, with the fastest winds we know of.",
+  ),
+  place(
+    "proxima",
+    "star",
+    "Proxima Centauri",
+    "Proxima Centauri",
+    14.4953,
+    -62.679,
+    4.24,
+    "The nearest star to the Sun.",
+  ),
+  place(
+    "sirius",
+    "star",
+    "Sirius",
+    "Sirius",
+    6.7525,
+    -16.716,
+    8.6,
+    "The brightest star in the night sky.",
+  ),
+  place(
+    "tau-ceti",
+    "star",
+    "Tau Ceti",
+    "Tau Ceti",
+    1.7345,
+    -15.937,
+    11.9,
+    "A quiet star much like the Sun.",
+  ),
+  place(
+    "vega",
+    "star",
+    "Vega",
+    "Vega",
+    18.6156,
+    38.784,
+    25,
+    "A bright blue white star, once the North Star.",
+  ),
+  place(
+    "trappist",
+    "star",
+    "TRAPPIST-1",
+    "TRAPPIST-1",
+    23.1081,
+    -5.041,
+    40.7,
+    "A small star with seven rocky planets.",
+  ),
+  place(
+    "polaris",
+    "star",
+    "Polaris",
+    "Polaris",
+    2.5303,
+    89.264,
+    433,
+    "The North Star, almost straight above Earth's north pole.",
+  ),
+  place(
+    "pleiades",
+    "nebula",
+    "The Pleiades",
+    "The Pleiades",
+    3.7908,
+    24.117,
+    444,
+    "The Seven Sisters, a cluster of young stars.",
+  ),
+  place(
+    "orion",
+    "nebula",
+    "The Orion Nebula",
+    "Orion Nebula",
+    5.5881,
+    -5.391,
+    1344,
+    "A cloud where new stars are being born.",
+  ),
+  place(
+    "eagle",
+    "nebula",
+    "The Eagle Nebula",
+    "Eagle Nebula",
+    18.3133,
+    -13.817,
+    5700,
+    "Home of the Pillars of Creation, where stars are forming.",
+  ),
+  place(
+    "gaia-bh1",
+    "black-hole",
+    "Gaia BH1",
+    "Gaia BH1",
+    17.4781,
+    -0.5811,
+    1560,
+    "The nearest black hole we know of, circled by a star much like the Sun.",
+  ),
+  place(
+    "cygnus-x1",
+    "black-hole",
+    "Cygnus X-1",
+    "Cygnus X-1",
+    19.9727,
+    35.2016,
+    7200,
+    "A black hole 21 times the Sun's mass, pulling gas from a giant blue star.",
+  ),
+  place(
+    "centre",
+    "black-hole",
+    "Sagittarius A*",
+    "Sagittarius A*",
+    17.7611,
+    -29.008,
+    26000,
+    "The black hole at the centre of our galaxy, four million times the Sun's mass.",
+  ),
+  place(
+    "m87",
+    "black-hole",
+    "M87*",
+    "M87*",
+    12.5137,
+    12.3911,
+    55e6,
+    "The first black hole ever photographed, 6.5 billion times the Sun's mass.",
+  ),
+  place(
+    "lmc",
+    "galaxy",
+    "The Large Magellanic Cloud",
+    "Large Magellanic Cloud",
+    5.3929,
+    -69.756,
+    160000,
+    "A small galaxy circling our own, seen from the southern hemisphere.",
+  ),
+  place(
+    "andromeda",
+    "galaxy",
+    "The Andromeda Galaxy",
+    "Andromeda",
+    0.7123,
+    41.269,
+    2.5e6,
+    "The nearest big galaxy.",
+  ),
+  place(
+    "triangulum",
+    "galaxy",
+    "The Triangulum Galaxy",
+    "Triangulum",
+    1.5641,
+    30.6603,
+    2.73e6,
+    "The third largest galaxy in our Local Group.",
+  ),
+  place(
+    "sombrero",
+    "galaxy",
+    "The Sombrero Galaxy",
+    "Sombrero Galaxy",
+    12.6665,
+    -11.6231,
+    31e6,
+    "Seen almost edge on, with a bright core and a dark band of dust.",
+  ),
 ];
 
 export const DEFAULT_DESTINATION = "sirius";
@@ -123,11 +278,51 @@ export interface Note {
   light?: boolean;
 }
 
-export function destinationOf(note: Pick<Note, "to">): Destination {
-  return (
-    DESTINATIONS.find((d) => d.id === note.to) ??
-    (DESTINATIONS.find((d) => d.id === DEFAULT_DESTINATION) as Destination)
-  );
+const LY_KM = 9_460_730_472_580.8;
+
+const AU_KM = 149_597_870.7;
+const EPS = (23.4392911 * Math.PI) / 180;
+
+/**
+ * A destination as it was at the moment `at`. Stars stay put; for a planet, the note is aimed where
+ * the planet will be when the light gets there, from where Earth was at sending. Worked out exactly
+ * as the website does, with the same planet table (constants/ephemeris.ts).
+ */
+export function resolveDestination(d: Destination, at: number): Destination {
+  if (!d.planet) return d;
+  const earth = heliocentric("earth", at);
+  if (!earth) return d;
+  let arrive = at;
+  let v = { x: 0, y: 0, z: 0 };
+  for (let i = 0; i < 3; i++) {
+    const p = heliocentric(d.planet, arrive);
+    if (!p) return d;
+    v = { x: p.x - earth.x, y: p.y - earth.y, z: p.z - earth.z };
+    arrive = at + ((Math.hypot(v.x, v.y, v.z) * AU_KM) / C_KM_S) * 1000;
+  }
+  const km = Math.hypot(v.x, v.y, v.z) * AU_KM;
+  const xe = v.x;
+  const ye = v.y * Math.cos(EPS) - v.z * Math.sin(EPS);
+  const ze = v.y * Math.sin(EPS) + v.z * Math.cos(EPS);
+  let ra = (Math.atan2(ye, xe) * 180) / Math.PI;
+  if (ra < 0) ra += 360;
+  const dec = (Math.atan2(ze, Math.hypot(xe, ye)) * 180) / Math.PI;
+  return { ...d, ra, dec, ly: km / LY_KM };
+}
+
+/** Where a note is going, as it was when it was sent. */
+export function destinationOf(
+  note: Pick<Note, "to"> & { sentAt?: number },
+): Destination {
+  const d =
+    DESTINATIONS.find((x) => x.id === note.to) ??
+    (DESTINATIONS.find((x) => x.id === DEFAULT_DESTINATION) as Destination);
+  return resolveDestination(d, note.sentAt ?? Date.now());
+}
+
+/** How long a note's light takes to get there, in seconds. */
+export function travelSeconds(dest: Destination): number {
+  return (dest.ly * YEAR_MS) / 1000;
 }
 
 export function newNote(text: string, to: string, now = Date.now()): Note {
@@ -215,6 +410,15 @@ export function progressWords(note: Note, now: number): string {
 }
 
 export function arrivalWords(dest: Destination): string {
+  const seconds = travelSeconds(dest);
+  if (seconds < 3600) {
+    const m = Math.max(1, Math.round(seconds / 60));
+    return `arrives in ${m} ${m === 1 ? "minute" : "minutes"}`;
+  }
+  if (seconds < 86_400) {
+    const h = Math.round(seconds / 3600);
+    return `arrives in about ${h} ${h === 1 ? "hour" : "hours"}`;
+  }
   if (dest.ly >= 1000) {
     return `arrives in ${Math.round(dest.ly).toLocaleString("en-GB")} years`;
   }
