@@ -40,6 +40,11 @@ import {
   type Aim,
   type Note,
 } from "@/constants/notes";
+import {
+  areNoteMilestonesOn,
+  refreshNoteMilestones,
+  setNoteMilestones,
+} from "@/constants/noteMilestones";
 import { useColors } from "@/hooks/useColors";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
@@ -121,9 +126,18 @@ export function NotesScreen() {
 
   const save = (next: Note[]) => {
     setNotes(next);
-    AsyncStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(next)).catch(
-      () => undefined,
-    );
+    AsyncStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(next))
+      .then(() => refreshNoteMilestones())
+      .catch(() => undefined);
+  };
+
+  // Whether PALE will say when each note passes a milestone; offered once a note is sent.
+  const [milestonesOn, setMilestonesOn] = useState<boolean | null>(null);
+  useEffect(() => {
+    areNoteMilestonesOn().then(setMilestonesOn);
+  }, []);
+  const turnOnMilestones = async () => {
+    setMilestonesOn(await setNoteMilestones(true).catch(() => false));
   };
 
   const send = () => {
@@ -305,6 +319,26 @@ export function NotesScreen() {
                 {current.light && (
                   <Text style={[styles.body, { color: colors.primary }]}>
                     You also sent it as real light from your phone.
+                  </Text>
+                )}
+                {milestonesOn === false && (
+                  <TouchableOpacity
+                    onPress={turnOnMilestones}
+                    accessibilityRole="button"
+                    style={button}
+                  >
+                    <Text
+                      style={[styles.primaryText, { color: colors.foreground }]}
+                    >
+                      Tell me as it passes each milestone
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {milestonesOn === true && (
+                  <Text
+                    style={[styles.body, { color: colors.mutedForeground }]}
+                  >
+                    {`PALE will tell you as it passes the Sun, Jupiter, Neptune and Voyager 1${dest.ly <= 100 ? ", and when it arrives" : ""}.`}
                   </Text>
                 )}
                 <TouchableOpacity

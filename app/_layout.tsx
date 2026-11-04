@@ -47,7 +47,8 @@ function RootLayoutNav({
   // Keep the nightly notifications in step with the app.
   useNotificationSchedule();
 
-  // Tapping the weekly picture's notification opens it (phones only; the web has no notifications).
+  // Tapping a notification opens what it is about: the weekly picture, or Notes for a note's
+  // milestone (phones only; the web has no notifications).
   const router = useRouter();
   const handledResponse = useRef<string | null>(null);
   useEffect(() => {
@@ -56,9 +57,11 @@ function RootLayoutNav({
       if (!response) return;
       const id = response.notification.request.identifier;
       const url = response.notification.request.content.data?.url;
-      if (handledResponse.current === id || url !== "/this-week") return;
+      if (handledResponse.current === id) return;
+      if (url === "/this-week") router.push("/this-week");
+      else if (url === "/notes") router.push("/(tabs)/notes");
+      else return;
       handledResponse.current = id;
-      router.push("/this-week");
     };
     // Opened from the notification when PALE was closed, or while it was running.
     Notifications.getLastNotificationResponseAsync()

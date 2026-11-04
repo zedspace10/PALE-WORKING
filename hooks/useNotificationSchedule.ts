@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { AppState, AppStateStatus } from "react-native";
 
+import { refreshNoteMilestones } from "@/constants/noteMilestones";
 import { refreshObservatorySchedule } from "@/constants/notifications";
 
 /**
@@ -17,10 +18,12 @@ import { refreshObservatorySchedule } from "@/constants/notifications";
 export function useNotificationSchedule() {
   useEffect(() => {
     refreshObservatorySchedule().catch(() => {});
+    refreshNoteMilestones().catch(() => {});
 
     const sub = AppState.addEventListener("change", (next: AppStateStatus) => {
       if (next === "active") {
         refreshObservatorySchedule().catch(() => {});
+        refreshNoteMilestones().catch(() => {});
       }
     });
 

@@ -11,7 +11,9 @@ import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
 const ENABLED_KEY = "pale_notifications_enabled";
 export const NOTIFICATION_IDS_KEY = "pale_observatory_notification_ids";
 const CHANNEL_ID = "observatory";
-const DAYS_AHEAD = 50;
+// An iPhone holds at most 64 scheduled notifications for an app. The Observatory takes the next 30
+// evenings (topped up every time PALE opens), note milestones up to 30, and This week one.
+const DAYS_AHEAD = 30;
 /** Every Observatory reminder is named for its evening, so scheduling one again replaces it. */
 export const OBSERVATORY_ID_PREFIX = "pale-observatory-";
 const OBSERVATORY_TITLE_PREFIX = "The Observatory:";

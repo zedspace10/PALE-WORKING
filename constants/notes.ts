@@ -192,7 +192,8 @@ export function voyagerLightSeconds(at: number): number {
   );
 }
 
-function marks(now: number): { name: string; seconds: number }[] {
+/** The landmarks a note passes on its way out, with how many seconds after sending. */
+export function marks(now: number): { name: string; seconds: number }[] {
   return [
     { name: "the Moon", seconds: 1.28 },
     { name: "the Sun's distance", seconds: 499 },
