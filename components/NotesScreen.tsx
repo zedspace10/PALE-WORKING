@@ -34,12 +34,15 @@ import {
   formatKm,
   heightWords,
   kmTravelled,
+  LET_GO_ASK,
+  LET_GO_DONE,
   MAX_NOTE_LINE,
   newNote,
   noteLink,
   NOTES_STORAGE_KEY,
   parseNotes,
   progressWords,
+  withoutNote,
   type Aim,
   type Note,
 } from "@/constants/notes";
@@ -179,6 +182,72 @@ export function NotesScreen() {
     setStage("sent");
   };
 
+  // Letting a note go asks once, in place, then removes it from the phone.
+  const [letGoId, setLetGoId] = useState<string | null>(null);
+  // Where to say it has gone: at the top after letting go of the note just sent, or in the list.
+  const [letGone, setLetGone] = useState<"top" | "list" | null>(null);
+  useEffect(() => {
+    if (!letGone) return;
+    const id = setTimeout(() => setLetGone(null), 6000);
+    return () => clearTimeout(id);
+  }, [letGone]);
+  const letGo = (id: string) => {
+    save(withoutNote(notes, id));
+    setLetGoId(null);
+    setLetGone(current?.id === id ? "top" : "list");
+    if (current?.id === id) {
+      setCurrent(null);
+      setLine("");
+      setStage("compose");
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  const letGoControls = (id: string) =>
+    letGoId === id ? (
+      <View
+        style={[
+          styles.letGoAsk,
+          { borderColor: colors.border, backgroundColor: colors.card },
+        ]}
+      >
+        <Text style={[styles.noteMeta, { color: colors.foreground }]}>
+          {LET_GO_ASK}
+        </Text>
+        <View style={styles.letGoRow}>
+          <TouchableOpacity
+            onPress={() => letGo(id)}
+            accessibilityRole="button"
+            style={styles.letGoButton}
+          >
+            <Text style={[styles.link, { color: colors.primary }]}>
+              Let it go
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setLetGoId(null)}
+            accessibilityRole="button"
+            style={styles.letGoButton}
+          >
+            <Text style={[styles.link, { color: colors.mutedForeground }]}>
+              Keep it
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    ) : (
+      <TouchableOpacity
+        onPress={() => setLetGoId(id)}
+        accessibilityRole="button"
+        accessibilityHint="Removes this note from your phone"
+        style={styles.letGoButton}
+      >
+        <Text style={[styles.link, { color: colors.mutedForeground }]}>
+          Let it go
+        </Text>
+      </TouchableOpacity>
+    );
+
   const dest = current ? destinationOf(current) : null;
   const chosen = DESTINATIONS.find((d) => d.id === to) ?? null;
   const others = useMemo(
@@ -199,6 +268,14 @@ export function NotesScreen() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
+        {letGone === "top" && (
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[styles.body, { color: colors.primary }]}
+          >
+            {LET_GO_DONE}
+          </Text>
+        )}
         {stage === "compose" && (
           <View style={styles.section}>
             <Text style={[styles.title, { color: colors.foreground }]}>
@@ -425,6 +502,7 @@ export function NotesScreen() {
                     Write another
                   </Text>
                 </TouchableOpacity>
+                <View style={styles.centred}>{letGoControls(current.id)}</View>
               </View>
             )}
 
@@ -483,6 +561,15 @@ export function NotesScreen() {
           </View>
         )}
 
+        {letGone === "list" && (
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[styles.body, { color: colors.primary }]}
+          >
+            {LET_GO_DONE}
+          </Text>
+        )}
+
         {others.length > 0 && stage !== "aim" && (
           <View style={styles.section}>
             <Text style={[styles.label, { color: colors.mutedForeground }]}>
@@ -505,16 +592,21 @@ export function NotesScreen() {
                     {progressWords(n, now)}.
                     {n.light ? " Also sent as light." : ""}
                   </Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      Linking.openURL(noteLink(n)).catch(() => undefined)
-                    }
-                    accessibilityRole="link"
-                  >
-                    <Text style={[styles.link, { color: colors.primary }]}>
-                      Follow it
-                    </Text>
-                  </TouchableOpacity>
+                  <View style={styles.letGoRow}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        Linking.openURL(noteLink(n)).catch(() => undefined)
+                      }
+                      accessibilityRole="link"
+                      style={styles.letGoButton}
+                    >
+                      <Text style={[styles.link, { color: colors.primary }]}>
+                        Follow it
+                      </Text>
+                    </TouchableOpacity>
+                    {letGoId !== n.id && letGoControls(n.id)}
+                  </View>
+                  {letGoId === n.id && letGoControls(n.id)}
                 </View>
               );
             })}
@@ -603,6 +695,10 @@ const styles = StyleSheet.create({
   noteRow: { borderTopWidth: 1, gap: 4, paddingTop: 12 },
   noteText: { fontSize: 15, lineHeight: 22, fontFamily: "Inter_500Medium" },
   noteMeta: { fontSize: 13, lineHeight: 19, fontFamily: "Inter_400Regular" },
+  centred: { alignItems: "center" },
+  letGoRow: { flexDirection: "row", gap: 20, alignItems: "center" },
+  letGoButton: { minHeight: 44, justifyContent: "center" },
+  letGoAsk: { borderRadius: 14, borderWidth: 1, gap: 4, padding: 14 },
   link: {
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",

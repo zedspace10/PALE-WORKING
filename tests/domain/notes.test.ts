@@ -7,6 +7,8 @@ import {
   compassWords,
   DESTINATIONS,
   destinationOf,
+  LET_GO_ASK,
+  LET_GO_DONE,
   morsePulses,
   newNote,
   noteLink,
@@ -16,6 +18,7 @@ import {
   signalSeconds,
   signalText,
   voyagerLightSeconds,
+  withoutNote,
 } from "@/constants/notes";
 
 // How the Stellara website reads a note link (src/lib/notes.ts, noteFromHash).
@@ -200,5 +203,23 @@ describe("pointing at the star", () => {
     expect(compassWords(0)).toBe("north");
     expect(compassWords(135)).toBe("south east");
     expect(compassWords(359)).toBe("north");
+  });
+});
+
+describe("letting a note go", () => {
+  it("removes only that note, and keeps the rest in order", () => {
+    const a = newNote("one", "sirius", 1);
+    const b = newNote("two", "vega", 2);
+    const c = newNote("three", "mars", 3);
+    expect(withoutNote([a, b, c], b.id)).toEqual([a, c]);
+    expect(withoutNote([a, c], "missing")).toEqual([a, c]);
+  });
+
+  it("says plainly that the light cannot be called back", () => {
+    expect(LET_GO_ASK).toContain("keeps travelling");
+    expect(LET_GO_DONE).toContain("keeps travelling");
+    for (const line of [LET_GO_ASK, LET_GO_DONE]) {
+      expect(line).not.toMatch(/[\u2013\u2014]| - /);
+    }
   });
 });
