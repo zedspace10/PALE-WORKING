@@ -23,7 +23,8 @@ interface Props {
 
 /**
  * The opening of PALE: one faint blue point in a field of stars, the way Earth looked to Voyager 1.
- * No globe and no big numbers; two quiet sentences underneath.
+ * It pulses slowly, a ring of light leaving it every few seconds. No globe and no big numbers;
+ * two quiet sentences underneath.
  */
 export function PaleDotHero({
   days,
@@ -35,13 +36,31 @@ export function PaleDotHero({
   const colors = useColors();
   const breath = useRef(new Animated.Value(reduceMotion ? 1 : 0.6)).current;
   const words = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
+  // A ring of light that leaves the dot and fades, like a slow heartbeat.
+  const ripple = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (reduceMotion) {
       breath.setValue(1);
       words.setValue(1);
+      ripple.setValue(0);
       return;
     }
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ripple, {
+          toValue: 1,
+          duration: 3200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ripple, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(breath, {
@@ -67,12 +86,14 @@ export function PaleDotHero({
       }),
     ]);
     loop.start();
+    pulse.start();
     show.start();
     return () => {
       loop.stop();
+      pulse.stop();
       show.stop();
     };
-  }, [breath, words, reduceMotion]);
+  }, [breath, words, ripple, reduceMotion]);
 
   return (
     <View style={styles.wrap}>
@@ -82,9 +103,44 @@ export function PaleDotHero({
         accessibilityRole="image"
         accessibilityLabel="Earth, a single pale blue point of light. You are here."
       >
+        {!reduceMotion ? (
+          <Animated.View
+            style={[
+              styles.ripple,
+              {
+                opacity: ripple.interpolate({
+                  inputRange: [0, 0.15, 1],
+                  outputRange: [0, 0.55, 0],
+                }),
+                transform: [
+                  {
+                    scale: ripple.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.4, 5.5],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
+        ) : null}
         <Animated.View style={[styles.haloOuter, { opacity: breath }]} />
         <Animated.View style={[styles.halo, { opacity: breath }]} />
-        <View style={styles.dot} />
+        <Animated.View
+          style={[
+            styles.dot,
+            {
+              transform: [
+                {
+                  scale: breath.interpolate({
+                    inputRange: [0.6, 1],
+                    outputRange: [0.85, 1.2],
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
         <Text style={[styles.here, { color: colors.mutedForeground }]}>
           You are here
         </Text>
@@ -167,14 +223,22 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(141,200,255,0.05)",
+    backgroundColor: "rgba(141,200,255,0.07)",
+  },
+  ripple: {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(160,212,255,0.9)",
   },
   halo: {
     position: "absolute",
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "rgba(141,200,255,0.12)",
+    backgroundColor: "rgba(141,200,255,0.18)",
   },
   dot: {
     width: 5,

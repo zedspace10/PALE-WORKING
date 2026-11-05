@@ -20,10 +20,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CalmPressable } from "@/components/CalmPressable";
-import { CardArtwork } from "@/components/CardArtwork";
+import { BeginShiftButton } from "@/components/BeginShiftButton";
 import { HomeLocationSphere } from "@/components/HomeHeroScene";
 import { IllustrationDisclosure } from "@/components/IllustrationDisclosure";
-import { MagicalAction } from "@/components/MagicalSurface";
 import { ShiftZoomScene } from "@/components/ShiftZoomScene";
 import { StarField } from "@/components/StarField";
 import { SHIFT_STAGES } from "@/constants/cosmicData";
@@ -362,11 +361,15 @@ export default function ShiftScreen() {
             { paddingTop: topPad, paddingBottom: bottomPad + 80 },
           ]}
         >
+          <View style={styles.spacer} />
+
           <View style={styles.orbCenter}>
-            <HomeLocationSphere
-              active={ambientMotionActive}
-              testID="shift-entry-sphere"
-            />
+            <View style={styles.orbScale}>
+              <HomeLocationSphere
+                active={ambientMotionActive}
+                testID="shift-entry-sphere"
+              />
+            </View>
           </View>
 
           <Text style={[styles.youAreHere, { color: colors.foreground }]}>
@@ -375,25 +378,11 @@ export default function ShiftScreen() {
 
           <View style={styles.spacer} />
 
-          <View style={styles.ctaSection}>
-            <MagicalAction
-              onPress={beginJourney}
-              wrapperStyle={styles.beginBtnWrap}
-              accessibilityRole="button"
-              accessibilityLabel="Begin the Shift"
-              contentStyle={styles.beginBtn}
-            >
-              <CardArtwork name="shift" />
-              <Text style={[styles.beginText, { color: colors.foreground }]}>
-                Begin the Shift
-              </Text>
-              <Text
-                style={[styles.beginSub, { color: colors.mutedForeground }]}
-              >
-                About a minute, from Earth to everything we can see
-              </Text>
-            </MagicalAction>
-          </View>
+          <BeginShiftButton
+            onPress={beginJourney}
+            reduceMotion={reduceMotion}
+            active={ambientMotionActive}
+          />
         </View>
       ) : null}
 
@@ -583,9 +572,11 @@ const styles = StyleSheet.create({
   orbCenter: {
     alignItems: "center",
     justifyContent: "center",
-    width: 120,
-    height: 120,
+    width: 200,
+    height: 200,
   },
+  // The sphere is drawn at 120 points; shown larger here so the screen has one clear subject.
+  orbScale: { width: 120, height: 120, transform: [{ scale: 1.6 }] },
   youAreHere: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
@@ -593,29 +584,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   spacer: { flex: 1 },
-  ctaSection: { width: "100%", gap: 16, alignItems: "center" },
-  beginBtnWrap: { width: "100%" },
-  beginBtn: {
-    width: "100%",
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    alignItems: "flex-start",
-    justifyContent: "flex-end",
-    gap: 5,
-    minHeight: 120,
-  },
-  beginText: {
-    ...calmTypography.cardTitle,
-    position: "relative",
-    zIndex: 1,
-  },
-  beginSub: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    letterSpacing: 0.2,
-    position: "relative",
-    zIndex: 1,
-  },
   journeyBackdrop: {
     ...StyleSheet.absoluteFillObject,
     overflow: "hidden",

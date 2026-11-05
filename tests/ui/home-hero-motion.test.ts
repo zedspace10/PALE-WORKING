@@ -88,7 +88,7 @@ describe("Home hero scene contracts", () => {
     expect(home).toContain('<CardArtwork name="shift"');
     expect(home).toContain('<CardArtwork name="timeMachine"');
     expect(home).toContain('<CardArtwork name="tonightsSky"');
-    expect(shift).toContain('<CardArtwork name="shift" />');
+    expect(shift).toContain("<BeginShiftButton");
     for (const file of [
       "observatory",
       "shift",
@@ -125,6 +125,9 @@ describe("Home hero scene contracts", () => {
     expect(hero).toContain("You are here");
     expect(hero).toContain("13.8 billion years old.");
     expect(hero).toContain("reduceMotion");
+    // The dot pulses: a ring of light leaves it, and stays still when motion is reduced.
+    expect(hero).toContain("styles.ripple");
+    expect(hero).toContain("!reduceMotion ?");
   });
 
   it("zooms out through nested pictures in Shift, then flies home", () => {
