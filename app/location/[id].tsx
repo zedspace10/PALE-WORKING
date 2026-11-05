@@ -19,6 +19,7 @@ import { TravelThere } from "@/components/TravelThere";
 import { StarField } from "@/components/StarField";
 import { LOCATIONS } from "@/constants/cosmicData";
 import { EXPLORE_ARTWORK } from "@/constants/exploreArtworkAssets";
+import { photoCreditLine } from "@/constants/pictureCredits";
 import {
   canFindNow,
   lightLeftFor,
@@ -138,7 +139,7 @@ export default function LocationScreen() {
               { color: colors.mutedForeground, top: topPad + 22 },
             ]}
           >
-            Illustration
+            {photoCreditLine(location.artworkKey) ?? "Illustration"}
           </Text>
         </View>
 

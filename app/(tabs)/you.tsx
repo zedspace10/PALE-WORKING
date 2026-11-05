@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NightlyReminderToggle } from "@/components/NightlyReminderToggle";
 import { NoteMilestonesToggle } from "@/components/NoteMilestonesToggle";
+import { PictureCredits } from "@/components/PictureCredits";
 import { ThisWeekToggle } from "@/components/ThisWeekToggle";
 import { MagicalAction } from "@/components/MagicalSurface";
 import { StarField } from "@/components/StarField";
@@ -360,6 +361,8 @@ export default function YouScreen() {
             Change birthday
           </Text>
         </TouchableOpacity>
+
+        <PictureCredits />
       </ScrollView>
     </View>
   );
