@@ -157,6 +157,25 @@ describe("Note milestone notifications", () => {
     vi.useRealTimers();
   });
 
+  it("drops a note's reminders once it is let go, and keeps the others", async () => {
+    mocks.storage.set(
+      NOTES_STORAGE_KEY,
+      JSON.stringify([note("a", "sirius"), note("b", "vega")]),
+    );
+    vi.useFakeTimers();
+    vi.setSystemTime(sent + 1000);
+    await setNoteMilestones(true);
+    const before = [...mocks.pending.keys()];
+    expect(before.some((id) => id.startsWith("pale-note-a-"))).toBe(true);
+    mocks.storage.set(NOTES_STORAGE_KEY, JSON.stringify([note("b", "vega")]));
+    await refreshNoteMilestones();
+    const after = [...mocks.pending.keys()];
+    expect(after.some((id) => id.startsWith("pale-note-a-"))).toBe(false);
+    expect(after.some((id) => id.startsWith("pale-note-b-"))).toBe(true);
+    await setNoteMilestones(false);
+    vi.useRealTimers();
+  });
+
   it("leaves other notifications alone", async () => {
     mocks.pending.set("pale-observatory-2026-11-05", {
       identifier: "pale-observatory-2026-11-05",

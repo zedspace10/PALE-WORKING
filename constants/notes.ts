@@ -334,6 +334,19 @@ export function newNote(text: string, to: string, now = Date.now()): Note {
   };
 }
 
+/**
+ * Letting a note go: it leaves the phone, and its milestone reminders go with it. A note cannot
+ * be called back; the light it became keeps travelling.
+ */
+export function withoutNote(notes: Note[], id: string): Note[] {
+  return notes.filter((n) => n.id !== id);
+}
+
+export const LET_GO_ASK =
+  "Let this note go? It will disappear from your phone. The light it became keeps travelling.";
+export const LET_GO_DONE =
+  "It is gone from your phone. The light keeps travelling.";
+
 export function parseNotes(raw: string | null): Note[] {
   if (!raw) return [];
   try {
