@@ -33,6 +33,13 @@ export function photoCreditLine(key: ExploreArtworkKey): string | null {
   return c ? `Photo: ${c.credit}` : null;
 }
 
+/**
+ * The illustrations are rendered for PALE. Mars, Saturn and Earth are painted with planet maps
+ * from Solar System Scope, which ask for this credit.
+ */
+export const ILLUSTRATION_NOTE =
+  "Every other picture is an illustration made for PALE. Mars, Saturn and Earth use planet maps by Solar System Scope (solarsystemscope.com), CC BY 4.0.";
+
 /** Every credit, for the list on the You tab. */
 export function allPictureCredits(): PictureCredit[] {
   return Object.values(PHOTO_CREDITS).filter(

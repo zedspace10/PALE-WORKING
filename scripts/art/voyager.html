@@ -1,0 +1,239 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="importmap">
+      { "imports": { "three": "./three.module.js" } }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { W, H, makeRenderer, stars, rng } from "./common.mjs";
+      const renderer = makeRenderer();
+      renderer.toneMappingExposure = 1.1;
+      const s = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 2000);
+
+      // Sunlight from far away: one hard light, almost nothing else.
+      const sunDir = new THREE.Vector3(-0.78, 0.32, 0.54).normalize();
+      const sun = new THREE.DirectionalLight(0xfff4e0, 3.4);
+      sun.position.copy(sunDir.clone().multiplyScalar(30));
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(4096, 4096);
+      Object.assign(sun.shadow.camera, {
+        left: -8,
+        right: 8,
+        top: 8,
+        bottom: -8,
+        near: 1,
+        far: 70,
+      });
+      sun.shadow.bias = -0.0003;
+      s.add(sun);
+      const fill = new THREE.DirectionalLight(0x8ea4d0, 0.6);
+      fill.position.set(5, -1, 4);
+      s.add(fill);
+      s.add(new THREE.AmbientLight(0x202430, 0.15));
+
+      const white = new THREE.MeshStandardMaterial({
+        color: 0xdedbd2,
+        roughness: 0.4,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+      });
+      const gold = new THREE.MeshStandardMaterial({
+        color: 0xc9a25a,
+        roughness: 0.32,
+        metalness: 0.9,
+      });
+      const foil = new THREE.MeshStandardMaterial({
+        color: 0x2a2620,
+        roughness: 0.6,
+        metalness: 0.5,
+      });
+      const metal = new THREE.MeshStandardMaterial({
+        color: 0x9a9a98,
+        roughness: 0.45,
+        metalness: 0.8,
+      });
+      const dark = new THREE.MeshStandardMaterial({
+        color: 0x1b1b1d,
+        roughness: 0.7,
+        metalness: 0.2,
+      });
+      const sc = new THREE.Group();
+      s.add(sc);
+      const add = (geo, mat, pos, rot) => {
+        const m = new THREE.Mesh(geo, mat);
+        if (pos) m.position.set(...pos);
+        if (rot) m.rotation.set(...rot);
+        m.castShadow = m.receiveShadow = true;
+        sc.add(m);
+        return m;
+      };
+
+      // High gain antenna: a 3.7 m dish facing +z (towards Earth and the Sun).
+      const pts = [];
+      for (let i = 0; i <= 40; i++) {
+        const r = (1.85 * i) / 40;
+        pts.push(new THREE.Vector2(r, (r * r) / (4 * 1.6)));
+      }
+      const dish = add(
+        new THREE.LatheGeometry(pts, 128),
+        white,
+        [0, 0, 0.55],
+        [Math.PI / 2, 0, 0],
+      );
+      add(new THREE.TorusGeometry(1.85, 0.025, 8, 128), white, [
+        0,
+        0,
+        0.55 + (1.85 * 1.85) / 6.4,
+      ]);
+      // Ribs on the back of the dish.
+      // Feed struts and subreflector.
+      const focal = new THREE.Vector3(0, 0, 0.55 + 1.6);
+      for (let k = 0; k < 4; k++) {
+        const a = (k / 4) * Math.PI * 2 + Math.PI / 4;
+        const base = new THREE.Vector3(
+          Math.cos(a) * 1.4,
+          Math.sin(a) * 1.4,
+          0.55 + 1.96 / 6.4,
+        );
+        const len = base.distanceTo(focal);
+        const m = add(new THREE.CylinderGeometry(0.018, 0.018, len, 8), metal);
+        m.position.copy(base.clone().add(focal).multiplyScalar(0.5));
+        m.lookAt(focal);
+        m.rotateX(Math.PI / 2);
+      }
+      add(
+        new THREE.CylinderGeometry(0.22, 0.16, 0.12, 32),
+        white,
+        [0, 0, focal.z],
+        [Math.PI / 2, 0, 0],
+      );
+      // Bus: the ten sided body under the dish, wrapped in dark foil, with the gold record on one face.
+      add(
+        new THREE.CylinderGeometry(0.89, 0.89, 0.47, 10),
+        foil,
+        [0, 0, 0.12],
+        [Math.PI / 2, 0, 0],
+      );
+      add(
+        new THREE.CylinderGeometry(0.15, 0.15, 0.6, 24),
+        metal,
+        [0, 0, -0.35],
+        [Math.PI / 2, 0, 0],
+      );
+      const rec = add(
+        new THREE.CylinderGeometry(0.16, 0.16, 0.02, 48),
+        gold,
+        [0.0, -0.86, 0.12],
+        [0, 0, 0],
+      );
+      add(new THREE.SphereGeometry(0.28, 32, 16), foil, [0, 0, -0.5]);
+      // RTG boom: three power units with fins, out to one side.
+      const boomA = add(
+        new THREE.CylinderGeometry(0.03, 0.03, 2.6, 8),
+        metal,
+        [-1.95, -0.35, 0.05],
+        [0, 0, Math.PI / 2 + 0.15],
+      );
+      for (let k = 0; k < 3; k++) {
+        const x = -1.6 - k * 0.55,
+          y = -0.3 - k * 0.08;
+        add(
+          new THREE.CylinderGeometry(0.2, 0.2, 0.5, 6),
+          dark,
+          [x, y, 0.05],
+          [0, 0, Math.PI / 2 + 0.15],
+        );
+        for (let f = 0; f < 6; f++) {
+          const a = (f / 6) * Math.PI * 2;
+          add(
+            new THREE.BoxGeometry(0.46, 0.2, 0.012),
+            dark,
+            [x, y + Math.cos(a) * 0.27, 0.05 + Math.sin(a) * 0.27],
+            [a, 0, 0.15],
+          );
+        }
+      }
+      // Science boom with the scan platform and its cameras, out to the other side.
+      add(
+        new THREE.CylinderGeometry(0.035, 0.035, 2.4, 8),
+        metal,
+        [1.85, -0.25, 0.0],
+        [0, 0, Math.PI / 2 - 0.1],
+      );
+      add(new THREE.BoxGeometry(0.55, 0.42, 0.5), foil, [3.05, -0.38, 0.0]);
+      add(
+        new THREE.CylinderGeometry(0.12, 0.12, 0.7, 24),
+        white,
+        [3.05, -0.38, 0.45],
+        [Math.PI / 2, 0, 0],
+      );
+      add(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.5, 24),
+        white,
+        [3.32, -0.2, 0.38],
+        [Math.PI / 2, 0, 0],
+      );
+      add(new THREE.BoxGeometry(0.25, 0.25, 0.3), gold, [2.6, -0.3, 0.1]);
+      // Magnetometer boom: very long and thin, running far off frame.
+      add(
+        new THREE.CylinderGeometry(0.02, 0.02, 13, 6),
+        metal,
+        [-1.0, 6.6, -0.4],
+        [0.06, 0, 0.18],
+      );
+      // Two long plasma wave antennas in a V.
+      for (const sgn of [-1, 1])
+        add(
+          new THREE.CylinderGeometry(0.01, 0.01, 10, 4),
+          metal,
+          [sgn * 1.2, -5.0, -0.3],
+          [0, 0, sgn * -0.25],
+        );
+
+      sc.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), sunDir);
+      sc.rotateZ(0.5);
+      s.add(stars(5200, 300, 21, 2.6));
+      // The Sun, a very bright point in the distance, more than 160 times further than from Earth.
+      const sunPt = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: (() => {
+            const c = document.createElement("canvas");
+            c.width = c.height = 256;
+            const g = c.getContext("2d");
+            const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+            gr.addColorStop(0, "rgba(255,250,235,1)");
+            gr.addColorStop(0.04, "rgba(255,244,220,0.9)");
+            gr.addColorStop(0.15, "rgba(255,220,170,0.18)");
+            gr.addColorStop(1, "rgba(255,200,150,0)");
+            g.fillStyle = gr;
+            g.fillRect(0, 0, 256, 256);
+            const t = new THREE.CanvasTexture(c);
+            t.colorSpace = THREE.SRGBColorSpace;
+            return t;
+          })(),
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+
+      cam.position.set(0.6, -0.4, 21);
+      // Point the camera so the Sun sits in frame, top left.
+      cam.lookAt(new THREE.Vector3(0.2, 0.1, 0));
+      renderer.render(s, cam);
+      window.done = true;
+    </script>
+  </body>
+</html>

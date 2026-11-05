@@ -1,0 +1,257 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="importmap">
+      { "imports": { "three": "./three.module.js" } }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import {
+        q,
+        W,
+        H,
+        makeRenderer,
+        load,
+        stars,
+        atmosphere,
+        rng,
+      } from "./common.mjs";
+      const renderer = makeRenderer();
+      const s = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(22, W / H, 0.1, 1000);
+
+      async function mars() {
+        const tex = await load("mars.webp");
+        const L = new THREE.Vector3(-2.6, 0.9, 3.4);
+        const light = new THREE.DirectionalLight(0xfff1e2, 3.4);
+        light.position.copy(L);
+        s.add(light);
+        s.add(new THREE.AmbientLight(0x2a1c16, 0.06));
+        const m = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 256, 256),
+          new THREE.MeshStandardMaterial({
+            map: tex,
+            bumpMap: tex,
+            bumpScale: 2.0,
+            roughness: 0.95,
+            metalness: 0,
+          }),
+        );
+        m.rotation.set(0.12, 3.9, 0.44);
+        s.add(m);
+        s.add(atmosphere(1, 0.022, 0xf0b08a, 0.9, L));
+        s.add(stars(900, 60, 7));
+        cam.position.set(0, 0, 8.9);
+        cam.lookAt(0, 0, 0);
+      }
+
+      // Saturn's rings built from their real radii (in Saturn radii): C, B, Cassini Division, A, Encke Gap.
+      function ringStrip() {
+        const N = 2048,
+          data = new Uint8Array(N * 4),
+          rnd = rng(42);
+        const inner = 1.236,
+          outer = 2.269;
+        let wob = 0;
+        const fine = [];
+        for (let i = 0; i < N; i++) {
+          wob = wob * 0.86 + (rnd() - 0.5) * 0.5;
+          fine.push(wob);
+        }
+        for (let i = 0; i < N; i++) {
+          const r = inner + (i / (N - 1)) * (outer - inner);
+          let a = 0,
+            col = [0.78, 0.74, 0.68];
+          if (r < 1.528) {
+            a = 0.1 + (0.1 * (r - 1.236)) / 0.29;
+            col = [0.55, 0.5, 0.46];
+          } // C ring
+          else if (r < 1.951) {
+            const x = (r - 1.528) / 0.423;
+            a = 0.72 + 0.24 * Math.sin(Math.min(x, 1) * Math.PI * 0.9);
+            col = [0.84, 0.79, 0.7];
+          } // B ring
+          else if (r < 2.027) {
+            a = 0.06 + (r > 1.99 && r < 2.0 ? 0.08 : 0);
+            col = [0.5, 0.47, 0.44];
+          } // Cassini Division
+          else if (r < 2.269) {
+            a = 0.58 - (0.12 * (r - 2.027)) / 0.242;
+            col = [0.78, 0.75, 0.7];
+            if (Math.abs(r - 2.2165) < 0.0035) a = 0.04;
+            if (r > 2.255) a *= (2.269 - r) / 0.014;
+          } // A ring
+          a = Math.max(0, Math.min(1, a * (1 + fine[i] * 0.18)));
+          const shade = 0.95 + fine[i] * 0.06;
+          data.set(
+            [
+              col[0] * 255 * shade,
+              col[1] * 255 * shade,
+              col[2] * 255 * shade,
+              a * 255,
+            ],
+            i * 4,
+          );
+        }
+        const t = new THREE.DataTexture(data, N, 1);
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.magFilter = THREE.LinearFilter;
+        t.minFilter = THREE.LinearFilter;
+        t.needsUpdate = true;
+        return { t, inner, outer };
+      }
+
+      async function saturn() {
+        const tex = await load("saturn.webp");
+        const L = new THREE.Vector3(-5, 2.6, 4.2).normalize();
+        const light = new THREE.DirectionalLight(0xfff5e6, 3.1);
+        light.position.copy(L.clone().multiplyScalar(8));
+        light.castShadow = true;
+        light.shadow.mapSize.set(4096, 4096);
+        Object.assign(light.shadow.camera, {
+          left: -2.6,
+          right: 2.6,
+          top: 2.6,
+          bottom: -2.6,
+          near: 1,
+          far: 20,
+        });
+        light.shadow.bias = -0.0005;
+        light.shadow.radius = 3;
+        s.add(light);
+        s.add(new THREE.AmbientLight(0x1a1a22, 0.05));
+        const g = new THREE.Group();
+        g.rotation.set(0.36, 0, -0.42);
+        s.add(g);
+        const planet = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 256, 256),
+          new THREE.MeshStandardMaterial({ map: tex, roughness: 1 }),
+        );
+        planet.scale.set(1, 0.902, 1);
+        planet.rotation.y = 1.2;
+        planet.castShadow = true;
+        planet.receiveShadow = true;
+        g.add(planet);
+        const { t, inner, outer } = ringStrip();
+        const rg = new THREE.RingGeometry(inner, outer, 512, 8);
+        const pos = rg.attributes.position,
+          uv = rg.attributes.uv,
+          v3 = new THREE.Vector3();
+        for (let i = 0; i < pos.count; i++) {
+          v3.fromBufferAttribute(pos, i);
+          uv.setXY(i, (v3.length() - inner) / (outer - inner), 0.5);
+        }
+        // Rings: lit from the Sun's side, a little light passes through, and the planet's shadow falls across them.
+        const ringMat = new THREE.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          uniforms: {
+            map: { value: t },
+            L: { value: L },
+            inv: { value: new THREE.Matrix4() },
+          },
+          vertexShader: `varying vec2 vUv; varying vec3 wp; varying vec3 wn; void main(){ vUv = uv; vec4 w = modelMatrix*vec4(position,1.); wp = w.xyz; wn = normalize(mat3(modelMatrix)*normal); gl_Position = projectionMatrix*viewMatrix*w; }`,
+          fragmentShader: `uniform sampler2D map; uniform vec3 L; uniform mat4 inv; varying vec2 vUv; varying vec3 wp; varying vec3 wn;
+      void main(){ vec4 c = texture2D(map, vUv); c.rgb = pow(c.rgb, vec3(2.2));
+        // shadow: does the ray towards the Sun hit the (oblate) planet?
+        vec3 o = (inv*vec4(wp,1.)).xyz; vec3 d = normalize((inv*vec4(L,0.)).xyz);
+        o.y /= 0.902; d.y /= 0.902; float b = dot(o,d), cc = dot(o,o)-1., a2 = dot(d,d); float disc = b*b - a2*cc;
+        float sh = (disc > 0. && -b > 0.) ? 0.04 : 1.0;
+        float facing = dot(wn, L); vec3 V = normalize(cameraPosition - wp); bool sameSide = sign(dot(wn, V)) == sign(facing);
+        float light = sameSide ? 1.0 : 0.35*(1.0 - c.a);
+        gl_FragColor = vec4(c.rgb*light*sh*1.25, c.a); }`,
+        });
+        const ring = new THREE.Mesh(rg, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.castShadow = true;
+        ring.customDepthMaterial = new THREE.MeshDepthMaterial({
+          depthPacking: THREE.RGBADepthPacking,
+          map: t,
+          alphaTest: 0.45,
+        });
+        g.add(ring);
+        g.updateMatrixWorld(true);
+        ringMat.uniforms.inv.value.copy(g.matrixWorld).invert();
+        s.add(stars(800, 60, 3));
+        cam.position.set(0, 0, 17.2);
+        cam.lookAt(0, 0, 0);
+      }
+
+      async function earth() {
+        const [tex, clouds] = await Promise.all([
+          load("earth.webp"),
+          load("earth-clouds.webp"),
+        ]);
+        // Oceans shine, land does not: build a roughness map from the colour map.
+        const img = tex.image;
+        const cv = document.createElement("canvas");
+        cv.width = img.width;
+        cv.height = img.height;
+        const cx = cv.getContext("2d");
+        cx.drawImage(img, 0, 0);
+        const d = cx.getImageData(0, 0, cv.width, cv.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+          const [r, g, b] = [d.data[i], d.data[i + 1], d.data[i + 2]];
+          const ocean = b > r * 1.25 && b > g * 1.05;
+          const v = ocean ? 150 : 245;
+          d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
+        }
+        cx.putImageData(d, 0, 0);
+        const rough = new THREE.CanvasTexture(cv);
+        const L = new THREE.Vector3(-3.5, 1.2, 2.4).normalize();
+        const light = new THREE.DirectionalLight(0xfffaf2, 3.4);
+        light.position.copy(L);
+        s.add(light);
+        s.add(new THREE.AmbientLight(0x0a1020, 0.04));
+        const e = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 256, 256),
+          new THREE.MeshStandardMaterial({
+            map: tex,
+            roughnessMap: rough,
+            roughness: 1,
+            metalness: 0,
+          }),
+        );
+        e.rotation.set(0.2, -2.0, 0.41);
+        s.add(e);
+        const c = new THREE.Mesh(
+          new THREE.SphereGeometry(1.006, 256, 256),
+          new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            alphaMap: clouds,
+            transparent: true,
+            depthWrite: false,
+            roughness: 1,
+          }),
+        );
+        c.rotation.copy(e.rotation);
+        c.rotation.y += 0.6;
+        s.add(c);
+        s.add(atmosphere(1, 0.035, 0x5aa6ff, 1.5, L));
+        s.add(stars(700, 60, 11));
+        // Card: Earth sits right of centre, large, partly lit, like the old card.
+        cam.fov = 26;
+        cam.updateProjectionMatrix();
+        cam.position.set(-0.95, 0.0, 4.6);
+        cam.lookAt(-0.95, 0.0, 0);
+      }
+
+      const scenes = { mars, saturn, earth };
+      await scenes[q.get("scene")]();
+      renderer.render(s, cam);
+      window.done = true;
+    </script>
+  </body>
+</html>
