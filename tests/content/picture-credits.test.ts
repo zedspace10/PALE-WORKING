@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { EXPLORE_ARTWORK_KEYS } from "@/constants/exploreArtwork";
 import {
   allPictureCredits,
+  ILLUSTRATION_NOTE,
   photoCreditLine,
   PHOTO_CREDITS,
 } from "@/constants/pictureCredits";
@@ -24,6 +25,12 @@ describe("picture credits", () => {
       expect(c.credit).toMatch(/NASA|ESA|STScI|JPL|CSA/);
     }
     expect(allPictureCredits().length).toBe(Object.keys(PHOTO_CREDITS).length);
+  });
+
+  it("credits the planet maps the illustrations are painted with", () => {
+    expect(ILLUSTRATION_NOTE).toContain("Solar System Scope");
+    expect(ILLUSTRATION_NOTE).toContain("CC BY 4.0");
+    expect(ILLUSTRATION_NOTE).not.toMatch(/[\u2013\u2014]| - /);
   });
 
   it("shows the credits on the You tab and on each place", () => {

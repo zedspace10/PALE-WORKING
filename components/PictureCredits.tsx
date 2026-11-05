@@ -1,15 +1,16 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { allPictureCredits } from "@/constants/pictureCredits";
+import {
+  allPictureCredits,
+  ILLUSTRATION_NOTE,
+} from "@/constants/pictureCredits";
 import { useColors } from "@/hooks/useColors";
 
-/** At the foot of the You tab: who took each real photograph in PALE. */
+/** At the foot of the You tab: who took each real photograph in PALE, and where the rest come from. */
 export function PictureCredits() {
   const colors = useColors();
   const credits = allPictureCredits();
-  if (credits.length === 0) return null;
-
   return (
     <View style={styles.wrap}>
       <Text style={[styles.heading, { color: colors.mutedForeground }]}>
@@ -24,6 +25,9 @@ export function PictureCredits() {
           {c.licence === "Public domain" ? "." : ", cropped."}
         </Text>
       ))}
+      <Text style={[styles.line, { color: colors.mutedForeground }]}>
+        {ILLUSTRATION_NOTE}
+      </Text>
     </View>
   );
 }
