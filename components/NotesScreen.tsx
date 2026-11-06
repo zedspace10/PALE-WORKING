@@ -15,6 +15,18 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LightSignal } from "@/components/LightSignal";
+import {
+  JOURNAL_STORAGE_KEY,
+  KEPT_LINE,
+  keptOnWords,
+  LET_GO_KEPT_ASK,
+  MAX_JOURNAL_ENTRY,
+  newEntry,
+  parseJournal,
+  TOO_LONG_TO_SEND,
+  withoutEntry,
+  type JournalEntry,
+} from "@/constants/journal";
 import { StarField } from "@/components/StarField";
 import {
   LOCATION_CACHE_KEY,
@@ -84,7 +96,8 @@ async function findWhere(): Promise<Coordinates | null> {
   }
 }
 
-type Stage = "compose" | "sent" | "aim" | "light";
+// Write first, then keep it or send it. Choosing where only comes after "Send it".
+type Stage = "compose" | "where" | "kept" | "sent" | "aim" | "light";
 
 const capitalise = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
@@ -129,9 +142,22 @@ export function NotesScreen() {
   }, [params.to]);
   useResetScrollOnFocus(scrollRef);
 
+  const [journal, setJournal] = useState<JournalEntry[]>([]);
+  // The kept entry being sent out, so it moves from Kept to Sent once it goes.
+  const [sendingFrom, setSendingFrom] = useState<string | null>(null);
+  const saveJournal = (next: JournalEntry[]) => {
+    setJournal(next);
+    AsyncStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(next)).catch(
+      () => undefined,
+    );
+  };
+
   useEffect(() => {
     AsyncStorage.getItem(NOTES_STORAGE_KEY)
       .then((raw) => setNotes(parseNotes(raw)))
+      .catch(() => undefined);
+    AsyncStorage.getItem(JOURNAL_STORAGE_KEY)
+      .then((raw) => setJournal(parseJournal(raw)))
       .catch(() => undefined);
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
@@ -153,10 +179,34 @@ export function NotesScreen() {
     setMilestonesOn(await setNoteMilestones(true).catch(() => false));
   };
 
+  const tooLong = line.trim().length > MAX_NOTE_LINE;
+  const keep = () => {
+    if (!line.trim()) return;
+    saveJournal([newEntry(line), ...journal]);
+    setLine("");
+    setStage("kept");
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+  const chooseWhere = () => {
+    if (tooLong) return;
+    setStage("where");
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+  const sendOut = (entry: JournalEntry) => {
+    setLine(entry.text);
+    setSendingFrom(entry.id);
+    setStage(entry.text.length > MAX_NOTE_LINE ? "compose" : "where");
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
   const send = () => {
     const text = line.trim() || "Hello from Earth.";
     const note = newNote(text, to);
     save([note, ...notes]);
+    if (sendingFrom) {
+      saveJournal(withoutEntry(journal, sendingFrom));
+      setSendingFrom(null);
+    }
     setCurrent(note);
     setStage("sent");
     scrollRef.current?.scrollTo({ y: 0, animated: true });
@@ -192,6 +242,11 @@ export function NotesScreen() {
     return () => clearTimeout(id);
   }, [letGone]);
   const letGo = (id: string) => {
+    if (journal.some((e) => e.id === id)) {
+      saveJournal(withoutEntry(journal, id));
+      setLetGoId(null);
+      return;
+    }
     save(withoutNote(notes, id));
     setLetGoId(null);
     setLetGone(current?.id === id ? "top" : "list");
@@ -212,7 +267,7 @@ export function NotesScreen() {
         ]}
       >
         <Text style={[styles.noteMeta, { color: colors.foreground }]}>
-          {LET_GO_ASK}
+          {journal.some((e) => e.id === id) ? LET_GO_KEPT_ASK : LET_GO_ASK}
         </Text>
         <View style={styles.letGoRow}>
           <TouchableOpacity
@@ -279,21 +334,23 @@ export function NotesScreen() {
         {stage === "compose" && (
           <View style={styles.section}>
             <Text style={[styles.title, { color: colors.foreground }]}>
-              Send a note to the universe
+              Write it down
             </Text>
             <Text style={[styles.body, { color: colors.mutedForeground }]}>
-              Write a line and pick where it goes. PALE keeps track of how far
-              it has travelled at the speed of light.
+              Keep it for yourself, or send it out at the speed of light.
             </Text>
             <TextInput
               value={line}
               onChangeText={setLine}
-              maxLength={MAX_NOTE_LINE}
-              placeholder="Hello from Earth."
+              maxLength={MAX_JOURNAL_ENTRY}
+              multiline
+              textAlignVertical="top"
+              placeholder="What is on your mind?"
               placeholderTextColor={colors.mutedForeground + "80"}
-              accessibilityLabel="Your line"
+              accessibilityLabel="What you want to write"
               style={[
                 styles.input,
+                styles.writing,
                 {
                   color: colors.foreground,
                   backgroundColor: colors.glassStrong,
@@ -301,6 +358,93 @@ export function NotesScreen() {
                 },
               ]}
             />
+            {tooLong && (
+              <Text
+                style={[styles.noteMeta, { color: colors.mutedForeground }]}
+              >
+                {TOO_LONG_TO_SEND(MAX_NOTE_LINE)}
+              </Text>
+            )}
+            <View style={styles.choice}>
+              <TouchableOpacity
+                onPress={keep}
+                disabled={!line.trim()}
+                accessibilityRole="button"
+                accessibilityHint="Saves it on this phone only"
+                accessibilityState={{ disabled: !line.trim() }}
+                style={[
+                  styles.primary,
+                  styles.choiceButton,
+                  {
+                    borderColor: colors.border,
+                    opacity: line.trim() ? 1 : 0.45,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.primaryText, { color: colors.foreground }]}
+                >
+                  Keep it
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={chooseWhere}
+                disabled={tooLong}
+                accessibilityRole="button"
+                accessibilityHint="Choose where it travels"
+                accessibilityState={{ disabled: tooLong }}
+                style={[
+                  styles.primary,
+                  styles.choiceButton,
+                  {
+                    borderColor: colors.primary,
+                    opacity: tooLong ? 0.45 : 1,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.primaryText, { color: colors.foreground }]}
+                >
+                  Send it
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {stage === "kept" && (
+          <View style={styles.section}>
+            <Text style={[styles.title, { color: colors.foreground }]}>
+              Kept.
+            </Text>
+            <Text style={[styles.body, { color: colors.mutedForeground }]}>
+              {KEPT_LINE}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setStage("compose")}
+              accessibilityRole="button"
+              style={styles.secondary}
+            >
+              <Text
+                style={[
+                  styles.secondaryText,
+                  { color: colors.mutedForeground },
+                ]}
+              >
+                Write another
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {stage === "where" && (
+          <View style={styles.section}>
+            <Text style={[styles.title, { color: colors.foreground }]}>
+              Where should it go?
+            </Text>
+            <Text style={[styles.quote, { color: colors.foreground }]}>
+              “{line.trim() || "Hello from Earth."}”
+            </Text>
             <Text style={[styles.label, { color: colors.mutedForeground }]}>
               Follow it towards
             </Text>
@@ -404,162 +548,186 @@ export function NotesScreen() {
               style={[styles.primary, { borderColor: colors.primary }]}
             >
               <Text style={[styles.primaryText, { color: colors.foreground }]}>
-                Send it
+                Send it to {chosen?.short ?? "the stars"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setStage("compose")}
+              accessibilityRole="button"
+              style={styles.secondary}
+            >
+              <Text
+                style={[
+                  styles.secondaryText,
+                  { color: colors.mutedForeground },
+                ]}
+              >
+                Back
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {current && dest && stage !== "compose" && (
-          <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.primary }]}>
-              On its way to {dest.name}
-            </Text>
-            <Text style={[styles.title, { color: colors.foreground }]}>
-              It has left Earth.
-            </Text>
-            <Text style={[styles.quote, { color: colors.foreground }]}>
-              “{current.text}”
-            </Text>
-            <Text style={[styles.big, { color: colors.primary }]}>
-              {formatKm(kmTravelled(current.sentAt, now))}
-            </Text>
-            <Text style={[styles.body, { color: colors.mutedForeground }]}>
-              {capitalise(progressWords(current, now))}, travelling at the speed
-              of light. It {arrivalWords(dest)}.
-            </Text>
+        {current &&
+          dest &&
+          (stage === "sent" || stage === "aim" || stage === "light") && (
+            <View style={styles.section}>
+              <Text style={[styles.label, { color: colors.primary }]}>
+                On its way to {dest.name}
+              </Text>
+              <Text style={[styles.title, { color: colors.foreground }]}>
+                It has left Earth.
+              </Text>
+              <Text style={[styles.quote, { color: colors.foreground }]}>
+                “{current.text}”
+              </Text>
+              <Text style={[styles.big, { color: colors.primary }]}>
+                {formatKm(kmTravelled(current.sentAt, now))}
+              </Text>
+              <Text style={[styles.body, { color: colors.mutedForeground }]}>
+                {capitalise(progressWords(current, now))}, travelling at the
+                speed of light. It {arrivalWords(dest)}.
+              </Text>
 
-            {stage === "sent" && (
-              <View style={styles.actions}>
-                {!current.light && (
-                  <TouchableOpacity
-                    onPress={startAim}
-                    accessibilityRole="button"
-                    style={[styles.primary, { borderColor: colors.primary }]}
-                  >
-                    <Text
-                      style={[styles.primaryText, { color: colors.foreground }]}
+              {stage === "sent" && (
+                <View style={styles.actions}>
+                  {!current.light && (
+                    <TouchableOpacity
+                      onPress={startAim}
+                      accessibilityRole="button"
+                      style={[styles.primary, { borderColor: colors.primary }]}
                     >
-                      Send it with real light
+                      <Text
+                        style={[
+                          styles.primaryText,
+                          { color: colors.foreground },
+                        ]}
+                      >
+                        Send it with real light
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {current.light && (
+                    <Text style={[styles.body, { color: colors.primary }]}>
+                      You also sent it as real light from your phone.
                     </Text>
-                  </TouchableOpacity>
-                )}
-                {current.light && (
-                  <Text style={[styles.body, { color: colors.primary }]}>
-                    You also sent it as real light from your phone.
-                  </Text>
-                )}
-                {milestonesOn === false && (
+                  )}
+                  {milestonesOn === false && (
+                    <TouchableOpacity
+                      onPress={turnOnMilestones}
+                      accessibilityRole="button"
+                      style={button}
+                    >
+                      <Text
+                        style={[
+                          styles.primaryText,
+                          { color: colors.foreground },
+                        ]}
+                      >
+                        Tell me as it passes each milestone
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {milestonesOn === true && (
+                    <Text
+                      style={[styles.body, { color: colors.mutedForeground }]}
+                    >
+                      {dest.planet
+                        ? "PALE will tell you when it arrives."
+                        : `PALE will tell you as it passes each milestone, and on each year it travels${dest.ly <= 100 ? ", until it arrives" : ""}.`}
+                    </Text>
+                  )}
                   <TouchableOpacity
-                    onPress={turnOnMilestones}
-                    accessibilityRole="button"
+                    onPress={() =>
+                      Linking.openURL(noteLink(current)).catch(() => undefined)
+                    }
+                    accessibilityRole="link"
                     style={button}
                   >
                     <Text
                       style={[styles.primaryText, { color: colors.foreground }]}
                     >
-                      Tell me as it passes each milestone
+                      Follow it on the website
                     </Text>
                   </TouchableOpacity>
-                )}
-                {milestonesOn === true && (
-                  <Text
-                    style={[styles.body, { color: colors.mutedForeground }]}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setCurrent(null);
+                      setLine("");
+                      setStage("compose");
+                    }}
+                    accessibilityRole="button"
+                    style={styles.secondary}
                   >
-                    {dest.planet
-                      ? "PALE will tell you when it arrives."
-                      : `PALE will tell you as it passes each milestone, and on each year it travels${dest.ly <= 100 ? ", until it arrives" : ""}.`}
-                  </Text>
-                )}
-                <TouchableOpacity
-                  onPress={() =>
-                    Linking.openURL(noteLink(current)).catch(() => undefined)
-                  }
-                  accessibilityRole="link"
-                  style={button}
-                >
-                  <Text
-                    style={[styles.primaryText, { color: colors.foreground }]}
-                  >
-                    Follow it on the website
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setCurrent(null);
-                    setLine("");
-                    setStage("compose");
-                  }}
-                  accessibilityRole="button"
-                  style={styles.secondary}
-                >
-                  <Text
-                    style={[
-                      styles.secondaryText,
-                      { color: colors.mutedForeground },
-                    ]}
-                  >
-                    Write another
-                  </Text>
-                </TouchableOpacity>
-                <View style={styles.centred}>{letGoControls(current.id)}</View>
-              </View>
-            )}
+                    <Text
+                      style={[
+                        styles.secondaryText,
+                        { color: colors.mutedForeground },
+                      ]}
+                    >
+                      Write another
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={styles.centred}>
+                    {letGoControls(current.id)}
+                  </View>
+                </View>
+              )}
 
-            {stage === "aim" && (
-              <View style={styles.actions}>
-                {aim === null && (
-                  <Text
-                    style={[styles.body, { color: colors.mutedForeground }]}
+              {stage === "aim" && (
+                <View style={styles.actions}>
+                  {aim === null && (
+                    <Text
+                      style={[styles.body, { color: colors.mutedForeground }]}
+                    >
+                      Finding {dest.name} in your sky…
+                    </Text>
+                  )}
+                  {aim !== null && aim !== "none" && aim.kind === "up" && (
+                    <Text style={[styles.aim, { color: colors.foreground }]}>
+                      Face {aim.direction}, and point the phone{" "}
+                      {heightWords(aim.alt)}. {dest.name} is there, whether or
+                      not you can see it.
+                    </Text>
+                  )}
+                  {aim !== null && aim !== "none" && aim.kind === "below" && (
+                    <Text style={[styles.aim, { color: colors.foreground }]}>
+                      {dest.name} is below your horizon right now
+                      {aim.risesAt
+                        ? `, and rises at about ${aim.risesAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                        : ""}
+                      . You can send the light then, or point it straight up
+                      now, and it will travel out among the stars all the same.
+                    </Text>
+                  )}
+                  {aim === "none" && (
+                    <Text style={[styles.aim, { color: colors.foreground }]}>
+                      Without your location PALE cannot tell where {dest.name}{" "}
+                      is tonight. Point the phone straight up instead; the light
+                      will travel out among the stars all the same.
+                    </Text>
+                  )}
+                  {aim !== null && (
+                    <LightSignal line={current.text} onDone={lightDone} />
+                  )}
+                  <TouchableOpacity
+                    onPress={() => setStage("sent")}
+                    accessibilityRole="button"
+                    style={styles.secondary}
                   >
-                    Finding {dest.name} in your sky…
-                  </Text>
-                )}
-                {aim !== null && aim !== "none" && aim.kind === "up" && (
-                  <Text style={[styles.aim, { color: colors.foreground }]}>
-                    Face {aim.direction}, and point the phone{" "}
-                    {heightWords(aim.alt)}. {dest.name} is there, whether or not
-                    you can see it.
-                  </Text>
-                )}
-                {aim !== null && aim !== "none" && aim.kind === "below" && (
-                  <Text style={[styles.aim, { color: colors.foreground }]}>
-                    {dest.name} is below your horizon right now
-                    {aim.risesAt
-                      ? `, and rises at about ${aim.risesAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                      : ""}
-                    . You can send the light then, or point it straight up now,
-                    and it will travel out among the stars all the same.
-                  </Text>
-                )}
-                {aim === "none" && (
-                  <Text style={[styles.aim, { color: colors.foreground }]}>
-                    Without your location PALE cannot tell where {dest.name} is
-                    tonight. Point the phone straight up instead; the light will
-                    travel out among the stars all the same.
-                  </Text>
-                )}
-                {aim !== null && (
-                  <LightSignal line={current.text} onDone={lightDone} />
-                )}
-                <TouchableOpacity
-                  onPress={() => setStage("sent")}
-                  accessibilityRole="button"
-                  style={styles.secondary}
-                >
-                  <Text
-                    style={[
-                      styles.secondaryText,
-                      { color: colors.mutedForeground },
-                    ]}
-                  >
-                    Not now
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
+                    <Text
+                      style={[
+                        styles.secondaryText,
+                        { color: colors.mutedForeground },
+                      ]}
+                    >
+                      Not now
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
 
         {letGone === "list" && (
           <Text
@@ -570,10 +738,46 @@ export function NotesScreen() {
           </Text>
         )}
 
+        {journal.length > 0 && stage !== "aim" && (
+          <View style={styles.section}>
+            <Text style={[styles.label, { color: colors.mutedForeground }]}>
+              Kept
+            </Text>
+            {journal.map((e) => (
+              <View
+                key={e.id}
+                style={[styles.noteRow, { borderColor: colors.border }]}
+              >
+                <Text
+                  style={[styles.noteMeta, { color: colors.mutedForeground }]}
+                >
+                  {keptOnWords(e.at, now)}
+                </Text>
+                <Text style={[styles.keptText, { color: colors.foreground }]}>
+                  {e.text}
+                </Text>
+                <View style={styles.letGoRow}>
+                  <TouchableOpacity
+                    onPress={() => sendOut(e)}
+                    accessibilityRole="button"
+                    style={styles.letGoButton}
+                  >
+                    <Text style={[styles.link, { color: colors.primary }]}>
+                      Send it out
+                    </Text>
+                  </TouchableOpacity>
+                  {letGoId !== e.id && letGoControls(e.id)}
+                </View>
+                {letGoId === e.id && letGoControls(e.id)}
+              </View>
+            ))}
+          </View>
+        )}
+
         {others.length > 0 && stage !== "aim" && (
           <View style={styles.section}>
             <Text style={[styles.label, { color: colors.mutedForeground }]}>
-              Your notes
+              Sent
             </Text>
             {others.map((n) => {
               const d = destinationOf(n);
@@ -693,6 +897,10 @@ const styles = StyleSheet.create({
   secondary: { alignItems: "center", justifyContent: "center", minHeight: 44 },
   secondaryText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   noteRow: { borderTopWidth: 1, gap: 4, paddingTop: 12 },
+  writing: { minHeight: 140, paddingTop: 14, paddingBottom: 14 },
+  choice: { flexDirection: "row", gap: 12 },
+  choiceButton: { flex: 1 },
+  keptText: { fontSize: 15, lineHeight: 23, fontFamily: "Inter_400Regular" },
   noteText: { fontSize: 15, lineHeight: 22, fontFamily: "Inter_500Medium" },
   noteMeta: { fontSize: 13, lineHeight: 19, fontFamily: "Inter_400Regular" },
   centred: { alignItems: "center" },
