@@ -88,7 +88,7 @@ describe("Home hero scene contracts", () => {
     expect(home).toContain('<CardArtwork name="shift"');
     expect(home).toContain('<CardArtwork name="timeMachine"');
     expect(home).toContain('<CardArtwork name="tonightsSky"');
-    expect(shift).toContain("<BeginShiftButton");
+    expect(shift).toContain("<ShiftEarthButton");
     for (const file of [
       "observatory",
       "shift",
@@ -133,11 +133,15 @@ describe("Home hero scene contracts", () => {
   it("zooms out through nested pictures in Shift, then flies home", () => {
     const shift = read("app/(tabs)/shift.tsx");
     const scene = read("components/ShiftZoomScene.tsx");
-    expect(shift).toContain('from "@/components/HomeHeroScene"');
     expect(shift).toContain("useHomeHeroMotionActive(reduceMotion)");
     expect(shift).toContain("active={ambientMotionActive}");
     expect(shift).toContain("<ShiftZoomScene");
-    expect(shift).toContain('testID="shift-entry-sphere"');
+    // Earth itself is the way in, the same rendered Earth the journey starts from.
+    expect(shift).toContain("<ShiftEarthButton");
+    expect(read("components/ShiftEarthButton.tsx")).toContain(
+      'testID="shift-entry-earth"',
+    );
+    expect(read("components/ShiftEarthButton.tsx")).toContain("<EarthGlobe");
     expect(shift).toContain(
       "<StarField count={72} containerOpacity={0.38} drift={11}",
     );
@@ -155,7 +159,10 @@ describe("Home hero scene contracts", () => {
     expect(shift).toContain("zoom.setValue(target)");
     // All movement runs on the native driver, sampled from the same zoom maths.
     expect(scene).toContain("shiftFrame(z, size)");
-    expect(scene).toContain("<HomeLocationSphere");
+    expect(scene).toContain("<EarthGlobe");
+    expect(read("components/EarthGlobe.tsx")).toContain(
+      "assets/images/earth-globe.png",
+    );
     expect(scene).toContain("You are here");
     expect(scene).not.toContain("useNativeDriver: false");
   });

@@ -3,6 +3,7 @@ import React from "react";
 import { NotifyToggle } from "@/components/NotifyToggle";
 import {
   areNoteMilestonesOn,
+  nextNoteMilestoneLine,
   setNoteMilestones,
 } from "@/constants/noteMilestones";
 
@@ -11,9 +12,10 @@ export function NoteMilestonesToggle() {
   return (
     <NotifyToggle
       title="Note milestones"
-      subtitle="When your notes pass the Sun, Jupiter, Neptune and Voyager 1, and when they arrive"
+      subtitle="As your notes pass the Sun, Neptune and Voyager 1, then each year they travel, and when they arrive"
       isOn={areNoteMilestonesOn}
       setOn={setNoteMilestones}
+      status={nextNoteMilestoneLine}
     />
   );
 }

@@ -1,6 +1,7 @@
 /**
  * A notification each time a sent note's light passes a milestone: the Sun's distance, Jupiter's
- * orbit, Neptune's orbit, Voyager 1, and arrival for stars within a hundred light years. Every
+ * orbit, Neptune's orbit and Voyager 1 on the first day; then a light week, the Oort Cloud,
+ * every year since it was sent, halfway, and arrival for stars within a hundred light years. Every
  * time is known the moment the note is sent, so PALE sets them on the phone itself: no server,
  * nothing sent. The note's own words never appear in a notification, so nothing private shows
  * on a locked screen.
@@ -23,6 +24,10 @@ export const NOTE_ID_PREFIX = "pale-note-";
 /** The most note milestones waiting at once (see the 64 limit in notifications.ts). */
 export const NOTE_BUDGET = 30;
 const YEAR_MS = 365.25 * 86_400_000;
+const DAY_S = 86_400;
+const KM_PER_LIGHT_SECOND = 299_792.458;
+// Where the Oort Cloud is thought to begin: about 2,000 times Earth's distance from the Sun.
+const OORT_SECONDS = 2000 * 499.005;
 // The Moon is passed 1.3 seconds after sending, while the person is still looking at the screen.
 const SKIP = new Set(["the Moon"]);
 // Arrivals further off than this are left out: a phone cannot hold a notification for centuries.
@@ -59,6 +64,59 @@ function spanWords(years: number): string {
   return months ? `${y} and ${months} ${months === 1 ? "month" : "months"}` : y;
 }
 
+/** "181 billion km", "9.5 trillion km". */
+function kmWords(seconds: number): string {
+  const km = seconds * KM_PER_LIGHT_SECOND;
+  if (km >= 1e12) {
+    const t = km / 1e12;
+    return `${t < 10 ? t.toFixed(1) : Math.round(t)} trillion km`;
+  }
+  return `${Math.round(km / 1e9)} billion km`;
+}
+
+/** The slower milestones, after the first day: weeks, then years. */
+function laterMarks(
+  lightYears: number,
+): { key: string; seconds: number; body: (name: string) => string }[] {
+  const out: {
+    key: string;
+    seconds: number;
+    body: (name: string) => string;
+  }[] = [
+    {
+      key: "week",
+      seconds: 7 * DAY_S,
+      body: () =>
+        `It is now a light week from Earth, about ${kmWords(7 * DAY_S)} away.`,
+    },
+    {
+      key: "oort",
+      seconds: OORT_SECONDS,
+      body: () =>
+        "It has reached where the Oort Cloud is thought to begin, the far edge of the Sun's family.",
+    },
+  ];
+  const years = Math.min(Math.floor(lightYears), MAX_ARRIVAL_YEARS);
+  for (let y = 1; y <= years; y++) {
+    if (y === lightYears) continue;
+    const seconds = (y * YEAR_MS) / 1000;
+    out.push({
+      key: `year-${y}`,
+      seconds,
+      body: () =>
+        `${y === 1 ? "A year" : `${y} years`} ago today it left Earth. It is now ${y === 1 ? "a light year" : `${y} light years`} away, ${kmWords(seconds)}.`,
+    });
+  }
+  if (lightYears >= 2 && lightYears <= MAX_ARRIVAL_YEARS) {
+    out.push({
+      key: "halfway",
+      seconds: (lightYears * YEAR_MS) / 2000,
+      body: (name) => `It is halfway to ${name}.`,
+    });
+  }
+  return out;
+}
+
 /** Every milestone still to come for one note, soonest first. */
 export function milestonesFor(note: Note, now: number): PlannedNote[] {
   const dest = destinationOf(note);
@@ -76,6 +134,16 @@ export function milestonesFor(note: Note, now: number): PlannedNote[] {
       at,
       title: `Your note to ${dest.short}`,
       body: `It has just passed ${m.name}${extra}, ${afterWords(m.seconds)} after you sent it.`,
+    });
+  }
+  for (const m of laterMarks(dest.ly)) {
+    const at = note.sentAt + m.seconds * 1000;
+    if (at >= arriveAt) continue;
+    out.push({
+      identifier: `${NOTE_ID_PREFIX}${note.id}-${m.key}`,
+      at,
+      title: `Your note to ${dest.short}`,
+      body: m.body(dest.name),
     });
   }
   if (dest.ly <= MAX_ARRIVAL_YEARS) {
@@ -172,6 +240,41 @@ async function rebuild(now: number): Promise<number> {
     });
   }
   return plan.length;
+}
+
+/**
+ * For the You tab: what PALE will say next, and when, so it is clear the milestones are set.
+ * Null when they are off; a short line when they are on but nothing is waiting.
+ */
+export async function nextNoteMilestoneLine(
+  now = Date.now(),
+): Promise<string | null> {
+  if (!(await areNoteMilestonesOn())) return null;
+  if (!(await Notifications.getPermissionsAsync()).granted) {
+    return "Notifications for PALE are turned off in your phone's settings.";
+  }
+  const [next] = planNoteNotifications(
+    parseNotes(await AsyncStorage.getItem(NOTES_STORAGE_KEY).catch(() => null)),
+    now,
+    1,
+  );
+  if (!next) return "Nothing is due yet. Send a note and PALE will follow it.";
+  const when = new Date(next.at);
+  const sameDay = when.toDateString() === new Date(now).toDateString();
+  const time = when.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const day = sameDay
+    ? "today"
+    : when.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        ...(when.getFullYear() !== new Date(now).getFullYear()
+          ? { year: "numeric" }
+          : {}),
+      });
+  return `Next: ${next.title.replace(/^Your/, "your")}, ${day} at ${time}.`;
 }
 
 /** Turns note milestones on or off. Returns whether they ended up on. */
