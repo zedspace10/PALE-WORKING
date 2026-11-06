@@ -10,14 +10,37 @@ interface Props {
   setOn: (on: boolean) => Promise<boolean>;
   /** Shown under the switch once it is on. */
   onNote?: string;
+  /** A live line under the switch, worked out again whenever it changes. */
+  status?: () => Promise<string | null>;
 }
 
 /** A notification setting on the You tab, matching the Observatory reminder card. */
-export function NotifyToggle({ title, subtitle, isOn, setOn, onNote }: Props) {
+export function NotifyToggle({
+  title,
+  subtitle,
+  isOn,
+  setOn,
+  onNote,
+  status,
+}: Props) {
   const colors = useColors();
   const [on, setOnState] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [live, setLive] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!status) return;
+    let alive = true;
+    status()
+      .then((line) => {
+        if (alive) setLive(line);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [status, on, busy]);
 
   useEffect(() => {
     let alive = true;
@@ -75,6 +98,11 @@ export function NotifyToggle({ title, subtitle, isOn, setOn, onNote }: Props) {
           thumbColor={on ? colors.primary : undefined}
         />
       </View>
+      {live && !note ? (
+        <Text style={[styles.note, { color: colors.mutedForeground }]}>
+          {live}
+        </Text>
+      ) : null}
       {note ? (
         <Text style={[styles.note, { color: colors.mutedForeground }]}>
           {note}

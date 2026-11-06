@@ -11,7 +11,7 @@ import Svg, {
   Text as SvgText,
 } from "react-native-svg";
 
-import { HomeLocationSphere } from "@/components/HomeHeroScene";
+import { EarthGlobe } from "@/components/EarthGlobe";
 import {
   CHILD_OFFSETS,
   shiftFrame,
@@ -485,7 +485,6 @@ export function ShiftZoomScene({
     width: size,
     height: size,
   };
-  const sphereScale = (size * EARTH_SPHERE_FRACTION) / 88;
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill} testID={testID}>
@@ -505,9 +504,7 @@ export function ShiftZoomScene({
       <Animated.View
         style={[styles.layer, styles.centred, box, layerStyles[0]]}
       >
-        <View style={{ transform: [{ scale: sphereScale }] }}>
-          <HomeLocationSphere active={ambientMotion} variant="earth" />
-        </View>
+        <EarthGlobe diameter={size * EARTH_SPHERE_FRACTION} />
       </Animated.View>
 
       {/* You are here: a ring that follows Earth once it is too small to see */}

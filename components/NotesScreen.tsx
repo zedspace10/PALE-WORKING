@@ -468,7 +468,7 @@ export function NotesScreen() {
                   >
                     {dest.planet
                       ? "PALE will tell you when it arrives."
-                      : `PALE will tell you as it passes each milestone on the way${dest.ly <= 100 ? ", and when it arrives" : ""}.`}
+                      : `PALE will tell you as it passes each milestone, and on each year it travels${dest.ly <= 100 ? ", until it arrives" : ""}.`}
                   </Text>
                 )}
                 <TouchableOpacity

@@ -248,7 +248,69 @@
         cam.lookAt(-0.95, 0.0, 0);
       }
 
-      const scenes = { mars, saturn, earth };
+      async function globe() {
+        const [tex, clouds] = await Promise.all([
+          load("earth.webp"),
+          load("earth-clouds.webp"),
+        ]);
+        const img = tex.image;
+        const cv = document.createElement("canvas");
+        cv.width = img.width;
+        cv.height = img.height;
+        const cx = cv.getContext("2d");
+        cx.drawImage(img, 0, 0);
+        const d = cx.getImageData(0, 0, cv.width, cv.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+          const [r, g, b] = [d.data[i], d.data[i + 1], d.data[i + 2]];
+          const ocean = b > r * 1.25 && b > g * 1.05;
+          const v = ocean ? 150 : 245;
+          d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
+        }
+        cx.putImageData(d, 0, 0);
+        const rough = new THREE.CanvasTexture(cv);
+        const L = new THREE.Vector3(-2.2, 1.0, 2.6).normalize();
+        const light = new THREE.DirectionalLight(0xfffaf2, 3.3);
+        light.position.copy(L);
+        s.add(light);
+        s.add(new THREE.AmbientLight(0x0a1020, 0.05));
+        const mask = q.get("mask") === "1";
+        const e = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 256, 256),
+          mask
+            ? new THREE.MeshBasicMaterial({ color: 0xffffff })
+            : new THREE.MeshStandardMaterial({
+                map: tex,
+                roughnessMap: rough,
+                roughness: 1,
+                metalness: 0,
+              }),
+        );
+        e.rotation.set(0.25, +q.get("rot") || -1.6, 0.41);
+        s.add(e);
+        if (!mask) {
+          const c = new THREE.Mesh(
+            new THREE.SphereGeometry(1.006, 256, 256),
+            new THREE.MeshStandardMaterial({
+              color: 0xffffff,
+              alphaMap: clouds,
+              transparent: true,
+              depthWrite: false,
+              roughness: 1,
+            }),
+          );
+          c.rotation.copy(e.rotation);
+          c.rotation.y += 0.6;
+          s.add(c);
+          s.add(atmosphere(1, 0.06, 0x5aa6ff, 1.6, L));
+        }
+        // Disc fills 80% of the frame, leaving room for the glow.
+        cam.fov = (2 * Math.atan(1 / 0.8 / 9) * 180) / Math.PI;
+        cam.updateProjectionMatrix();
+        cam.position.set(0, 0, 9);
+        cam.lookAt(0, 0, 0);
+      }
+
+      const scenes = { mars, saturn, earth, globe };
       await scenes[q.get("scene")]();
       renderer.render(s, cam);
       window.done = true;

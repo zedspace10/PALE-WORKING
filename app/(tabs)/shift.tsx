@@ -20,8 +20,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CalmPressable } from "@/components/CalmPressable";
-import { BeginShiftButton } from "@/components/BeginShiftButton";
-import { HomeLocationSphere } from "@/components/HomeHeroScene";
 import { IllustrationDisclosure } from "@/components/IllustrationDisclosure";
 import { ShiftZoomScene } from "@/components/ShiftZoomScene";
 import { StarField } from "@/components/StarField";
@@ -37,6 +35,7 @@ import { SHIFT_MAX_ZOOM } from "@/constants/shiftZoom";
 import { getTonightsEvent } from "@/constants/skyEvents";
 import { calmSpace, calmTypography } from "@/constants/ui";
 import { useShiftCount } from "@/hooks/useBirthday";
+import { ShiftEarthButton } from "@/components/ShiftEarthButton";
 import { useColors } from "@/hooks/useColors";
 import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -363,26 +362,13 @@ export default function ShiftScreen() {
         >
           <View style={styles.spacer} />
 
-          <View style={styles.orbCenter}>
-            <View style={styles.orbScale}>
-              <HomeLocationSphere
-                active={ambientMotionActive}
-                testID="shift-entry-sphere"
-              />
-            </View>
-          </View>
-
-          <Text style={[styles.youAreHere, { color: colors.foreground }]}>
-            You are here.
-          </Text>
-
-          <View style={styles.spacer} />
-
-          <BeginShiftButton
+          <ShiftEarthButton
             onPress={beginJourney}
             reduceMotion={reduceMotion}
             active={ambientMotionActive}
           />
+
+          <View style={styles.spacer} />
         </View>
       ) : null}
 

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   afterWords,
   milestonesFor,
+  nextNoteMilestoneLine,
   NOTE_BUDGET,
   planNoteNotifications,
   refreshNoteMilestones,
@@ -90,6 +91,17 @@ describe("Note milestone notifications", () => {
       "pale-note-a-jupiter",
       "pale-note-a-neptune",
       "pale-note-a-voyager",
+      "pale-note-a-week",
+      "pale-note-a-oort",
+      "pale-note-a-year-1",
+      "pale-note-a-year-2",
+      "pale-note-a-year-3",
+      "pale-note-a-year-4",
+      "pale-note-a-halfway",
+      "pale-note-a-year-5",
+      "pale-note-a-year-6",
+      "pale-note-a-year-7",
+      "pale-note-a-year-8",
       "pale-note-a-arrived",
     ]);
     expect(plan[0].body).toBe(
@@ -98,10 +110,49 @@ describe("Note milestone notifications", () => {
     expect(plan[3].body).toContain(
       "Voyager 1, the farthest thing people have built",
     );
-    expect(plan[4].title).toBe("Your note has reached Sirius");
     expect(plan[4].body).toBe(
-      "After 8 years and 7 months at the speed of light.",
+      "It is now a light week from Earth, about 181 billion km away.",
     );
+    expect(plan[6].body).toBe(
+      "A year ago today it left Earth. It is now a light year away, 9.5 trillion km.",
+    );
+    expect(plan[7].body).toContain("2 years ago today");
+    expect(plan[10].body).toBe("It is halfway to Sirius.");
+    const last = plan[plan.length - 1];
+    expect(last.title).toBe("Your note has reached Sirius");
+    expect(last.body).toBe("After 8 years and 7 months at the speed of light.");
+  });
+
+  it("keeps telling you about old notes: a note sent long ago still has its anniversaries", () => {
+    const old = note("o", "proxima", sent - 400 * 86_400_000);
+    const plan = milestonesFor(old, sent);
+    expect(plan[0].identifier).toBe("pale-note-o-year-2");
+    // Galaxies millions of light years away still get yearly notes, just never an arrival.
+    const far = milestonesFor(note("g", "andromeda"), sent);
+    expect(far.some((p) => p.identifier.endsWith("-year-1"))).toBe(true);
+    expect(far.some((p) => p.identifier.endsWith("-arrived"))).toBe(false);
+    for (const p of [...plan, ...far]) {
+      expect(`${p.title} ${p.body}`).not.toMatch(/[\u2013\u2014]| - /);
+    }
+  });
+
+  it("says on the You tab what comes next, so it is clear they are set", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(sent + 1000);
+    expect(await nextNoteMilestoneLine(sent + 1000)).toBeNull();
+    mocks.storage.set(NOTES_STORAGE_KEY, JSON.stringify([note("a", "sirius")]));
+    await setNoteMilestones(true);
+    expect(await nextNoteMilestoneLine(sent + 1000)).toMatch(
+      /^Next: your note to Sirius, today at \d\d:\d\d\.$/,
+    );
+    mocks.storage.set(NOTES_STORAGE_KEY, "[]");
+    expect(await nextNoteMilestoneLine(sent + 1000)).toBe(
+      "Nothing is due yet. Send a note and PALE will follow it.",
+    );
+    mocks.granted = false;
+    expect(await nextNoteMilestoneLine(sent + 1000)).toContain("turned off");
+    await setNoteMilestones(false);
+    vi.useRealTimers();
   });
 
   it("for a planet, only what comes before it arrives, then the arrival", () => {
@@ -149,9 +200,9 @@ describe("Note milestone notifications", () => {
     vi.useFakeTimers();
     vi.setSystemTime(sent + 1000);
     expect(await setNoteMilestones(true)).toBe(true);
-    expect(mocks.pending.size).toBe(5);
+    expect(mocks.pending.size).toBe(16);
     await refreshNoteMilestones();
-    expect(mocks.pending.size).toBe(5);
+    expect(mocks.pending.size).toBe(16);
     expect(await setNoteMilestones(false)).toBe(false);
     expect(mocks.pending.size).toBe(0);
     vi.useRealTimers();
