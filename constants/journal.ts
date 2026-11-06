@@ -29,18 +29,30 @@ export function withoutEntry(
   return entries.filter((e) => e.id !== id);
 }
 
+/**
+ * Reads kept entries back. Entries from PALE's earlier Journal (same storage, a `date` string
+ * instead of `at`) are read too, so nothing anyone wrote then is lost.
+ */
 export function parseJournal(raw: string | null): JournalEntry[] {
   if (!raw) return [];
   try {
     const value = JSON.parse(raw);
     if (!Array.isArray(value)) return [];
-    return value.filter(
-      (e): e is JournalEntry =>
-        e &&
-        typeof e.id === "string" &&
-        typeof e.text === "string" &&
-        typeof e.at === "number",
-    );
+    const out: JournalEntry[] = [];
+    for (const e of value) {
+      if (!e || typeof e.id !== "string" || typeof e.text !== "string") {
+        continue;
+      }
+      const at =
+        typeof e.at === "number"
+          ? e.at
+          : typeof e.date === "string"
+            ? Date.parse(e.date)
+            : NaN;
+      if (!Number.isFinite(at) || !e.text.trim()) continue;
+      out.push({ id: e.id, text: e.text, at });
+    }
+    return out.sort((a, b) => b.at - a.at);
   } catch {
     return [];
   }

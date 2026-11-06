@@ -89,10 +89,12 @@ describe("first open and the Journal", () => {
     expect(layout).toContain('"@pale_birthday"');
   });
 
-  it("no longer has a Journal screen", () => {
+  it("keeps writing inside Notes, with no separate Journal screen", () => {
     expect(
       fs.existsSync(path.resolve(process.cwd(), "app/(tabs)/journal.tsx")),
     ).toBe(false);
-    expect(read("components/NotesScreen.tsx")).not.toMatch(/journal/i);
+    const notes = read("components/NotesScreen.tsx");
+    expect(notes).toContain("Keep it");
+    expect(notes).toContain("Send it");
   });
 });
