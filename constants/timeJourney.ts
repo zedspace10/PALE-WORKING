@@ -1,6 +1,6 @@
 /**
  * Hold to travel back in time, from now to the beginning. Time runs faster the longer you hold,
- * so the whole 13.8 billion years takes about half a minute, passing the moments of the Time
+ * so the whole 13.8 billion years takes a little over twenty seconds, passing the moments of the Time
  * Machine on the way. The point is the contrast: everything that has ever happened fits inside the
  * time it takes to hold your finger down.
  */
@@ -10,7 +10,7 @@ export const UNIVERSE_AGE_YEARS = 13.8e9;
 
 // Years of history per held second at the start, and how fast that grows.
 const START_RATE = 1;
-const GROWTH = 0.66;
+const GROWTH = 1.05;
 
 export interface TimeMarker {
   yearsAgo: number;
@@ -33,7 +33,7 @@ export function timeMarkers(now: Date, birthday: Date | null): TimeMarker[] {
     { yearsAgo: 1_000_000, name: "early humans using fire" },
     {
       yearsAgo: 6_000_000,
-      name: "our ancestors parting from the chimpanzees'",
+      name: "the last ancestor we share with chimpanzees",
     },
     { yearsAgo: 66_000_000, name: "the asteroid that ended the dinosaurs" },
     { yearsAgo: 230_000_000, name: "the first dinosaurs" },
@@ -60,7 +60,9 @@ export function timeMarkers(now: Date, birthday: Date | null): TimeMarker[] {
 /** Years travelled back after holding for `held` seconds. */
 export function yearsBack(held: number): number {
   if (held <= 0) return 0;
-  return (START_RATE * (Math.exp(GROWTH * held) - 1)) / GROWTH;
+  const years = (START_RATE * (Math.exp(GROWTH * held) - 1)) / GROWTH;
+  // Snap to the beginning so rounding never leaves it a hair short.
+  return years >= UNIVERSE_AGE_YEARS * 0.999999 ? UNIVERSE_AGE_YEARS : years;
 }
 
 /** Years of history each held second is worth, after holding for `held` seconds. */
@@ -126,15 +128,40 @@ function heldPhrase(held: number): string {
   return `${s} ${s === 1 ? "second" : "seconds"}`;
 }
 
+/** How far back, as a share of the way to the beginning: "0.0004%", "0.48%", "33%". */
+export function shareOfTheWay(years: number): string {
+  const pct = (Math.min(years, UNIVERSE_AGE_YEARS) / UNIVERSE_AGE_YEARS) * 100;
+  if (pct < 0.0001) return "less than a millionth of the way";
+  if (pct < 1) return `${Number(pct.toPrecision(1))}% of the way`;
+  return `${Math.round(pct)}% of the way`;
+}
+
+/** Where the journey has reached, from 0 (now) to 1 (the beginning), on a scale that gives recent history room. */
+export function journeyDepth(years: number): number {
+  if (years <= 0) return 0;
+  return Math.min(
+    1,
+    Math.log10(1 + years) / Math.log10(1 + UNIVERSE_AGE_YEARS),
+  );
+}
+
+/** The moments passed so far, most recent first. */
+export function passedMarkers(
+  markers: TimeMarker[],
+  years: number,
+): TimeMarker[] {
+  return markers.filter((m) => years >= m.yearsAgo).reverse();
+}
+
 /** What to say on letting go, or on reaching the beginning. */
 export function timeSummary(markers: TimeMarker[], held: number): string {
   const years = yearsBack(held);
   if (years >= UNIVERSE_AGE_YEARS) {
-    return `You held on for ${heldPhrase(held)} and went back 13.8 billion years, to the beginning.`;
+    return `You held on for ${heldPhrase(held)} and went back 13.8 billion years, to the beginning. Everything that has ever happened fits inside that one long press.`;
   }
   const passed = passedMarker(markers, years);
   const went = `You held on for ${heldPhrase(held)} and went back ${yearsAgoWords(years).replace(/ ago$/, "")}`;
   return passed
-    ? `${went}, past ${passed.name}. The beginning is still ${yearsAgoWords(UNIVERSE_AGE_YEARS - years).replace(/ ago$/, "")} further back.`
-    : `${went}. Keep holding next time, and you can reach the beginning.`;
+    ? `${went}, past ${passed.name}. That is ${shareOfTheWay(years)} to the beginning. Hold again to keep going.`
+    : `${went}. Hold again to keep going.`;
 }

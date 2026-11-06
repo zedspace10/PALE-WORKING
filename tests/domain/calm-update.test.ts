@@ -41,10 +41,10 @@ describe("travelling back in time", () => {
   const now = new Date("2026-10-31T12:00:00Z");
   const markers = timeMarkers(now, new Date("1994-03-14T12:00:00Z"));
 
-  it("reaches the beginning in about half a minute", () => {
+  it("reaches the beginning in a little over twenty seconds", () => {
     const seconds = heldToGoBack(UNIVERSE_AGE_YEARS);
-    expect(seconds).toBeGreaterThan(30);
-    expect(seconds).toBeLessThan(40);
+    expect(seconds).toBeGreaterThan(20);
+    expect(seconds).toBeLessThan(25);
     expect(yearsBack(seconds)).toBeCloseTo(UNIVERSE_AGE_YEARS, -6);
   });
 
@@ -64,10 +64,10 @@ describe("travelling back in time", () => {
       "Each second you hold is now a year of history.",
     );
     expect(timeSummary(markers, heldToGoBack(UNIVERSE_AGE_YEARS))).toMatch(
-      /went back 13\.8 billion years, to the beginning\.$/,
+      /went back 13\.8 billion years, to the beginning\./,
     );
     expect(timeSummary(markers, heldToGoBack(7e7))).toMatch(
-      /past the asteroid that ended the dinosaurs\. The beginning is still 13\.7 billion years further back\.$/,
+      /past the asteroid that ended the dinosaurs\. That is 0\.5% of the way to the beginning\. Hold again to keep going\.$/,
     );
   });
 
@@ -96,5 +96,35 @@ describe("first open and the Journal", () => {
     const notes = read("components/NotesScreen.tsx");
     expect(notes).toContain("Keep it");
     expect(notes).toContain("Send it");
+  });
+});
+
+describe("the cosmic calendar", () => {
+  it("puts each moment on one calendar year", async () => {
+    const { calendarWords, calendarFor } =
+      await import("@/constants/cosmicCalendar");
+    expect(calendarWords(13.8e9)).toBe("1 January, just after midnight");
+    expect(calendarFor("cmb")).toBe("1 January, 12:14 am");
+    expect(calendarFor("sun-born")).toBe("1 September");
+    expect(calendarFor("dinosaurs")).toBe("25 December");
+    expect(calendarFor("asteroid")).toBe("30 December, 6:06 am");
+    expect(calendarFor("homo-sapiens")).toBe("31 December, 11:48 pm");
+    expect(calendarFor("civilization")).toBe("31 December, 11:59:32 pm");
+    expect(calendarFor("now")).toBe("Midnight, 31 December");
+    expect(calendarFor("vega-pole-star")).toBeNull();
+  });
+
+  it("goes back further as you hold, with recent history given room", async () => {
+    const { journeyDepth, passedMarkers, shareOfTheWay } =
+      await import("@/constants/timeJourney");
+    expect(journeyDepth(0)).toBe(0);
+    expect(journeyDepth(13.8e9)).toBe(1);
+    expect(journeyDepth(57)).toBeGreaterThan(0.15);
+    expect(shareOfTheWay(4.6e9)).toBe("33% of the way");
+    expect(shareOfTheWay(250_000)).toBe("0.002% of the way");
+    const now = new Date("2026-10-31T12:00:00Z");
+    const names = passedMarkers(timeMarkers(now, null), 7e7).map((m) => m.name);
+    expect(names[0]).toBe("the asteroid that ended the dinosaurs");
+    expect(names).toContain("the first steps on the Moon");
   });
 });

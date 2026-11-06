@@ -1,3 +1,5 @@
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -18,7 +20,8 @@ import {
   UNIVERSE_AGE_YEARS,
   heldToGoBack,
   historyRateWords,
-  passedMarker,
+  journeyDepth,
+  passedMarkers,
   timeMarkers,
   timeSummary,
   yearsAgoWords,
@@ -33,24 +36,39 @@ interface Props {
   onClose: () => void;
 }
 
+const WARM = "#F3DDB0";
 // Rings that slowly widen while you hold, like ripples going back through time.
 const RINGS = [60, 92, 124, 156];
 
+/** A faint colour for each stretch of the past, rising from the bottom of the screen. */
+function eraGlow(years: number): string {
+  if (years >= UNIVERSE_AGE_YEARS) return "rgba(255,214,150,0.42)"; // the beginning
+  if (years >= 13.3e9) return "rgba(150,120,255,0.26)"; // the first stars and galaxies
+  if (years >= 4.6e9) return "rgba(70,60,140,0.22)"; // before the Sun
+  if (years >= 3.6e9) return "rgba(220,110,60,0.24)"; // a young, hot Earth
+  if (years >= 6e6) return "rgba(60,170,140,0.18)"; // life
+  if (years >= 1) return "rgba(90,150,255,0.16)"; // people
+  return "rgba(0,0,0,0)";
+}
+
 /**
  * Hold to travel back in time, from now to the beginning, passing the moments of the Time Machine
- * on the way. Time speeds up the longer you hold, so 13.8 billion years takes about half a minute.
+ * on the way. Time speeds up the longer you hold, so 13.8 billion years takes a little over twenty
+ * seconds. Letting go pauses; holding again carries on from there.
  */
 export function TravelBack({ visible, birthday, onClose }: Props) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
 
   const [holding, setHolding] = useState(false);
   const [held, setHeld] = useState(0);
   const [summary, setSummary] = useState<string | null>(null);
   const startedAt = useRef(0);
+  const heldBefore = useRef(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const passedCount = useRef(0);
   const glow = useRef(new Animated.Value(0)).current;
   const swell = useRef(new Animated.Value(0)).current;
 
@@ -60,18 +78,33 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
   );
   const years = yearsBack(held);
   const atBeginning = years >= UNIVERSE_AGE_YEARS;
-  const passed = passedMarker(markers, years);
+  const passed = passedMarkers(markers, years);
+  const depth = journeyDepth(years);
+
+  const reset = () => {
+    if (timer.current) clearInterval(timer.current);
+    timer.current = null;
+    heldBefore.current = 0;
+    passedCount.current = 0;
+    setHolding(false);
+    setHeld(0);
+    setSummary(null);
+  };
 
   useEffect(() => {
-    if (!visible) {
-      setHolding(false);
-      setHeld(0);
-      setSummary(null);
-    }
+    if (!visible) reset();
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
   }, [visible]);
+
+  // A light tap each time another moment is passed.
+  useEffect(() => {
+    if (passed.length > passedCount.current && Platform.OS !== "web") {
+      Haptics.selectionAsync().catch(() => undefined);
+    }
+    passedCount.current = passed.length;
+  }, [passed.length]);
 
   useEffect(() => {
     Animated.timing(glow, {
@@ -96,21 +129,28 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
   const stop = (seconds: number) => {
     if (timer.current) clearInterval(timer.current);
     timer.current = null;
+    heldBefore.current = seconds;
     setHeld(seconds);
     setHolding(false);
     setSummary(timeSummary(markers, seconds));
   };
 
   const begin = () => {
+    if (atBeginning) return;
     setSummary(null);
-    setHeld(0);
     setHolding(true);
-    startedAt.current = Date.now();
+    startedAt.current = Date.now() - heldBefore.current * 1000;
     const end = heldToGoBack(UNIVERSE_AGE_YEARS);
     timer.current = setInterval(() => {
       const seconds = (Date.now() - startedAt.current) / 1000;
-      if (seconds >= end) stop(end);
-      else setHeld(seconds);
+      if (seconds >= end) {
+        stop(end);
+        if (Platform.OS !== "web") {
+          Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success,
+          ).catch(() => undefined);
+        }
+      } else setHeld(seconds);
     }, 50);
   };
 
@@ -125,6 +165,8 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
     outputRange: [1, 1.18],
   });
   const topPad = Platform.OS === "web" ? 24 : insets.top + 12;
+  const gaugeTop = topPad + 48;
+  const gaugeHeight = Math.max(200, height * 0.5);
 
   return (
     <Modal
@@ -134,13 +176,54 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
       statusBarTranslucent
     >
       <View style={[styles.wrap, { backgroundColor: colors.background }]}>
-        <StarField count={60} containerOpacity={0.6} />
+        <LinearGradient
+          colors={["rgba(0,0,0,0)", eraGlow(years)]}
+          locations={[0.35, 1]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        <StarField count={60} containerOpacity={years >= 13.5e9 ? 0.2 : 0.6} />
+
+        {/* How deep into the past: now at the top, the beginning at the bottom */}
+        <View
+          pointerEvents="none"
+          style={[styles.gauge, { top: gaugeTop, height: gaugeHeight }]}
+          accessible={false}
+        >
+          <View
+            style={[styles.gaugeLine, { backgroundColor: colors.border }]}
+          />
+          {markers.map((m) => (
+            <View
+              key={m.name}
+              style={[
+                styles.tick,
+                {
+                  top: journeyDepth(m.yearsAgo) * gaugeHeight,
+                  backgroundColor:
+                    years >= m.yearsAgo ? WARM : colors.mutedForeground + "66",
+                },
+              ]}
+            />
+          ))}
+          <View
+            style={[
+              styles.gaugeDot,
+              { top: depth * gaugeHeight - 5, backgroundColor: WARM },
+            ]}
+          />
+        </View>
+
         <Pressable
           onPressIn={begin}
           onPressOut={release}
           disabled={atBeginning}
           accessibilityRole="button"
-          accessibilityLabel="Press and hold to travel back in time"
+          accessibilityLabel={
+            held > 0
+              ? "Press and hold to keep going back in time"
+              : "Press and hold to travel back in time"
+          }
           style={styles.pad}
         >
           <View style={[styles.top, { paddingTop: topPad }]}>
@@ -165,7 +248,7 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
                     cy={180}
                     r={r}
                     fill="none"
-                    stroke="#F3DDB0"
+                    stroke={WARM}
                     strokeOpacity={0.28 - i * 0.05}
                     strokeWidth={1}
                   />
@@ -184,13 +267,31 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
                     : "Now"}
               </Text>
               {held > 0 ? (
-                <Text style={[styles.passed, { color: "#F3DDB0" }]}>
-                  {atBeginning
-                    ? "The beginning."
-                    : passed
-                      ? `Past ${passed.name}`
-                      : "Going back"}
-                </Text>
+                <View style={styles.trail}>
+                  <Text style={[styles.passed, { color: WARM }]}>
+                    {atBeginning
+                      ? "The beginning."
+                      : passed[0]
+                        ? `Past ${passed[0].name}`
+                        : "Going back"}
+                  </Text>
+                  {!atBeginning
+                    ? passed.slice(1, 3).map((m, i) => (
+                        <Text
+                          key={m.name}
+                          style={[
+                            styles.trailItem,
+                            {
+                              color: colors.mutedForeground,
+                              opacity: 0.75 - i * 0.3,
+                            },
+                          ]}
+                        >
+                          {m.name}
+                        </Text>
+                      ))
+                    : null}
+                </View>
               ) : null}
               {holding ? (
                 <Text style={[styles.rate, { color: colors.mutedForeground }]}>
@@ -214,23 +315,35 @@ export function TravelBack({ visible, birthday, onClose }: Props) {
             )}
           </View>
         </Pressable>
-        <TouchableOpacity
-          onPress={onClose}
-          accessibilityRole="button"
-          disabled={holding}
+
+        <View
           style={[
-            styles.close,
-            {
-              borderColor: colors.primary + "66",
-              bottom: insets.bottom + 24,
-              opacity: holding ? 0 : 1,
-            },
+            styles.buttons,
+            { bottom: insets.bottom + 24, opacity: holding ? 0 : 1 },
           ]}
+          pointerEvents={holding ? "none" : "auto"}
         >
-          <Text style={[styles.closeText, { color: colors.foreground }]}>
-            Back to the Time Machine
-          </Text>
-        </TouchableOpacity>
+          {held > 0 ? (
+            <TouchableOpacity
+              onPress={reset}
+              accessibilityRole="button"
+              style={[styles.button, { borderColor: colors.border }]}
+            >
+              <Text style={[styles.buttonText, { color: colors.foreground }]}>
+                Start again
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+          <TouchableOpacity
+            onPress={onClose}
+            accessibilityRole="button"
+            style={[styles.button, { borderColor: colors.primary + "66" }]}
+          >
+            <Text style={[styles.buttonText, { color: colors.foreground }]}>
+              {held > 0 ? "Done" : "Back to the Time Machine"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
@@ -242,7 +355,7 @@ const styles = StyleSheet.create({
   top: { alignSelf: "stretch", paddingHorizontal: 24 },
   eyebrow: { fontSize: 13, lineHeight: 18, fontFamily: "Inter_600SemiBold" },
   centre: { marginTop: 12, alignItems: "center", justifyContent: "center" },
-  readout: { alignItems: "center", gap: 6, paddingHorizontal: 32 },
+  readout: { alignItems: "center", gap: 6, paddingHorizontal: 40 },
   when: {
     fontSize: 28,
     lineHeight: 34,
@@ -251,10 +364,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontVariant: ["tabular-nums"],
   },
+  trail: { alignItems: "center", gap: 4 },
   passed: {
     fontSize: 15,
     lineHeight: 21,
     fontFamily: "Inter_600SemiBold",
+    textAlign: "center",
+  },
+  trailItem: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
   },
   rate: {
@@ -262,7 +382,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     fontFamily: "Inter_400Regular",
     textAlign: "center",
-    marginTop: 4,
+    marginTop: 6,
   },
   bottom: {
     flex: 1,
@@ -280,15 +400,24 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     textAlign: "center",
   },
-  close: {
+  gauge: { position: "absolute", right: 18, width: 14, alignItems: "center" },
+  gaugeLine: { position: "absolute", top: 0, bottom: 0, width: 1 },
+  tick: { position: "absolute", width: 7, height: 1 },
+  gaugeDot: { position: "absolute", width: 10, height: 10, borderRadius: 5 },
+  buttons: {
     position: "absolute",
     left: 24,
     right: 24,
+    flexDirection: "row",
+    gap: 12,
+  },
+  button: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     minHeight: 52,
     borderRadius: 26,
     borderWidth: 1,
   },
-  closeText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  buttonText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
 });

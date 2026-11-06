@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { CardArtwork } from "@/components/CardArtwork";
 import { StarField } from "@/components/StarField";
 import { TravelBack } from "@/components/TravelBack";
 import {
@@ -20,6 +21,7 @@ import {
   TimeMachineEra,
   TimeMachineEvent,
 } from "@/constants/cosmicTimeMachine";
+import { CALENDAR_INTRO, calendarFor } from "@/constants/cosmicCalendar";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
@@ -33,6 +35,7 @@ function EventCard({
 }) {
   const colors = useColors();
   const [expanded, setExpanded] = useState(false);
+  const calendar = calendarFor(event.id);
 
   return (
     <View style={styles.eventRow}>
@@ -67,6 +70,11 @@ function EventCard({
         <Text style={[styles.eventTitle, { color: colors.foreground }]}>
           {event.title}
         </Text>
+        {calendar ? (
+          <Text style={[styles.calendar, { color: colors.mutedForeground }]}>
+            On the cosmic calendar: {calendar}
+          </Text>
+        ) : null}
 
         {expanded && (
           <View style={styles.expandedBody}>
@@ -150,40 +158,34 @@ export default function TimeMachineScreen() {
           </View>
         </View>
 
-        {/* Banner */}
-        <View
-          style={[
-            styles.banner,
-            {
-              backgroundColor: colors.glassStrong,
-              borderColor: colors.luminousBorder,
-            },
-          ]}
-        >
-          <Text style={[styles.bannerText, { color: colors.foreground }]}>
-            About 13.8 billion years of cosmic history, and what may come next.
-            Tap any moment to read about it.
-          </Text>
-        </View>
+        <Text style={[styles.intro, { color: colors.foreground }]}>
+          13.8 billion years, from the beginning to now, and what may come next.
+          Tap any moment to read about it.
+        </Text>
 
         <TouchableOpacity
           onPress={() => setTravelling(true)}
           accessibilityRole="button"
-          style={[
-            styles.travel,
-            { borderColor: colors.primary, backgroundColor: colors.glass },
-          ]}
+          accessibilityHint="Hold your finger down to go from now to the beginning"
+          activeOpacity={0.85}
+          style={[styles.travel, { borderColor: colors.primary + "88" }]}
         >
-          <Feather name="rewind" size={18} color={colors.primary} />
+          <CardArtwork name="timeMachine" />
           <View style={styles.travelCopy}>
+            <Feather name="rewind" size={18} color={colors.primary} />
             <Text style={[styles.travelTitle, { color: colors.foreground }]}>
-              Hold to travel back in time
+              Travel back in time
             </Text>
             <Text style={[styles.travelSub, { color: colors.mutedForeground }]}>
-              From now to the beginning, in about half a minute
+              Hold your finger down and go from now to the beginning. It takes
+              about twenty seconds.
             </Text>
           </View>
         </TouchableOpacity>
+
+        <Text style={[styles.calendarIntro, { color: colors.mutedForeground }]}>
+          {CALENDAR_INTRO}
+        </Text>
 
         {/* Era filter */}
         <ScrollView
@@ -245,20 +247,31 @@ export default function TimeMachineScreen() {
 
 const styles = StyleSheet.create({
   travel: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    minHeight: 68,
-    borderRadius: 18,
+    minHeight: 150,
+    borderRadius: 20,
     borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    overflow: "hidden",
+    justifyContent: "flex-end",
   },
-  travelCopy: { flex: 1, gap: 2 },
+  travelCopy: { gap: 4, padding: 18, maxWidth: "75%" },
   travelTitle: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 20,
+    lineHeight: 26,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.3,
+    marginTop: 6,
+  },
+  intro: { fontSize: 16, lineHeight: 24, fontFamily: "Inter_400Regular" },
+  calendarIntro: {
+    fontSize: 13,
+    lineHeight: 20,
+    fontFamily: "Inter_400Regular",
+  },
+  calendar: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontFamily: "Inter_400Regular",
+    marginTop: 4,
   },
   travelSub: { fontSize: 13, lineHeight: 18, fontFamily: "Inter_400Regular" },
   container: { flex: 1 },
@@ -275,17 +288,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.4,
-  },
-  banner: {
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  bannerText: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    lineHeight: 22,
   },
   eraRow: {
     gap: 8,
