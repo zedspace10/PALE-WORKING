@@ -9,7 +9,7 @@ const SOUND_KEY = "@pale_shift_sound";
 const VOLUME = 0.8;
 
 /**
- * The Shift's music: an original piano piece over a soft pad, timed to the journey. It fades in and out rather
+ * The Shift's music: original, slow, warm chords, timed to the journey. It fades in and out rather
  * than cutting, never plays when the phone is on silent, plays alongside anything else the person
  * is listening to, pauses when PALE is in the background, and can be turned off (remembered).
  */
