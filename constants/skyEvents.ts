@@ -205,14 +205,14 @@ function showerLine(shower: Shower, offset: number, lat?: number): string {
       (shower.favours === "south" && lat > 20));
   const timing =
     offset === 0
-      ? "is near its typical annual peak window"
+      ? "are near their usual peak"
       : offset < 0
-        ? `is approaching its typical peak window in ${Math.abs(offset)} ${Math.abs(offset) === 1 ? "night" : "nights"}`
-        : "is just past its typical annual peak window";
+        ? `peak in about ${Math.abs(offset)} ${Math.abs(offset) === 1 ? "night" : "nights"}`
+        : "are just past their usual peak";
   const latitude = lessFavourable
-    ? " Your latitude is less favourable for this shower."
+    ? " They are harder to see from where you are."
     : "";
-  return `${shower.name} ${timing}. Published zenithal rates reach ${idealRate(shower.zhr)} under ideal dark-sky conditions; your actual rate may be much lower.${latitude} Its meteors come from debris associated with ${shower.parent}.`;
+  return `${shower.name} ${timing}. Under perfect dark skies they can reach ${idealRate(shower.zhr)}; most places will see fewer.${latitude} The meteors are dust left behind by ${shower.parent}.`;
 }
 
 export interface ApproximateMoonPhase {

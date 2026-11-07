@@ -23,7 +23,7 @@ describe("approximation-aware sky events", () => {
   it("handles recurring windows across a year boundary", () => {
     const events = getSkyEvents(new Date("2027-01-02T12:00:00Z"), 45);
     const quadrantids = events.find((event) => event.id === "quadrantids");
-    expect(quadrantids?.line).toMatch(/typical peak window/i);
+    expect(quadrantids?.line).toMatch(/peak in about 1 night\./i);
     expect(quadrantids?.line).not.toMatch(/peak tonight/i);
   });
 
@@ -31,7 +31,9 @@ describe("approximation-aware sky events", () => {
     const geminids = getSkyEvents(new Date("2026-12-13T12:00:00Z"), 51).find(
       (event) => event.id === "geminids",
     );
-    expect(geminids?.line).toMatch(/ideal dark-sky conditions/i);
+    expect(geminids?.line).toMatch(
+      /perfect dark skies.*most places will see fewer/i,
+    );
     expect(geminids?.estimate.accuracy).toBe("typical-window");
   });
 

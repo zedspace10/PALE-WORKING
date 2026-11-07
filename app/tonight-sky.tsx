@@ -173,7 +173,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Sirius is the brightest star in Earth's night sky by apparent magnitude.",
     instruction:
-      "The brightest star in the sky. Look for the one that sparkles with blue-white light.",
+      "The brightest star in the sky. Look for the one that sparkles with blue white light.",
   },
   {
     id: "orion",
@@ -201,7 +201,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Betelgeuse varies in brightness and sheds material into space. Models agree it is enormous, but not on one exact boundary for its extended atmosphere.",
     instruction:
-      "Find the reddish-orange star in Orion's shoulder. That's Betelgeuse.",
+      "Find the reddish orange star in Orion's shoulder. That's Betelgeuse.",
   },
   {
     id: "vega",
@@ -227,7 +227,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     truth:
       "Arcturus is about 37 light years away and has a comparatively large motion through the sky relative to the Sun.",
     wonder:
-      "Its warm orange appearance comes from a cooler surface temperature than the Sun's, not from a nearby fire-like glow.",
+      "Its warm orange appearance comes from a cooler surface temperature than the Sun's, not because it is somehow on fire.",
     instruction:
       "Follow the curve of the Plough's handle and it will arc to Arcturus, a warm orange star.",
   },
@@ -241,7 +241,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     truth:
       "The pale band is the combined light of vast numbers of unresolved stars, mixed with dark dust, as we look through the Milky Way's disk from inside it. The galaxy as a whole is estimated to contain roughly 100 to 400 billion stars.",
     wonder:
-      "The Milky Way core is best seen from June to September in the northern hemisphere. The band of light you see is our galaxy seen edge-on from within.",
+      "The Milky Way core is best seen from June to September in the northern hemisphere. The band of light you see is our galaxy seen edge on, from inside it.",
     instruction:
       "Find the darkest part of the sky and look for a faint band of light stretching across it. Give your eyes time to adjust. It takes about 20 minutes.",
   },

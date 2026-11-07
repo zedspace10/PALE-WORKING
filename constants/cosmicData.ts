@@ -173,7 +173,7 @@ const LOCATIONS_BASE: LocationBase[] = [
     lightYears: 1 / 365.25,
     jump: "About 18 times further",
     lightLeft:
-      "Its radio signals take about a day to reach us, and every message we send takes a day to reach it. In November 2026 it reaches a full light day from Earth, the first spacecraft ever to do so.",
+      "Its radio signals take about a day to reach us, and every message we send takes a day to reach it. {voyagerDay}",
     sky: { kind: "too-faint" },
     skyWithoutLocation: {
       chip: "Too faint to see",
@@ -364,11 +364,11 @@ const COSMIC_EVENTS_BASE: CosmicEventBase[] = [
     year: 1990,
     title: "Hubble Space Telescope",
     description:
-      "Helped reveal the depth and structure of the cosmos in unprecedented detail.",
+      "It showed the universe in sharper detail than ever before, and helped measure how old it is and how fast it is expanding.",
   },
   {
     year: 1995,
-    title: "First planet found around a Sun-like star",
+    title: "First planet found around a star like the Sun",
     description: "51 Pegasi b. Other stars have worlds too.",
   },
   {

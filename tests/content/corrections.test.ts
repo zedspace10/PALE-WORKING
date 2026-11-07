@@ -58,7 +58,7 @@ describe("audited scientific corrections", () => {
     expect(content).toMatch(/total distributed mass/i);
     expect(content).toMatch(/methane and ethane/i);
     expect(content).toMatch(/subsurface ocean of liquid water/i);
-    expect(content).toMatch(/highly contested/i);
+    expect(content).toMatch(/much disputed/i);
     expect(content).toMatch(/not a known physical edge/i);
     expect(content).toMatch(/northern constellation Cassiopeia/i);
     expect(content).not.toMatch(
@@ -69,8 +69,8 @@ describe("audited scientific corrections", () => {
       (star) => star.name === "Proxima Centauri",
     );
     const barnard = STAR_CATALOG.find((star) => star.name === "Barnard's Star");
-    expect(proxima?.note).toMatch(/M-type star.*roughly 4.2 light years/i);
-    expect(barnard?.note).toMatch(/M-type star.*roughly 5.9 light years/i);
+    expect(proxima?.note).toMatch(/type M star.*roughly 4.2 light years/i);
+    expect(barnard?.note).toMatch(/type M star.*roughly 5.9 light years/i);
     expect(textFor(STAR_CATALOG.map((star) => star.note))).not.toMatch(
       /prime candidate for planets with life|civilisation|confirmed planet|known planets/i,
     );
@@ -98,6 +98,18 @@ describe("audited scientific corrections", () => {
   it("builds an accessible source label", () => {
     expect(getSourceAccessibilityLabel(SCIENTIFIC_SOURCES.nasaBigBang)).toBe(
       "Open source: Big Bang Q&A, NASA Science",
+    );
+  });
+});
+
+describe("Voyager 1's light day", () => {
+  it("speaks of 18 November 2026 in the right tense", async () => {
+    const { voyagerDayWords } = await import("@/constants/exploreSky");
+    expect(voyagerDayWords(new Date("2026-11-07T12:00:00Z"))).toBe(
+      "On 18 November 2026 it will reach a full light day from Earth, the first spacecraft ever to do so.",
+    );
+    expect(voyagerDayWords(new Date("2026-12-01T12:00:00Z"))).toBe(
+      "On 18 November 2026 it became the first spacecraft ever to reach a full light day from Earth.",
     );
   });
 });
