@@ -23,7 +23,7 @@ export function timeMarkers(now: Date, birthday: Date | null): TimeMarker[] {
     (now.getTime() - new Date(iso).getTime()) / YEAR_MS;
   const markers: TimeMarker[] = [
     {
-      yearsAgo: since("1969-07-20T20:17:00Z"),
+      yearsAgo: since("1969-07-21T02:56:00Z"),
       name: "the first steps on the Moon",
     },
     { yearsAgo: 5_200, name: "the first writing" },

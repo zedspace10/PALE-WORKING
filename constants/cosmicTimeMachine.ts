@@ -58,10 +58,10 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
   {
     id: "dark-ages",
     era: "early-universe",
-    when: "13.6 billion years ago",
+    when: "Until about 13.6 billion years ago",
     title: "The cosmic dark ages",
     description:
-      "The universe enters a period of darkness. No stars yet, only clouds of hydrogen and helium slowly cooling and drifting. For a hundred million years or more, the universe is dark and silent.",
+      "After the first light fades, the universe goes dark. There are no stars yet, only clouds of hydrogen and helium slowly cooling and drifting. This lasts a hundred million years or more.",
     perspective:
       "For roughly one to two hundred million years there were no stars at all. The only light was the fading glow left over from the beginning.",
     color: "#3A3060",
@@ -125,7 +125,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "Water, delivered by comets and asteroids, or released from volcanic activity, accumulates on Earth's surface. The oceans form.",
     perspective:
-      "Earth's water has multiple possible sources, including water-rich material incorporated during formation and later delivery by small bodies. The relative contributions remain under study.",
+      "Earth's water has multiple possible sources, including water held in the rocks Earth formed from and later delivery by small bodies. The relative contributions remain under study.",
     color: "#3D8FBF",
     icon: "droplet",
   },
@@ -135,7 +135,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "At least 3.5 billion years ago; possibly earlier",
     title: "The first life",
     description:
-      "The earliest widely accepted evidence of life appears in ancient rocks. These organisms were simple and single-celled, although the date and setting of life's origin remain uncertain.",
+      "The earliest widely accepted evidence of life appears in ancient rocks. These organisms were simple, each a single cell, although the date and setting of life's origin remain uncertain.",
     perspective:
       "You are distantly related to every living thing on Earth, from oak trees to bacteria.",
     color: "#4CAF50",
@@ -171,7 +171,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "600 million years ago",
     title: "The first animals",
     description:
-      "Animals appear in the oceans after multicellular life had already evolved in other lineages. Their early forms were soft-bodied, and the exact relationships among them remain an active area of research.",
+      "Animals appear in the oceans after multicellular life had already evolved in other lineages. The earliest had soft bodies, and the exact relationships among them remain an active area of research.",
     perspective:
       "Animals are a recent branch on a much older tree of life, preceded by billions of years of microbial evolution and earlier multicellular lineages.",
     color: "#80B0D0",
@@ -183,7 +183,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "540 million years ago",
     title: "The Cambrian explosion",
     description:
-      "Over tens of millions of years, many major animal groups become conspicuous in the fossil record. Eyes, limbs, shells, and new predator-prey relationships spread through increasingly complex marine ecosystems.",
+      "Over tens of millions of years, many major animal groups become conspicuous in the fossil record. Eyes, limbs, shells, and new kinds of hunter and prey spread through increasingly complex marine ecosystems.",
     perspective:
       "The basic layout of your body, with two matching sides and a head with eyes at the front, was already around in animals more than 500 million years ago.",
     color: "#A0B890",
@@ -207,7 +207,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "230 million years ago",
     title: "The age of dinosaurs",
     description:
-      "After the Permian mass extinction wipes out around 80% of marine species, dinosaurs emerge and come to dominate. They rule Earth for 165 million years, some 27 times longer than our own lineage has existed.",
+      "After the end Permian extinction wipes out most species in the sea, dinosaurs emerge and come to dominate. They rule Earth for 165 million years, some 27 times longer than our own lineage has existed.",
     perspective:
       "Dinosaurs lasted about 165 million years. The human lineage has been around for about 6 million.",
     color: "#8DA060",
@@ -219,7 +219,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "66 million years ago",
     title: "The asteroid and the mass extinction",
     description:
-      "An asteroid about 10 kilometres wide strikes what is now the Yucatán Peninsula, triggering global environmental disruption. About three-quarters of species go extinct, including all non-avian dinosaurs.",
+      "An asteroid about 10 kilometres wide strikes what is now the Yucatán Peninsula, triggering global environmental disruption. About three quarters of species die out, including every dinosaur except the birds.",
     perspective:
       "The mammals that survived the impact were mostly small, and many probably sheltered in burrows. Our ancestors were among them.",
     color: "#D08040",
@@ -231,7 +231,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "66 million years ago",
     title: "The rise of mammals",
     description:
-      "With the dinosaurs gone, mammals rapidly diversify into the ecological niches left empty. Whales return to the sea. Bats take to the air. Primates develop in the forests. The world fills with warm-blooded, social, curious animals.",
+      "With the dinosaurs gone, mammals rapidly diversify into the ecological niches left empty. Whales return to the sea. Bats take to the air. Primates develop in the forests. The world fills with warm blooded, social, curious animals.",
     perspective:
       "Blue whales, bats and humans all evolved in the 66 million years since the asteroid.",
     color: "#C09070",
@@ -280,7 +280,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "70,000 years ago",
     title: "The great migration",
     description:
-      "Several dispersals of Homo sapiens leave Africa, with a major expansion contributing much of the ancestry of present-day populations outside Africa. Those groups mixed with Neanderthals, Denisovans, and other human populations along the way.",
+      "Several dispersals of Homo sapiens leave Africa, with a major expansion contributing much of the ancestry of people living outside Africa. Those groups mixed with Neanderthals, Denisovans, and other human populations along the way.",
     perspective:
       "All living humans share deep African ancestry. Later migrations and mixing made our family tree more like a network than a single line.",
     color: "#B89060",

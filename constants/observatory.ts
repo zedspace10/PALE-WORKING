@@ -20,15 +20,15 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     id: "andromeda",
     location: "Andromeda Galaxy",
     locationDetail: "Our nearest major galactic neighbour",
-    distance: "2.537 million light years",
+    distance: "2.5 million light years",
     reflection:
-      "Light reaching Earth from Andromeda began its journey before modern humans existed. It carries information from a galaxy whose stars predate our species by millions of years.",
+      "Light reaching Earth from Andromeda began its journey before modern humans existed. Tonight you see the galaxy as it was 2.5 million years ago.",
   },
   {
     id: "voyager",
     location: "Voyager 1",
-    locationDetail: "The most distant human-made object",
-    distance: "Tens of billions of kilometres from Earth",
+    locationDetail: "The farthest thing people have made",
+    distance: "About 26 billion kilometres from Earth",
     reflection:
       "A machine no heavier than a small car, launched in 1977, is now travelling through interstellar space beyond the heliosphere. It has not yet passed the Solar System's distant Oort Cloud. It carries a golden record with sounds and images from Earth.",
   },
@@ -36,9 +36,9 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     id: "pillars",
     location: "Pillars of Creation",
     locationDetail: "Eagle Nebula, a stellar nursery",
-    distance: "6,500 light years",
+    distance: "About 5,700 light years",
     reflection:
-      "These towering columns of gas and dust are regions of active star formation. The light we see left roughly 6,500 years before it reached Earth, so every image is a view into the past.",
+      "These towering columns of gas and dust are regions of active star formation. The light we see left them roughly 5,700 years ago, so every image is a view into the past.",
   },
   {
     id: "sagittarius-a",
@@ -78,7 +78,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "A huge, nearly empty region of the cosmic web",
     distance: "700 million light years",
     reflection:
-      "The Boötes Void is a vast, unusually underdense region of the cosmic web, roughly hundreds of millions of light years across. It is not completely empty: galaxies have been observed inside it, just far fewer than in denser regions.",
+      "The Boötes Void is a vast, unusually underdense region of the cosmic web, about 330 million light years across. It is not completely empty: galaxies have been observed inside it, just far fewer than in denser regions.",
   },
   {
     id: "cosmic-background",
@@ -102,7 +102,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "Saturn's moon, a world with lakes and weather",
     distance: "About 1.4 billion kilometres",
     reflection:
-      "Saturn's moon Titan has clouds, rain, rivers, and lakes of liquid methane and ethane on its surface. Beneath the water-ice crust, evidence points to a global subsurface ocean of liquid water.",
+      "Saturn's moon Titan has clouds, rain, rivers, and lakes of liquid methane and ethane on its surface. Beneath its crust of water ice, evidence points to a global subsurface ocean of liquid water.",
   },
   {
     id: "olympus-mons",
@@ -115,10 +115,11 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "kepler-442b",
     location: "Kepler-442b",
-    locationDetail: "A super-Earth-size exoplanet in its star's habitable zone",
+    locationDetail:
+      "A planet a little bigger than Earth, in its star's habitable zone",
     distance: "1,200 light years",
     reflection:
-      "Kepler-442b is about 1.34 times Earth's radius and orbits a K-type star in a region where surface liquid water could be possible under suitable atmospheric conditions. Its composition and atmosphere have not been measured, and there is no evidence that it hosts life.",
+      "Kepler-442b is about 1.34 times Earth's radius and orbits an orange K type star in a region where surface liquid water could be possible under suitable atmospheric conditions. Its composition and atmosphere have not been measured, and there is no evidence that it hosts life.",
   },
   {
     id: "europa",
@@ -133,7 +134,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     id: "messier-87",
     location: "Messier 87",
     locationDetail: "The galaxy whose black hole was first photographed",
-    distance: "53 million light years",
+    distance: "55 million light years",
     reflection:
       "In 2019, humanity took its first photograph of a black hole, the supermassive black hole at the centre of Messier 87. It took years of international work, linking observatories across the world into one telescope as wide as Earth. It showed the dark shadow of the black hole against the glowing gas around it.",
   },
@@ -172,15 +173,15 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "hercules-corona-borealis",
     location: "Hercules-Corona Borealis Great Wall",
-    locationDetail: "A proposed, highly contested large-scale pattern",
+    locationDetail: "A proposed and much disputed giant pattern",
     distance: "10 billion light years",
     reflection:
-      "A statistical clustering of gamma-ray bursts has been interpreted as a structure spanning several billion light years. Whether it represents one physical object is disputed, and it should not be treated as a confirmed cosmic wall.",
+      "A statistical clustering of gamma ray bursts has been interpreted as a structure spanning several billion light years. Whether it represents one physical object is disputed, and it should not be treated as a confirmed cosmic wall.",
   },
   {
     id: "tau-ceti",
     location: "Tau Ceti",
-    locationDetail: "A nearby Sun-like star with reported planet candidates",
+    locationDetail: "A nearby star like the Sun, with possible planets",
     distance: "11.9 light years",
     reflection:
       "Tau Ceti is a nearby star broadly similar to the Sun. Researchers have reported several planet candidates from subtle changes in its radial velocity, but the candidate list and their properties depend on difficult signal analysis. No life has been detected there.",
@@ -207,7 +208,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "Pressure waves in a cluster's hot gas",
     distance: "250 million light years",
     reflection:
-      "X-ray observations revealed ripples in the Perseus Cluster's hot gas that researchers interpreted as pressure waves driven by its central black hole. Converted to a pitch, their frequency is about a B-flat 57 octaves below middle C, far below human hearing.",
+      "X-ray observations revealed ripples in the Perseus Cluster's hot gas that researchers interpreted as pressure waves driven by its central black hole. Converted to a pitch, their frequency is about a B flat 57 octaves below middle C, far below human hearing.",
   },
   {
     id: "pleiades",
@@ -228,7 +229,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "cosmic-web",
     location: "The Cosmic Web",
-    locationDetail: "The large-scale structure of the universe",
+    locationDetail: "The shape of the universe on the largest scales",
     distance: "Spanning the observable universe",
     reflection:
       "At the largest scales, galaxies gather into filaments and sheets separated by vast voids. Images can resemble neural networks or fungal mycelium, but that visual similarity does not mean the systems share a physical mechanism.",
@@ -239,7 +240,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "A proposed supervoid aligned with the CMB Cold Spot",
     distance: "About 3 billion light years",
     reflection:
-      "Galaxy surveys have found an underdense region in the direction of the cosmic microwave background Cold Spot. Its size and ability to explain the Cold Spot remain debated; current evidence does not support exotic-universe explanations.",
+      "Galaxy surveys have found an underdense region in the direction of the cosmic microwave background Cold Spot. Its size and ability to explain the Cold Spot remain debated; current evidence does not support more exotic explanations.",
   },
   {
     id: "edge-observable",
@@ -255,7 +256,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "Our nearest stellar system, with three suns",
     distance: "4.37 light years",
     reflection:
-      "Alpha Centauri is a three-star system: Alpha Centauri A and B orbit each other, while Proxima Centauri is a much wider companion and slightly closer to us. From there, our Sun would appear as a modest star in the northern constellation Cassiopeia.",
+      "Alpha Centauri is a system of three stars: Alpha Centauri A and B orbit each other, while Proxima Centauri is a much wider companion and slightly closer to us. From there, our Sun would appear as a modest star in the northern constellation Cassiopeia.",
   },
 ];
 

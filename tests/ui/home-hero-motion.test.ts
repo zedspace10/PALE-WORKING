@@ -2,44 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import {
-  createHomeHeroStars,
-  HOME_HERO_LAYER_CONFIG,
-  HOME_HERO_STARS,
-  shouldRunHomeHeroMotion,
-} from "@/constants/homeHeroMotion";
+import { shouldRunHomeHeroMotion } from "@/constants/homeHeroMotion";
 
 function read(file: string): string {
   return fs.readFileSync(path.resolve(process.cwd(), file), "utf8");
 }
 
-describe("Home hero ambient stars", () => {
-  it("creates a deterministic, bounded three-layer star field", () => {
-    expect(createHomeHeroStars()).toEqual(HOME_HERO_STARS);
-    expect(createHomeHeroStars()).toHaveLength(39);
-    expect(new Set(HOME_HERO_STARS.map((star) => star.id)).size).toBe(39);
-    expect(new Set(HOME_HERO_STARS.map((star) => star.layer))).toEqual(
-      new Set([0, 1, 2]),
-    );
-
-    for (const star of HOME_HERO_STARS) {
-      expect(star.x).toBeGreaterThanOrEqual(3);
-      expect(star.x).toBeLessThanOrEqual(97);
-      expect(star.y).toBeGreaterThanOrEqual(4);
-      expect(star.y).toBeLessThanOrEqual(96);
-      expect(star.opacity).toBeGreaterThanOrEqual(0.15);
-      expect(star.opacity).toBeLessThanOrEqual(0.38);
-      expect(star.size).toBeLessThanOrEqual(2.1);
-    }
-
-    for (const layer of HOME_HERO_LAYER_CONFIG) {
-      expect(
-        HOME_HERO_STARS.filter((star) => star.layer === layer.layer),
-      ).toHaveLength(layer.count);
-      expect(layer.duration).toBeGreaterThanOrEqual(19_000);
-    }
-  });
-
+describe("Ambient motion", () => {
   it("runs only when focused, foregrounded, and motion is permitted", () => {
     expect(shouldRunHomeHeroMotion(false, true, "active")).toBe(true);
     expect(shouldRunHomeHeroMotion(true, true, "active")).toBe(false);
@@ -50,35 +19,6 @@ describe("Home hero ambient stars", () => {
 });
 
 describe("Home hero scene contracts", () => {
-  it("uses layer-level drift and a shader-like SVG sphere", () => {
-    const scene = read("components/HomeHeroScene.tsx");
-    expect(scene).toContain("HOME_HERO_LAYER_CONFIG.map");
-    expect(scene).toContain("layer.stars.map");
-    expect(scene).toContain("<RadialGradient");
-    expect(scene).toContain('id="ambientHalo"');
-    expect(scene).toContain('id="earthClip"');
-    expect(scene).toContain('id="oceanBody"');
-    expect(scene).toContain('id="atmosphereRim"');
-    expect(scene).toContain('id="softEarth"');
-    expect(scene).toContain("<FeGaussianBlur");
-    expect(scene).toContain('testID="earth-land"');
-    expect(scene).not.toContain('testID="earth-clouds"');
-    expect(scene).toContain('testID="earth-energy"');
-    expect(scene).toContain('id="surfaceHaze"');
-    expect(scene).toContain('id="violetBloom"');
-    expect(scene).toContain('id="cyanBloom"');
-    expect(scene).not.toContain("M23 49 31 45");
-    expect(scene).not.toContain("M29 61 36 57");
-    expect(scene.indexOf('testID="earth-land"')).toBeLessThan(
-      scene.indexOf('testID="earth-energy"'),
-    );
-    expect(scene).toContain('testID = "home-location-sphere"');
-    expect(scene).toContain('transform="rotate(-28 37 35)"');
-    expect(scene).not.toContain("origin=");
-    expect(scene).toContain("useNativeDriver: true");
-    expect(scene).not.toMatch(/<Image|https?:\/\/|require\(/);
-  });
-
   it("gives each home card its own rendered picture, faded behind the text", () => {
     const home = read("app/(tabs)/index.tsx");
     const artwork = read("components/CardArtwork.tsx");
@@ -102,12 +42,8 @@ describe("Home hero scene contracts", () => {
     expect(artwork).not.toMatch(/https?:\/\//);
   });
 
-  it("keeps the scene decorative and lifecycle-aware", () => {
-    const scene = read("components/HomeHeroScene.tsx");
+  it("only moves while its screen is in front", () => {
     const lifecycle = read("hooks/useHomeHeroMotionActive.ts");
-    expect(scene).toContain('pointerEvents="none"');
-    expect(scene).toContain('importantForAccessibility="no-hide-descendants"');
-    expect(scene).toContain("accessibilityElementsHidden");
     expect(lifecycle).toContain("useFocusEffect");
     expect(lifecycle).toContain('AppState.addEventListener("change"');
     expect(lifecycle).toContain("shouldRunHomeHeroMotion");

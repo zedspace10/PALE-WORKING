@@ -217,10 +217,18 @@ export function departureWords(lightYears: number, now: Date): string {
 
 /** The place's "when this light left" line, with any date filled in. */
 export function lightLeftFor(place: Location, now: Date): string {
-  return place.lightLeft.replace(
-    "{when}",
-    departureWords(place.lightYears, now),
-  );
+  return place.lightLeft
+    .replace("{when}", departureWords(place.lightYears, now))
+    .replace("{voyagerDay}", voyagerDayWords(now));
+}
+
+/** Voyager 1 reaches a full light day from Earth on 18 November 2026 (NASA JPL). */
+const VOYAGER_LIGHT_DAY = Date.UTC(2026, 10, 18);
+
+export function voyagerDayWords(now: Date): string {
+  return now.getTime() < VOYAGER_LIGHT_DAY
+    ? "On 18 November 2026 it will reach a full light day from Earth, the first spacecraft ever to do so."
+    : "On 18 November 2026 it became the first spacecraft ever to reach a full light day from Earth.";
 }
 
 /** The newest note the person sent to this place, if any. */
