@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LightSignal } from "@/components/LightSignal";
+import { NoteMilestonesToggle } from "@/components/NoteMilestonesToggle";
 import {
   JOURNAL_STORAGE_KEY,
   KEPT_LINE,
@@ -815,6 +816,14 @@ export function NotesScreen() {
               );
             })}
           </View>
+        )}
+
+        {stage !== "aim" && stage !== "light" && (
+          // Keyed so it shows the right state after the offer under a sent note is accepted.
+          <NoteMilestonesToggle
+            key={String(milestonesOn)}
+            onChange={setMilestonesOn}
+          />
         )}
       </ScrollView>
     </View>

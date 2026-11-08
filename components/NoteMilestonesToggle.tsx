@@ -7,8 +7,12 @@ import {
   setNoteMilestones,
 } from "@/constants/noteMilestones";
 
-/** On the You tab: a notification as each note passes a milestone. */
-export function NoteMilestonesToggle() {
+/** On the Notes and You tabs: a notification as each note passes a milestone. */
+export function NoteMilestonesToggle({
+  onChange,
+}: {
+  onChange?: (on: boolean) => void;
+}) {
   return (
     <NotifyToggle
       title="Note milestones"
@@ -16,6 +20,7 @@ export function NoteMilestonesToggle() {
       isOn={areNoteMilestonesOn}
       setOn={setNoteMilestones}
       status={nextNoteMilestoneLine}
+      onChange={onChange}
     />
   );
 }

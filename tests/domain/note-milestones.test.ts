@@ -238,3 +238,14 @@ describe("Note milestone notifications", () => {
     expect([...mocks.pending.keys()]).toEqual(["pale-observatory-2026-11-05"]);
   });
 });
+
+describe("the switch on the Notes tab", () => {
+  it("sits on the Notes tab as well as the You tab, and stays in step", async () => {
+    const fs = await import("node:fs");
+    const notes = fs.readFileSync("components/NotesScreen.tsx", "utf8");
+    expect(notes).toContain("<NoteMilestonesToggle");
+    expect(notes).toContain("onChange={setMilestonesOn}");
+    const you = fs.readFileSync("app/(tabs)/you.tsx", "utf8");
+    expect(you).toContain("<NoteMilestonesToggle");
+  });
+});

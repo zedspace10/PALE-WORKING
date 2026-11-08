@@ -12,6 +12,8 @@ interface Props {
   onNote?: string;
   /** A live line under the switch, worked out again whenever it changes. */
   status?: () => Promise<string | null>;
+  /** Told whenever the switch ends up on or off, so the screen around it can follow. */
+  onChange?: (on: boolean) => void;
 }
 
 /** A notification setting on the You tab, matching the Observatory reminder card. */
@@ -22,6 +24,7 @@ export function NotifyToggle({
   setOn,
   onNote,
   status,
+  onChange,
 }: Props) {
   const colors = useColors();
   const [on, setOnState] = useState(false);
@@ -58,6 +61,7 @@ export function NotifyToggle({
     try {
       const reached = await setOn(next);
       setOnState(reached);
+      onChange?.(reached);
       if (next && !reached) {
         setNote(
           "Notifications for PALE are turned off in your phone's settings.",
