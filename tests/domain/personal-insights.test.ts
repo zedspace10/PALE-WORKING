@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { COSMIC_EVENTS } from "@/constants/cosmicData";
-import { getMomentLines } from "@/constants/momentContent";
+import { getMomentLines, momentFacts } from "@/constants/momentContent";
 import {
   formatUniverseAgeEstimate,
   getEventsAfterBirth,
@@ -156,39 +156,60 @@ describe("serialized local state", () => {
   });
 });
 
-describe("Moment Card local-condition honesty", () => {
+describe("the opening card", () => {
+  const at = (h: number) => new Date(2026, 10, 8, h, 0, 0);
   const say = (...args: Parameters<typeof getMomentLines>) =>
     getMomentLines(...args)
       .map((line) => line.text)
       .join(" ");
 
+  it("greets by the time of day", () => {
+    expect(say(at(7), null)).toMatch(/^Good morning\./);
+    expect(say(at(14), null)).toMatch(/^Good afternoon\./);
+    expect(say(at(19), null)).toMatch(/^Good evening\./);
+    expect(say(at(1), "astronomical-darkness")).toMatch(/^Still up\?/);
+    // Late, but the Sun has not set (summer near the poles).
+    expect(say(at(23), "daylight")).toMatch(/^Hello again\./);
+  });
+
   it("says nothing about the Sun without a verified location", () => {
-    const text = say(7, 1, null);
-    expect(text).toMatch(/good morning/i);
+    const text = say(at(7), null);
     expect(text).not.toMatch(/Sun (rose|is up|is above)/i);
-  });
-
-  it("describes polar daylight from the calculated solar state", () => {
-    const text = say(23, 1, "daylight");
-    expect(text).toMatch(/the Sun is up/i);
-    expect(text).not.toMatch(/stars.*visible|stars are out/i);
-  });
-
-  it("does not claim a photon is on the user indoors", () => {
-    const text = say(12, 1, "daylight");
-    expect(text).toMatch(/eight minutes/i);
-    expect(text).not.toMatch(/on your skin|just arrived|reaching you/i);
-  });
-
-  it("does not promise stars in the evening", () => {
-    const text = say(19, 1, "civil-twilight");
-    expect(text).toMatch(/Where you are, it is twilight\./);
-    expect(text).not.toMatch(/stars (are|will be) (out|visible)/i);
-  });
-
-  it("gives the age of the universe as a sentence", () => {
-    expect(say(15, 1, null)).toMatch(
-      /the universe is about 13\.8 billion years old\./,
+    expect(say(at(19), "civil-twilight")).toMatch(
+      /Where you are, it is twilight\./,
     );
+  });
+
+  it("leads with how far Earth has carried you since the last visit", () => {
+    const now = at(9);
+    const lines = getMomentLines(now, null, {
+      lastVisitAt: now.getTime() - 3 * 86_400_000,
+    });
+    expect(lines[lines.length - 1].text).toBe(
+      "Since you last opened PALE, Earth has carried you 7.7 million km around the Sun.",
+    );
+  });
+
+  it("only says true things about this moment, and changes day to day", () => {
+    const facts = momentFacts(new Date(2026, 10, 20, 21), {
+      birthday: new Date(1994, 4, 12),
+    });
+    expect(facts.join(" ")).toMatch(/now 32 light years away, past Vega\./);
+    expect(facts.join(" ")).toMatch(
+      /The Moon is \d+% lit today, and growing each night\./,
+    );
+    expect(facts.join(" ")).toMatch(
+      /Voyager 1 is now about 25\.\d billion km from Earth/,
+    );
+    const days = new Set(
+      [8, 9, 10, 11, 12].map((d) => {
+        const lines = getMomentLines(new Date(2026, 10, d, 21), null);
+        return lines[lines.length - 1].text;
+      }),
+    );
+    expect(days.size).toBeGreaterThan(2);
+    for (const line of facts) {
+      expect(line).not.toMatch(/[\u2013\u2014]| - /);
+    }
   });
 });

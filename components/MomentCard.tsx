@@ -8,17 +8,24 @@ import { useColors } from "@/hooks/useColors";
 import { StarField } from "./StarField";
 
 interface Props {
-  hour: number;
-  openCount: number;
+  now: Date;
   solarState: SolarState | null;
+  lastVisitAt: number | null;
+  birthday: Date | null;
   onDismiss: () => void;
 }
 
-export function MomentCard({ hour, openCount, solarState, onDismiss }: Props) {
+export function MomentCard({
+  now,
+  solarState,
+  lastVisitAt,
+  birthday,
+  onDismiss,
+}: Props) {
   const colors = useColors();
   const lines = useMemo(
-    () => getMomentLines(hour, openCount, solarState),
-    [hour, openCount, solarState],
+    () => getMomentLines(now, solarState, { lastVisitAt, birthday }),
+    [now, solarState, lastVisitAt, birthday],
   );
   const [, setCanDismiss] = useState(false);
   const dismissing = useRef(false);

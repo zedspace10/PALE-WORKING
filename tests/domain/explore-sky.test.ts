@@ -167,3 +167,19 @@ describe("moments on each place", () => {
     expect(canFindNow(place("voyager"), london, night)).toBe(false);
   });
 });
+
+describe("Look back pictures", () => {
+  it("has a rendered picture for every place", async () => {
+    const fs = await import("node:fs");
+    const { LOCATIONS } = await import("@/constants/cosmicData");
+    const source = fs.readFileSync("components/LookBack.tsx", "utf8");
+    for (const place of LOCATIONS) {
+      expect(source).toContain(`"${place.lookBack.scene}": require(`);
+    }
+    for (const file of source.match(/assets\/images\/lookback\/[a-z]+\.jpg/g) ??
+      []) {
+      expect(fs.existsSync(file)).toBe(true);
+    }
+    expect(source).not.toContain("react-native-svg");
+  });
+});

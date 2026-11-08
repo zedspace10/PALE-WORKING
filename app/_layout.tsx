@@ -35,9 +35,13 @@ SplashScreen.setOptions({ fade: true, duration: 700 });
 
 function RootLayoutNav({
   openCount,
+  lastVisitAt,
+  birthday,
   onReady,
 }: {
   openCount: number;
+  lastVisitAt: number | null;
+  birthday: Date | null;
   /** Called once the first screen is decided, so the splash screen can fade straight into it. */
   onReady: () => void;
 }) {
@@ -70,7 +74,7 @@ function RootLayoutNav({
 
   // Full moment card on the first open of the day only.
   const [dismissed, setDismissed] = useState(openCount > 1);
-  const hour = new Date().getHours();
+  const [openedAt] = useState(() => new Date());
   const [momentSolarState, setMomentSolarState] = useState<
     SolarState | null | undefined
   >(undefined);
@@ -183,8 +187,9 @@ function RootLayoutNav({
 
       {onboarded === true && !dismissed && momentSolarState !== undefined && (
         <MomentCard
-          hour={hour}
-          openCount={openCount}
+          now={openedAt}
+          lastVisitAt={lastVisitAt}
+          birthday={birthday}
           solarState={momentSolarState}
           onDismiss={() => setDismissed(true)}
         />
@@ -201,7 +206,12 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
-  const { todayCount, loaded: countLoaded } = useOpenCount();
+  const {
+    todayCount,
+    loaded: countLoaded,
+    lastVisitAt,
+    birthday,
+  } = useOpenCount();
 
   // Safety net: never let the splash screen stick forever.
   const [timedOut, setTimedOut] = useState(false);
@@ -231,6 +241,8 @@ export default function RootLayout() {
         >
           <RootLayoutNav
             openCount={todayCount}
+            lastVisitAt={lastVisitAt}
+            birthday={birthday}
             onReady={markFirstScreenReady}
           />
         </GestureHandlerRootView>
