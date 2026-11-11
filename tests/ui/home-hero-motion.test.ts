@@ -78,6 +78,14 @@ describe("Home hero scene contracts", () => {
       'testID="shift-entry-earth"',
     );
     expect(read("components/ShiftEarthButton.tsx")).toContain("<EarthGlobe");
+    // Tapping Earth glides it to where the journey starts, then the journey fades in around it.
+    expect(read("components/ShiftEarthButton.tsx")).toContain("measureInWindow");
+    expect(shift).toContain("onPress={tapEarth}");
+    expect(shift).toContain("duration: GLIDE_MS");
+    expect(shift).toContain("!journeyActive || entering");
+    expect(shift).toContain(
+      "(sceneSize * EARTH_SPHERE_FRACTION) / SHIFT_ENTRY_DIAMETER",
+    );
     expect(shift).toContain(
       "<StarField count={72} containerOpacity={0.38} drift={11}",
     );

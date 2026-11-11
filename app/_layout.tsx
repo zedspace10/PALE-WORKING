@@ -20,6 +20,7 @@ import { ONBOARDED_KEY, Onboarding } from "@/components/Onboarding";
 import { useNotificationSchedule } from "@/hooks/useNotificationSchedule";
 import { useOpenCount } from "@/hooks/useOpenCount";
 import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
+import { noteIdFromIdentifier } from "@/constants/noteMilestones";
 import palette from "@/constants/colors";
 // Defines the background check for a new weekly picture; must load before anything else runs.
 import "@/constants/thisWeekTask";
@@ -48,8 +49,8 @@ function RootLayoutNav({
   // Keep the nightly notifications in step with the app.
   useNotificationSchedule();
 
-  // Tapping a notification opens what it is about: the weekly picture, or Notes for a note's
-  // milestone (phones only; the web has no notifications).
+  // Tapping a notification opens what it is about: the weekly picture, or the very note a
+  // milestone is about (phones only; the web has no notifications).
   const router = useRouter();
   const handledResponse = useRef<string | null>(null);
   useEffect(() => {
@@ -60,8 +61,16 @@ function RootLayoutNav({
       const url = response.notification.request.content.data?.url;
       if (handledResponse.current === id) return;
       if (url === "/this-week") router.push("/this-week");
-      else if (url === "/notes") router.push("/(tabs)/notes");
-      else return;
+      else if (url === "/notes") {
+        const data = response.notification.request.content.data;
+        const note =
+          typeof data?.note === "string" ? data.note : noteIdFromIdentifier(id);
+        router.push(
+          note
+            ? { pathname: "/(tabs)/notes", params: { note, opened: id } }
+            : "/(tabs)/notes",
+        );
+      } else return;
       handledResponse.current = id;
     };
     // Opened from the notification when PALE was closed, or while it was running.

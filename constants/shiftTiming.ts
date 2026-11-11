@@ -4,7 +4,12 @@
  * update TRACK_CUES; a test checks the two still agree.
  */
 
-/** The screen fading in after Begin, before the first stage. */
+/**
+ * Tapping Earth: the words fade and Earth glides to where the journey starts. The music and the
+ * times below begin once it arrives, so this does not move any of them.
+ */
+export const GLIDE_MS = 1500;
+/** The screen fading in once Earth is in place, before the first stage. */
 export const ENTRY_FADE_MS = 620;
 // Each stage carries about 1.3s of animation overhead on top of these.
 // Weighted so the setup moves and the closing line is given room.
