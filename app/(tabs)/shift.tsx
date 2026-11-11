@@ -21,12 +21,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CalmPressable } from "@/components/CalmPressable";
 import { IllustrationDisclosure } from "@/components/IllustrationDisclosure";
-import { ShiftZoomScene } from "@/components/ShiftZoomScene";
+import {
+  EARTH_SPHERE_FRACTION,
+  ShiftZoomScene,
+} from "@/components/ShiftZoomScene";
 import { StarField } from "@/components/StarField";
 import { SHIFT_STAGES } from "@/constants/cosmicData";
 import {
   ENTRY_FADE_MS,
   FADE_MS,
+  GLIDE_MS,
   STAGE_DURATIONS_MS,
   ZOOM_HOME_MS,
   ZOOM_OUT_MS,
@@ -35,7 +39,16 @@ import { SHIFT_MAX_ZOOM } from "@/constants/shiftZoom";
 import { getTonightsEvent } from "@/constants/skyEvents";
 import { calmSpace, calmTypography } from "@/constants/ui";
 import { useShiftCount } from "@/hooks/useBirthday";
-import { ShiftEarthButton } from "@/components/ShiftEarthButton";
+import {
+  type EarthGlide,
+  SHIFT_ENTRY_DIAMETER,
+  ShiftEarthButton,
+} from "@/components/ShiftEarthButton";
+import {
+  travelledWhileAway,
+  WELCOME_LINE,
+  WELCOME_TITLE,
+} from "@/constants/shiftWelcome";
 import { useColors } from "@/hooks/useColors";
 import { useHomeHeroMotionActive } from "@/hooks/useHomeHeroMotionActive";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -98,6 +111,14 @@ export default function ShiftScreen() {
   const stageTextTop = topPad + 56;
 
   const [journeyActive, setJourneyActive] = useState(false);
+  // From tapping Earth until the journey has fully faded in, while Earth glides into place.
+  const [entering, setEntering] = useState(false);
+  const [glideTo, setGlideTo] = useState<EarthGlide | null>(null);
+  const glide = useRef(new Animated.Value(0)).current;
+  const entryFade = useRef(new Animated.Value(1)).current;
+  const containerRef = useRef<View>(null);
+  const journeyStartedAt = useRef(0);
+  const [awayLine, setAwayLine] = useState<string | null>(null);
   const [stage, setStage] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [completionPhase, setCompletionPhase] =
@@ -112,6 +133,7 @@ export default function ShiftScreen() {
   const zoom = useRef(new Animated.Value(0)).current;
   const welcomeBackOpacity = useRef(new Animated.Value(0)).current;
   const welcomeSubOpacity = useRef(new Animated.Value(0)).current;
+  const welcomeAwayOpacity = useRef(new Animated.Value(0)).current;
   const screenFade = useRef(new Animated.Value(1)).current;
   const endButtonsOpacity = useRef(new Animated.Value(0)).current;
 
@@ -136,21 +158,26 @@ export default function ShiftScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      tabBarStyle: journeyActive ? { display: "none" } : visibleTabBarStyle,
+      tabBarStyle:
+        journeyActive || entering ? { display: "none" } : visibleTabBarStyle,
     });
 
     return () => navigation.setOptions({ tabBarStyle: undefined });
-  }, [journeyActive, navigation, visibleTabBarStyle]);
+  }, [journeyActive, entering, navigation, visibleTabBarStyle]);
 
   // At the end, the camera flies all the way home to Earth before the welcome.
   const runReturnSequence = useCallback(() => {
     setCompleted(true);
     setCompletionPhase("contracting");
+    setAwayLine(
+      travelledWhileAway((Date.now() - journeyStartedAt.current) / 1000),
+    );
 
     if (reduceMotion) {
       zoom.setValue(0);
       welcomeBackOpacity.setValue(1);
       welcomeSubOpacity.setValue(1);
+      welcomeAwayOpacity.setValue(1);
       endButtonsOpacity.setValue(1);
       setCompletionPhase("done");
       return;
@@ -172,11 +199,19 @@ export default function ShiftScreen() {
         setTimeout(() => {
           setCompletionPhase("welcomeSub");
 
-          Animated.timing(welcomeSubOpacity, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }).start(() => {
+          Animated.sequence([
+            Animated.timing(welcomeSubOpacity, {
+              toValue: 1,
+              duration: 1200,
+              useNativeDriver: true,
+            }),
+            Animated.delay(1400),
+            Animated.timing(welcomeAwayOpacity, {
+              toValue: 1,
+              duration: 1200,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
             if (Platform.OS !== "web") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
@@ -196,6 +231,7 @@ export default function ShiftScreen() {
   }, [
     endButtonsOpacity,
     reduceMotion,
+    welcomeAwayOpacity,
     welcomeBackOpacity,
     welcomeSubOpacity,
     zoom,
@@ -279,9 +315,62 @@ export default function ShiftScreen() {
     runStage(stageRef.current + 1);
   };
 
+  // Tapping Earth: the words fade, and Earth glides to where the journey starts and grows or
+  // shrinks to the same size, so when the journey fades in around it, nothing jumps.
+  const glideRunId = useRef(0);
+  const tapEarth = (centre: { x: number; y: number } | null) => {
+    if (entering || journeyActive) return;
+    if (reduceMotion || !centre) {
+      beginJourney();
+      return;
+    }
+    const container = containerRef.current;
+    const go = (originX: number, originY: number) => {
+      const run = ++glideRunId.current;
+      setGlideTo({
+        dx: viewportWidth / 2 - (centre.x - originX),
+        dy: sceneCenterY - (centre.y - originY),
+        scale: (sceneSize * EARTH_SPHERE_FRACTION) / SHIFT_ENTRY_DIAMETER,
+      });
+      setEntering(true);
+      glide.setValue(0);
+      Animated.timing(glide, {
+        toValue: 1,
+        duration: GLIDE_MS,
+        easing: easeInOut,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished && run === glideRunId.current) beginJourney();
+      });
+    };
+    if (container && typeof container.measureInWindow === "function") {
+      container.measureInWindow((x, y) =>
+        go(Number.isFinite(x) ? x : 0, Number.isFinite(y) ? y : 0),
+      );
+    } else {
+      go(0, 0);
+    }
+  };
+
+  // Leaving the screen while Earth is still gliding puts it back where it was.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        glideRunId.current += 1;
+        glide.stopAnimation();
+        glide.setValue(0);
+        setEntering(false);
+        setGlideTo(null);
+      },
+      [glide],
+    ),
+  );
+
   const beginJourney = () => {
     clearStageTimer();
     music.start();
+    journeyStartedAt.current = Date.now();
+    setAwayLine(null);
     stageRef.current = 0;
     setTonight(readTonight());
     stageOpacity.setValue(0);
@@ -289,6 +378,7 @@ export default function ShiftScreen() {
     zoom.setValue(0);
     welcomeBackOpacity.setValue(0);
     welcomeSubOpacity.setValue(0);
+    welcomeAwayOpacity.setValue(0);
     endButtonsOpacity.setValue(0);
     screenFade.setValue(reduceMotion ? 1 : 0);
     setStage(0);
@@ -304,6 +394,9 @@ export default function ShiftScreen() {
         easing: easeInOut,
         useNativeDriver: true,
       }).start(({ finished }) => {
+        // Earth is now in the journey's own picture, in the same place, so the one that
+        // glided there can go.
+        setEntering(false);
         if (finished) runStage(0);
       });
     }
@@ -321,8 +414,23 @@ export default function ShiftScreen() {
     zoom.setValue(0);
     welcomeBackOpacity.setValue(0);
     welcomeSubOpacity.setValue(0);
+    welcomeAwayOpacity.setValue(0);
     endButtonsOpacity.setValue(0);
     screenFade.setValue(1);
+    // Earth comes back to its place quietly rather than appearing all at once.
+    glideRunId.current += 1;
+    glide.setValue(0);
+    setGlideTo(null);
+    setEntering(false);
+    if (!reduceMotion && !onDone) {
+      entryFade.setValue(0);
+      Animated.timing(entryFade, {
+        toValue: 1,
+        duration: 900,
+        easing: easeInOut,
+        useNativeDriver: true,
+      }).start();
+    }
     onDone?.();
   };
 
@@ -351,25 +459,36 @@ export default function ShiftScreen() {
   const lastStage = stage === SHIFT_STAGES.length - 1;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View
+      ref={containerRef}
+      collapsable={false}
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <StarField count={72} containerOpacity={0.38} drift={11} />
-      {!journeyActive ? (
-        <View
+      {!journeyActive || entering ? (
+        <Animated.View
           style={[
             styles.entryContent,
-            { paddingTop: topPad, paddingBottom: bottomPad + 80 },
+            {
+              paddingTop: topPad,
+              paddingBottom: bottomPad + 80,
+              opacity: entryFade,
+            },
           ]}
         >
           <View style={styles.spacer} />
 
           <ShiftEarthButton
-            onPress={beginJourney}
+            onPress={tapEarth}
             reduceMotion={reduceMotion}
             active={ambientMotionActive}
+            glide={glide}
+            glideTo={glideTo}
+            leaving={entering}
           />
 
           <View style={styles.spacer} />
-        </View>
+        </Animated.View>
       ) : null}
 
       {journeyActive ? (
@@ -484,7 +603,7 @@ export default function ShiftScreen() {
                   { color: colors.foreground, opacity: welcomeBackOpacity },
                 ]}
               >
-                Back on Earth.
+                {WELCOME_TITLE}
               </Animated.Text>
 
               <Animated.Text
@@ -493,8 +612,22 @@ export default function ShiftScreen() {
                   { color: colors.mutedForeground, opacity: welcomeSubOpacity },
                 ]}
               >
-                That was everything we can see, in six steps.
+                {WELCOME_LINE}
               </Animated.Text>
+
+              {awayLine ? (
+                <Animated.Text
+                  style={[
+                    styles.welcomeAway,
+                    {
+                      color: colors.mutedForeground,
+                      opacity: welcomeAwayOpacity,
+                    },
+                  ]}
+                >
+                  {awayLine}
+                </Animated.Text>
+              ) : null}
             </View>
           )}
 
@@ -606,6 +739,8 @@ const styles = StyleSheet.create({
   },
   completeWrap: {
     position: "absolute",
+    left: 0,
+    right: 0,
     alignItems: "center",
     gap: 14,
     paddingHorizontal: 40,
@@ -623,6 +758,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: "center",
     lineHeight: 26,
+  },
+  welcomeAway: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    letterSpacing: 0.3,
+    textAlign: "center",
+    lineHeight: 22,
+    marginTop: 10,
   },
   skipBtn: {
     position: "absolute",

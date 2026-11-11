@@ -103,6 +103,15 @@ type Stage = "compose" | "where" | "kept" | "sent" | "aim" | "light";
 const capitalise = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
 
+/** "It has left Earth." just after sending; after that, when it was sent, so it is clear which. */
+function sentHeading(sentAt: number, now: number): string {
+  if (now - sentAt < 10 * 60_000) return "It has left Earth.";
+  const when = keptOnWords(sentAt, now);
+  return when === "Today" || when === "Yesterday"
+    ? `You sent it ${when.toLowerCase()}.`
+    : `You sent it on ${when}.`;
+}
+
 /**
  * Send a note to the universe: the Notes tab.
  */
@@ -130,8 +139,13 @@ export function NotesScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
 
-  // Explore can open Notes with a star already chosen ("Send a note here").
-  const params = useLocalSearchParams<{ to?: string }>();
+  // Explore can open Notes with a star already chosen ("Send a note here"), and a milestone
+  // notification opens the note it is about.
+  const params = useLocalSearchParams<{
+    to?: string;
+    note?: string;
+    opened?: string;
+  }>();
   useEffect(() => {
     const wanted = typeof params.to === "string" ? params.to : undefined;
     if (wanted && DESTINATIONS.some((d) => d.id === wanted)) {
@@ -163,6 +177,20 @@ export function NotesScreen() {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Each notification is opened once, after the notes have loaded.
+  const openedFrom = useRef<string | null>(null);
+  useEffect(() => {
+    const wanted = typeof params.note === "string" ? params.note : undefined;
+    const key = `${params.opened ?? ""}:${wanted ?? ""}`;
+    if (!wanted || openedFrom.current === key) return;
+    const note = notes.find((n) => n.id === wanted);
+    if (!note) return;
+    openedFrom.current = key;
+    setCurrent(note);
+    setStage("sent");
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [params.note, params.opened, notes]);
 
   const save = (next: Note[]) => {
     setNotes(next);
@@ -577,7 +605,7 @@ export function NotesScreen() {
                 On its way to {dest.name}
               </Text>
               <Text style={[styles.title, { color: colors.foreground }]}>
-                It has left Earth.
+                {sentHeading(current.sentAt, now)}
               </Text>
               <Text style={[styles.quote, { color: colors.foreground }]}>
                 “{current.text}”

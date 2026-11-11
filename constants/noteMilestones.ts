@@ -4,7 +4,8 @@
  * every year since it was sent, halfway, and arrival for stars within a hundred light years. Every
  * time is known the moment the note is sent, so PALE sets them on the phone itself: no server,
  * nothing sent. The note's own words never appear in a notification, so nothing private shows
- * on a locked screen.
+ * on a locked screen; each one says where the note is going and when it was sent, so it is clear
+ * which note it means, and tapping it opens that note.
  */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
@@ -23,6 +24,10 @@ export const NOTE_MILESTONES_KEY = "@pale_note_milestones";
 export const NOTE_ID_PREFIX = "pale-note-";
 /** The most note milestones waiting at once (see the 64 limit in notifications.ts). */
 export const NOTE_BUDGET = 30;
+// Bumped when what a note notification carries changes, so ones already set on the phone are
+// set again with the new content rather than left as they were.
+const SCHEDULE_VERSION_KEY = "@pale_note_schedule_version";
+const SCHEDULE_VERSION = "2";
 const YEAR_MS = 365.25 * 86_400_000;
 const DAY_S = 86_400;
 const KM_PER_LIGHT_SECOND = 299_792.458;
@@ -35,9 +40,37 @@ const MAX_ARRIVAL_YEARS = 100;
 
 export interface PlannedNote {
   identifier: string;
+  /** The note it is about, so tapping it can open that note. */
+  noteId: string;
   at: number;
   title: string;
+  /** Which note: when it was sent ("Sent 3 November at 14:05"). */
+  subtitle: string;
   body: string;
+}
+
+/** "Sent 3 November at 14:05", with the year when it was sent in an earlier year than `at`. */
+export function sentWords(sentAt: number, at: number): string {
+  const sent = new Date(sentAt);
+  const day = sent.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    ...(sent.getFullYear() !== new Date(at).getFullYear()
+      ? { year: "numeric" }
+      : {}),
+  });
+  const time = sent.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `Sent ${day} at ${time}`;
+}
+
+/** The note a note notification is about, from its identifier ("pale-note-<id>-<milestone>"). */
+export function noteIdFromIdentifier(identifier: string): string | null {
+  if (!identifier.startsWith(NOTE_ID_PREFIX)) return null;
+  const id = identifier.slice(NOTE_ID_PREFIX.length).split("-")[0];
+  return id || null;
 }
 
 const KEYS: Record<string, string> = {
@@ -131,8 +164,10 @@ export function milestonesFor(note: Note, now: number): PlannedNote[] {
       m.name === "Voyager 1" ? ", the farthest thing people have built" : "";
     out.push({
       identifier: `${NOTE_ID_PREFIX}${note.id}-${KEYS[m.name] ?? m.name}`,
+      noteId: note.id,
       at,
       title: `Your note to ${dest.short}`,
+      subtitle: sentWords(note.sentAt, at),
       body: `It has just passed ${m.name}${extra}, ${afterWords(m.seconds)} after you sent it.`,
     });
   }
@@ -141,16 +176,20 @@ export function milestonesFor(note: Note, now: number): PlannedNote[] {
     if (at >= arriveAt) continue;
     out.push({
       identifier: `${NOTE_ID_PREFIX}${note.id}-${m.key}`,
+      noteId: note.id,
       at,
       title: `Your note to ${dest.short}`,
+      subtitle: sentWords(note.sentAt, at),
       body: m.body(dest.name),
     });
   }
   if (dest.ly <= MAX_ARRIVAL_YEARS) {
     out.push({
       identifier: `${NOTE_ID_PREFIX}${note.id}-arrived`,
+      noteId: note.id,
       at: arriveAt,
       title: `Your note has reached ${dest.name}`,
+      subtitle: sentWords(note.sentAt, arriveAt),
       body: `After ${dest.ly < 1 ? afterWords((arriveAt - note.sentAt) / 1000) : spanWords(dest.ly)} at the speed of light.`,
     });
   }
@@ -199,7 +238,24 @@ async function pendingNoteIds(): Promise<Set<string>> {
 }
 
 async function rebuild(now: number): Promise<number> {
-  const pending = await pendingNoteIds();
+  let pending = await pendingNoteIds();
+  // Notifications set by an earlier version carry older content: clear them so they are set again.
+  const version = await AsyncStorage.getItem(SCHEDULE_VERSION_KEY).catch(
+    () => null,
+  );
+  if (version !== SCHEDULE_VERSION) {
+    await Promise.all(
+      [...pending].map((id) =>
+        Notifications.cancelScheduledNotificationAsync(id).catch(
+          () => undefined,
+        ),
+      ),
+    );
+    pending = new Set();
+    await AsyncStorage.setItem(SCHEDULE_VERSION_KEY, SCHEDULE_VERSION).catch(
+      () => undefined,
+    );
+  }
   const on =
     (await areNoteMilestonesOn()) &&
     (await Notifications.getPermissionsAsync()).granted;
@@ -231,7 +287,12 @@ async function rebuild(now: number): Promise<number> {
     if (pending.has(p.identifier)) continue;
     await Notifications.scheduleNotificationAsync({
       identifier: p.identifier,
-      content: { title: p.title, body: p.body, data: { url: "/notes" } },
+      content: {
+        title: p.title,
+        subtitle: p.subtitle,
+        body: p.body,
+        data: { url: "/notes", note: p.noteId },
+      },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: new Date(p.at),

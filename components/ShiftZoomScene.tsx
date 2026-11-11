@@ -38,7 +38,7 @@ function seeded(seed: number) {
   };
 }
 
-const EARTH_SPHERE_FRACTION = 0.36;
+export const EARTH_SPHERE_FRACTION = 0.36;
 
 const SolarSystem = memo(function SolarSystem({ size }: { size: number }) {
   const earth = at(1);

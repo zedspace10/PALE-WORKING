@@ -5,6 +5,7 @@ import {
   milestonesFor,
   nextNoteMilestoneLine,
   NOTE_BUDGET,
+  noteIdFromIdentifier,
   planNoteNotifications,
   refreshNoteMilestones,
   setNoteMilestones,
@@ -15,7 +16,14 @@ const mocks = vi.hoisted(() => ({
   storage: new Map<string, string>(),
   pending: new Map<
     string,
-    { identifier: string; title: string; body: string; date: Date }
+    {
+      identifier: string;
+      title: string;
+      subtitle?: string;
+      body: string;
+      data?: Record<string, unknown>;
+      date: Date;
+    }
   >(),
   granted: true,
 }));
@@ -41,7 +49,12 @@ vi.mock("expo-notifications", () => ({
   scheduleNotificationAsync: vi.fn(
     async (r: {
       identifier: string;
-      content: { title: string; body: string };
+      content: {
+        title: string;
+        subtitle?: string;
+        body: string;
+        data?: Record<string, unknown>;
+      };
       trigger: { date: Date };
     }) => {
       mocks.pending.set(r.identifier, {
@@ -225,6 +238,72 @@ describe("Note milestone notifications", () => {
     expect(after.some((id) => id.startsWith("pale-note-b-"))).toBe(true);
     await setNoteMilestones(false);
     vi.useRealTimers();
+  });
+
+  it("says which note each one is about, and carries it for the tap", async () => {
+    mocks.storage.set(
+      NOTES_STORAGE_KEY,
+      JSON.stringify([
+        note("a", "sirius"),
+        note("b", "sirius", sent + 3 * 3_600_000),
+      ]),
+    );
+    vi.useFakeTimers();
+    vi.setSystemTime(sent + 1000);
+    await setNoteMilestones(true);
+    const all = [...mocks.pending.values()];
+    const a = all.filter((p) => p.identifier.startsWith("pale-note-a-"));
+    const b = all.filter((p) => p.identifier.startsWith("pale-note-b-"));
+    // Two notes to the same star are told apart by when they were sent.
+    expect(a[0].subtitle).toMatch(/^Sent 4 November at \d\d:\d\d$/);
+    expect(a[0].subtitle).not.toBe(b[0].subtitle);
+    for (const p of all) {
+      expect(p.data).toEqual({
+        url: "/notes",
+        note: noteIdFromIdentifier(p.identifier),
+      });
+      // Still nothing of the note's own words on a locked screen.
+      expect(`${p.title} ${p.subtitle} ${p.body}`).not.toContain(
+        "Something private",
+      );
+    }
+    await setNoteMilestones(false);
+    vi.useRealTimers();
+  });
+
+  it("sets again any notifications an earlier version left on the phone", async () => {
+    mocks.storage.set(NOTES_STORAGE_KEY, JSON.stringify([note("a", "sirius")]));
+    mocks.storage.set("@pale_note_milestones", "true");
+    vi.useFakeTimers();
+    vi.setSystemTime(sent + 1000);
+    // An old notification for the same milestone, without the note's id or when it was sent.
+    const [first] = planNoteNotifications([note("a", "sirius")], sent + 1000);
+    mocks.pending.set(first.identifier, {
+      identifier: first.identifier,
+      title: first.title,
+      body: first.body,
+      date: new Date(first.at),
+    });
+    await refreshNoteMilestones();
+    expect(mocks.pending.get(first.identifier)?.data).toEqual({
+      url: "/notes",
+      note: "a",
+    });
+    expect(mocks.pending.get(first.identifier)?.subtitle).toMatch(/^Sent /);
+    // Only once: after that, ones already set are left as they are.
+    const scheduled = mocks.pending.size;
+    await refreshNoteMilestones();
+    expect(mocks.pending.size).toBe(scheduled);
+    await setNoteMilestones(false);
+    vi.useRealTimers();
+  });
+
+  it("finds the note from an older notification's identifier", () => {
+    expect(noteIdFromIdentifier("pale-note-mhk2x9ab12cd-year-3")).toBe(
+      "mhk2x9ab12cd",
+    );
+    expect(noteIdFromIdentifier("pale-note-a-voyager")).toBe("a");
+    expect(noteIdFromIdentifier("pale-observatory-2026-11-05")).toBeNull();
   });
 
   it("leaves other notifications alone", async () => {
