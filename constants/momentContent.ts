@@ -14,7 +14,6 @@ export interface MomentLine {
 export interface MomentContext {
   /** When PALE was last opened, if it has been before. */
   lastVisitAt?: number | null;
-  birthday?: Date | null;
 }
 
 const C_KM_S = 299_792.458;
@@ -22,19 +21,6 @@ const C_KM_S = 299_792.458;
 const EARTH_KM_S = 29.78;
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
-const YEAR_MS = 365.25 * DAY_MS;
-
-// Well known stars, by how many light years away they are, for the birthday line.
-const LANDMARK_STARS: { name: string; ly: number }[] = [
-  { name: "Proxima Centauri, the nearest star", ly: 4.24 },
-  { name: "Sirius, the brightest star in the night sky", ly: 8.6 },
-  { name: "Altair", ly: 16.7 },
-  { name: "Vega", ly: 25 },
-  { name: "Arcturus", ly: 36.7 },
-  { name: "Capella", ly: 42.9 },
-  { name: "Aldebaran, the eye of Taurus", ly: 65 },
-  { name: "Regulus", ly: 79 },
-];
 
 /** "7.7 million km", "640,000 km", "1.2 billion km". */
 function kmWords(km: number): string {
@@ -82,16 +68,6 @@ export function momentFacts(now: Date, context: MomentContext = {}): string[] {
     facts.push(
       `Since you last opened PALE, Earth has carried you ${kmWords((since / 1000) * EARTH_KM_S)} around the Sun.`,
     );
-  }
-
-  if (context.birthday) {
-    const years = (t - context.birthday.getTime()) / YEAR_MS;
-    const passed = LANDMARK_STARS.filter((s) => s.ly <= years).pop();
-    if (years >= 1 && passed) {
-      facts.push(
-        `The light that left Earth on the day you were born is now ${Math.floor(years)} light years away, past ${passed.name}.`,
-      );
-    }
   }
 
   const lit = Math.round(getMoonIllumination(now) * 100);

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 
 const KEY = "@pale_open_count";
 const LAST_OPEN_KEY = "@pale_last_open_at";
-const BIRTHDAY_KEY = "@pale_birthday";
 
 interface OpenRecord {
   date: string; // YYYY-MM-DD
@@ -18,10 +17,8 @@ function todayStr(): string {
 export function useOpenCount() {
   const [todayCount, setTodayCount] = useState<number>(1);
   const [loaded, setLoaded] = useState(false);
-  // For the opening card: when PALE was last opened, and the birthday if one was added. Both stay
-  // on the phone.
+  // For the opening card: when PALE was last opened. It stays on the phone.
   const [lastVisitAt, setLastVisitAt] = useState<number | null>(null);
-  const [birthday, setBirthday] = useState<Date | null>(null);
 
   useEffect(() => {
     async function increment() {
@@ -39,14 +36,8 @@ export function useOpenCount() {
         await AsyncStorage.setItem(KEY, JSON.stringify(record));
         setTodayCount(record.count);
 
-        const [last, born] = await Promise.all([
-          AsyncStorage.getItem(LAST_OPEN_KEY),
-          AsyncStorage.getItem(BIRTHDAY_KEY),
-        ]);
-        const lastAt = Number(last);
+        const lastAt = Number(await AsyncStorage.getItem(LAST_OPEN_KEY));
         if (Number.isFinite(lastAt) && lastAt > 0) setLastVisitAt(lastAt);
-        const bornAt = born ? new Date(born) : null;
-        if (bornAt && !Number.isNaN(bornAt.getTime())) setBirthday(bornAt);
         await AsyncStorage.setItem(LAST_OPEN_KEY, String(Date.now()));
       } catch {
         setTodayCount(1);
@@ -57,5 +48,5 @@ export function useOpenCount() {
     increment();
   }, []);
 
-  return { todayCount, loaded, lastVisitAt, birthday };
+  return { todayCount, loaded, lastVisitAt };
 }
