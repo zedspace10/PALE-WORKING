@@ -24,6 +24,13 @@ import {
   parseBirthdayInput,
 } from "@/constants/personalInsights";
 import { requestGuide } from "@/constants/tabGuide";
+import {
+  bigKmWords,
+  discoveryAtBirth,
+  GALAXY_NOTE,
+  galaxyDistanceKm,
+} from "@/constants/youFacts";
+import { ShareYourNumbers } from "@/components/ShareYourNumbers";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
@@ -169,6 +176,8 @@ export default function YouScreen() {
   const metrics = getPersonalTravelMetrics(birthday, now);
   const orbitPercent = Math.round(metrics.calendarYearProgressPercent);
   const myEvents = getEventsAfterBirth(COSMIC_EVENTS, birthday);
+  const galaxyKm = galaxyDistanceKm(birthday, now);
+  const discovery = discoveryAtBirth(birthday);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -209,8 +218,31 @@ export default function YouScreen() {
             kilometres travelled with Earth since you were born
           </Text>
           <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
-            Earth moves about 30 km every second. Add the Sun's own journey
-            around the galaxy and it is far more.
+            Earth moves about 30 km every second on its way around the Sun.
+          </Text>
+        </View>
+
+        {/* The Sun's own journey around the galaxy */}
+        <View
+          style={[
+            styles.bigCard,
+            {
+              backgroundColor: colors.glassStrong,
+              borderColor: colors.luminousBorder,
+            },
+          ]}
+        >
+          <Text style={[styles.cardEyebrow, { color: colors.mutedForeground }]}>
+            Around the galaxy
+          </Text>
+          <Text style={[styles.bigNumber, { color: colors.primary }]}>
+            {bigKmWords(galaxyKm)}
+          </Text>
+          <Text style={[styles.bigUnit, { color: colors.foreground }]}>
+            kilometres travelled with the Sun since you were born
+          </Text>
+          <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
+            {GALAXY_NOTE}
           </Text>
         </View>
 
@@ -265,6 +297,12 @@ export default function YouScreen() {
           </View>
         </View>
 
+        <ShareYourNumbers
+          sunKm={metrics.approximateOrbitDistanceKm}
+          galaxyKm={galaxyKm}
+          trips={metrics.completedSolarOrbits}
+        />
+
         {/* Atomic age */}
         <View
           style={[
@@ -314,6 +352,34 @@ export default function YouScreen() {
             the Sun
           </Text>
         </View>
+
+        {/* What we knew when you were born */}
+        {discovery ? (
+          <View
+            style={[
+              styles.bigCard,
+              {
+                backgroundColor: colors.glassStrong,
+                borderColor: colors.violet + "88",
+              },
+            ]}
+          >
+            <Text
+              style={[styles.cardEyebrow, { color: colors.mutedForeground }]}
+            >
+              What we knew when you were born
+            </Text>
+            <Text style={[styles.bigNumber, { color: colors.primary }]}>
+              {discovery.number}
+            </Text>
+            <Text style={[styles.bigUnit, { color: colors.foreground }]}>
+              {discovery.unit}
+            </Text>
+            <Text style={[styles.bigNote, { color: colors.mutedForeground }]}>
+              {discovery.note}
+            </Text>
+          </View>
+        ) : null}
 
         {/* Cosmic events */}
         {myEvents.length > 0 && (
