@@ -21,7 +21,7 @@ export function bigKmWords(km: number): string {
   return `about ${Math.round(km / 1e6)} million`;
 }
 
-export const GALAXY_NOTE = `The Sun carries Earth, and you, around the centre of the Milky Way at about ${SUN_GALACTIC_KM_S} km every second. One lap takes about ${GALACTIC_YEAR_MYR} million years. The last time the Sun was where it is now, the first dinosaurs were appearing on Earth.`;
+export const GALAXY_NOTE = `The Sun moves at about ${SUN_GALACTIC_KM_S} km every second. One lap of the galaxy takes about ${GALACTIC_YEAR_MYR} million years, and the last time the Sun was here, the first dinosaurs were appearing.`;
 
 /**
  * Planets around other stars, by the end of each year: NASA Exoplanet Archive counts by year of

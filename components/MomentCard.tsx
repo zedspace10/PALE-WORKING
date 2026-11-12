@@ -11,7 +11,6 @@ interface Props {
   now: Date;
   solarState: SolarState | null;
   lastVisitAt: number | null;
-  birthday: Date | null;
   onDismiss: () => void;
 }
 
@@ -19,13 +18,12 @@ export function MomentCard({
   now,
   solarState,
   lastVisitAt,
-  birthday,
   onDismiss,
 }: Props) {
   const colors = useColors();
   const lines = useMemo(
-    () => getMomentLines(now, solarState, { lastVisitAt, birthday }),
-    [now, solarState, lastVisitAt, birthday],
+    () => getMomentLines(now, solarState, { lastVisitAt }),
+    [now, solarState, lastVisitAt],
   );
   const [, setCanDismiss] = useState(false);
   const dismissing = useRef(false);

@@ -191,10 +191,9 @@ describe("the opening card", () => {
   });
 
   it("only says true things about this moment, and changes day to day", () => {
-    const facts = momentFacts(new Date(2026, 10, 20, 21), {
-      birthday: new Date(1994, 4, 12),
-    });
-    expect(facts.join(" ")).toMatch(/now 32 light years away, past Vega\./);
+    const facts = momentFacts(new Date(2026, 10, 20, 21));
+    // Nothing ties a star to the person: that reads like astrology.
+    expect(facts.join(" ")).not.toMatch(/you were born|light years away, past/);
     expect(facts.join(" ")).toMatch(
       /The Moon is \d+% lit today, and growing each night\./,
     );
