@@ -125,11 +125,14 @@ export function useShiftMusic() {
     [fadeTo, playFrom],
   );
 
-  /** The journey has ended or been left. */
-  const stop = useCallback(() => {
-    active.current = false;
-    pauseQuietly(600);
-  }, [pauseQuietly]);
+  /** The journey has ended or been left. The music fades out over `fadeMs`. */
+  const stop = useCallback(
+    (fadeMs = 600) => {
+      active.current = false;
+      pauseQuietly(fadeMs);
+    },
+    [pauseQuietly],
+  );
 
   const toggleSound = useCallback(() => {
     const next = !soundOnRef.current;

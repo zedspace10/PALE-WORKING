@@ -113,6 +113,9 @@ export default function ShiftScreen() {
   const [journeyActive, setJourneyActive] = useState(false);
   // From tapping Earth until the journey has fully faded in, while Earth glides into place.
   const [entering, setEntering] = useState(false);
+  // From Return until Earth is back in its place on the opening screen.
+  const [leaving, setLeaving] = useState(false);
+  const leavingRef = useRef(false);
   const [glideTo, setGlideTo] = useState<EarthGlide | null>(null);
   const glide = useRef(new Animated.Value(0)).current;
   const entryFade = useRef(new Animated.Value(1)).current;
@@ -352,10 +355,13 @@ export default function ShiftScreen() {
     }
   };
 
-  // Leaving the screen while Earth is still gliding puts it back where it was.
+  // Leaving the screen while Earth is still gliding in puts it back where it was.
+  const enteringRef = useRef(false);
+  enteringRef.current = entering;
   useFocusEffect(
     useCallback(
       () => () => {
+        if (!enteringRef.current) return;
         glideRunId.current += 1;
         glide.stopAnimation();
         glide.setValue(0);
@@ -402,7 +408,7 @@ export default function ShiftScreen() {
     }
   };
 
-  const finishExit = (onDone?: () => void) => {
+  const finishExit = (onDone?: () => void, glidedHome = false) => {
     clearStageTimer();
     stageRunId.current += 1;
     stageRef.current = 0;
@@ -422,7 +428,9 @@ export default function ShiftScreen() {
     glide.setValue(0);
     setGlideTo(null);
     setEntering(false);
-    if (!reduceMotion && !onDone) {
+    setLeaving(false);
+    leavingRef.current = false;
+    if (!reduceMotion && !onDone && !glidedHome) {
       entryFade.setValue(0);
       Animated.timing(entryFade, {
         toValue: 1,
@@ -434,25 +442,52 @@ export default function ShiftScreen() {
     onDone?.();
   };
 
+  // Leaving is the way in played backwards: the words and the journey fade away around Earth,
+  // the music fades out slowly, and Earth glides back up to its place on the opening screen.
   const endJourney = (onDone?: () => void) => {
-    music.stop();
+    if (leavingRef.current) return;
+    leavingRef.current = true;
     clearStageTimer();
     stageRunId.current += 1;
     stageOpacity.stopAnimation();
     zoom.stopAnimation();
 
     if (reduceMotion) {
+      music.stop();
       finishExit(onDone);
+      return;
+    }
+
+    // At the end of the journey Earth is back where it started, so it can glide home.
+    const glideHome = completed && glideTo !== null && !onDone;
+    music.stop(glideHome ? 2800 : 1600);
+
+    if (glideHome) {
+      glide.setValue(1);
+      setLeaving(true);
+      Animated.sequence([
+        Animated.timing(screenFade, {
+          toValue: 0,
+          duration: 1100,
+          easing: easeInOut,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glide, {
+          toValue: 0,
+          duration: GLIDE_MS,
+          easing: easeInOut,
+          useNativeDriver: true,
+        }),
+      ]).start(() => finishExit(undefined, true));
       return;
     }
 
     Animated.timing(screenFade, {
       toValue: 0,
-      duration: 360,
+      duration: onDone ? 800 : 1100,
+      easing: easeInOut,
       useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) finishExit(onDone);
-    });
+    }).start(() => finishExit(onDone));
   };
 
   const currentStage = SHIFT_STAGES[stage];
@@ -465,7 +500,7 @@ export default function ShiftScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <StarField count={72} containerOpacity={0.38} drift={11} />
-      {!journeyActive || entering ? (
+      {!journeyActive || entering || leaving ? (
         <Animated.View
           style={[
             styles.entryContent,
@@ -484,7 +519,7 @@ export default function ShiftScreen() {
             active={ambientMotionActive}
             glide={glide}
             glideTo={glideTo}
-            leaving={entering}
+            leaving={entering || leaving}
           />
 
           <View style={styles.spacer} />

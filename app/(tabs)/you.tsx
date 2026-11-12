@@ -23,6 +23,7 @@ import {
   getPersonalTravelMetrics,
   parseBirthdayInput,
 } from "@/constants/personalInsights";
+import { requestGuide } from "@/constants/tabGuide";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
@@ -150,6 +151,16 @@ export default function YouScreen() {
               Show me
             </Text>
           </MagicalAction>
+
+          <TouchableOpacity
+            onPress={requestGuide}
+            style={styles.resetBtn}
+            accessibilityRole="button"
+          >
+            <Text style={[styles.resetText, { color: colors.mutedForeground }]}>
+              Show me around PALE
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     );
@@ -359,6 +370,16 @@ export default function YouScreen() {
         >
           <Text style={[styles.resetText, { color: colors.mutedForeground }]}>
             Change birthday
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={requestGuide}
+          style={styles.resetBtn}
+          accessibilityRole="button"
+        >
+          <Text style={[styles.resetText, { color: colors.mutedForeground }]}>
+            Show me around PALE
           </Text>
         </TouchableOpacity>
 
