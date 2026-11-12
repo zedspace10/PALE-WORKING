@@ -17,6 +17,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MomentCard } from "@/components/MomentCard";
 import { ONBOARDED_KEY, Onboarding } from "@/components/Onboarding";
+import { TabGuide } from "@/components/TabGuide";
+import { GUIDE_SEEN_KEY, onGuideRequested } from "@/constants/tabGuide";
 import { useNotificationSchedule } from "@/hooks/useNotificationSchedule";
 import { useOpenCount } from "@/hooks/useOpenCount";
 import { LOCATION_CACHE_KEY, parseCachedLocation } from "@/constants/location";
@@ -91,6 +93,15 @@ function RootLayoutNav({
   // The three opening screens, shown once. Someone already using PALE (anything saved from an
   // earlier version) goes straight in.
   const [onboarded, setOnboarded] = useState<boolean | undefined>(undefined);
+  // The guide to the five tabs: once, after the opening screens, and again from the You tab.
+  const [guideSeen, setGuideSeen] = useState<boolean | undefined>(undefined);
+  const [guideAsked, setGuideAsked] = useState(false);
+  useEffect(() => onGuideRequested(() => setGuideAsked(true)), []);
+  const finishGuide = () => {
+    AsyncStorage.setItem(GUIDE_SEEN_KEY, "1").catch(() => undefined);
+    setGuideSeen(true);
+    setGuideAsked(false);
+  };
   useEffect(() => {
     let active = true;
     (async () => {
@@ -110,7 +121,10 @@ function RootLayoutNav({
       if (seen && !keys.includes(ONBOARDED_KEY)) {
         AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => undefined);
       }
-      if (active) setOnboarded(seen);
+      if (active) {
+        setOnboarded(seen);
+        setGuideSeen(keys.includes(GUIDE_SEEN_KEY));
+      }
     })();
     return () => {
       active = false;
@@ -203,6 +217,12 @@ function RootLayoutNav({
           onDismiss={() => setDismissed(true)}
         />
       )}
+
+      {onboarded === true &&
+        dismissed &&
+        (guideSeen === false || guideAsked) && (
+          <TabGuide onDone={finishGuide} />
+        )}
     </>
   );
 }
