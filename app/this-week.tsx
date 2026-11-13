@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StarField } from "@/components/StarField";
 import { dateWords } from "@/constants/thisWeek";
 import { markThisWeekSeen } from "@/constants/thisWeekNotification";
+import { ThisWeekToggle } from "@/components/ThisWeekToggle";
 import { useColors } from "@/hooks/useColors";
 import { useThisWeek } from "@/hooks/useThisWeek";
 
@@ -179,6 +180,10 @@ export default function ThisWeekScreen() {
             This week's picture will appear here once PALE has been online.
           </Text>
         )}
+
+        <View style={styles.notify}>
+          <ThisWeekToggle />
+        </View>
       </ScrollView>
 
       <TouchableOpacity
@@ -198,6 +203,7 @@ export default function ThisWeekScreen() {
 }
 
 const styles = StyleSheet.create({
+  notify: { marginTop: 28 },
   container: { flex: 1 },
   content: {
     alignSelf: "center",

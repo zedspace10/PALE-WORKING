@@ -4,6 +4,10 @@ import { resolve } from "node:path";
 
 import {
   bigKmWords,
+  currentLap,
+  knownWhenBorn,
+  ordinal,
+  withoutAbout,
   discoveryAtBirth,
   EXOPLANETS_KNOWN_BY_END_OF,
   GALAXY_NOTE,
@@ -67,9 +71,20 @@ describe("The You tab", () => {
   const card = read("components/ShareYourNumbers.tsx");
 
   it("shows the galaxy, the discoveries and the share button", () => {
-    expect(you).toContain("Around the galaxy");
-    expect(you).toContain("What we knew when you were born");
+    expect(you).toContain("around the middle of the Milky Way");
+    expect(you).toContain("knownWhenBorn(birthday)");
+    expect(you).toContain("<LapDrawing");
     expect(you).toContain("<ShareYourNumbers");
+  });
+
+  it("keeps the notification switches by the things they are about", () => {
+    const you = read("app/(tabs)/you.tsx");
+    expect(you).not.toMatch(/Toggle/);
+    expect(read("app/(tabs)/index.tsx")).toContain("<NightlyReminderToggle");
+    expect(read("components/NotesScreen.tsx")).toContain(
+      "<NoteMilestonesToggle",
+    );
+    expect(read("app/this-week.tsx")).toContain("<ThisWeekToggle />");
   });
 
   it("is measurement, never astrology", () => {
@@ -81,6 +96,45 @@ describe("The You tab", () => {
   });
 
   it("never puts the birthday itself on the shared picture", () => {
-    expect(card).not.toMatch(/birthday\??:|: Date|toLocaleDateString|getFullYear/);
+    expect(card).not.toMatch(
+      /birthday\??:|: Date|toLocaleDateString|getFullYear/,
+    );
+  });
+});
+
+describe("This lap", () => {
+  it("runs from the last birthday to the next", () => {
+    const lap = currentLap(new Date(1996, 2, 14), new Date(2026, 10, 13, 12));
+    expect(lap.number).toBe(31);
+    expect(lap.daysIn).toBe(244);
+    expect(lap.daysLeft).toBe(121);
+    expect(lap.fraction).toBeCloseTo(244.5 / 365, 2);
+    // On the birthday itself a new lap begins.
+    expect(
+      currentLap(new Date(1996, 2, 14), new Date(2026, 2, 14, 9)).number,
+    ).toBe(31);
+    expect(
+      currentLap(new Date(1996, 2, 14), new Date(2026, 2, 13, 9)).number,
+    ).toBe(30);
+  });
+
+  it("writes numbers the way a person would", () => {
+    expect(ordinal(1)).toBe("1st");
+    expect(ordinal(22)).toBe("22nd");
+    expect(ordinal(13)).toBe("13th");
+    expect(ordinal(31)).toBe("31st");
+    expect(withoutAbout("about 28.8 billion")).toBe("28.8 billion");
+  });
+
+  it("says what was known the year you were born", () => {
+    expect(knownWhenBorn(new Date(1980, 1, 1))).toBe(
+      "Nobody had yet found a planet around another star.",
+    );
+    expect(knownWhenBorn(new Date(1996, 1, 1))).toBe(
+      "We knew of 4 planets around other stars.",
+    );
+    expect(knownWhenBorn(new Date(2013, 1, 1))).toBe(
+      "We knew of about 780 planets around other stars.",
+    );
   });
 });

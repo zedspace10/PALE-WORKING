@@ -87,7 +87,7 @@ const STAR_CATALOG_BASE: StarBase[] = [
     constellation: "Canis Minor",
     distance: 12.4,
     type: "M",
-    note: "A red dwarf with two planets, one in the zone where liquid water could exist.",
+    note: "A red dwarf with at least two planets, one in the zone where liquid water could exist.",
   },
   {
     name: "Kapteyn's Star",
@@ -184,8 +184,8 @@ const STAR_CATALOG_BASE: StarBase[] = [
     name: "Eta Cassiopeiae A",
     constellation: "Cassiopeia",
     distance: 19.4,
-    type: "F",
-    note: "A yellow white star in the W of Cassiopeia, a little bigger and brighter than the Sun.",
+    type: "G",
+    note: "A yellow star near the W of Cassiopeia, a little bigger and brighter than the Sun.",
   },
   {
     name: "Delta Pavonis",
@@ -381,7 +381,7 @@ const STAR_CATALOG_BASE: StarBase[] = [
     constellation: "Tucana",
     distance: 71.9,
     type: "G",
-    note: "A star like the Sun in Tucana, the Toucan, with a planet. At around ten billion years old, it is twice the Sun's age.",
+    note: "A star like the Sun in Tucana, the Toucan, with three known planets.",
   },
   {
     name: "Regulus",
