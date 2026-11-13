@@ -192,7 +192,7 @@ const STAR_CATALOG_BASE: StarBase[] = [
     constellation: "Pavo",
     distance: 19.9,
     type: "G",
-    note: "One of the nearest stars much like the Sun, high on astronomers' lists of places to look for Earth like planets.",
+    note: "One of the nearest stars much like the Sun, high on astronomers' lists of places to look for planets like Earth.",
   },
   {
     name: "Xi Bootis A",
@@ -388,7 +388,7 @@ const STAR_CATALOG_BASE: StarBase[] = [
     constellation: "Leo",
     distance: 79.3,
     type: "B",
-    note: "The heart of the lion, spinning so fast its equatorial diameter is a third larger than its poles.",
+    note: "The heart of the lion, spinning so fast that it is about a third wider at its equator than from pole to pole.",
   },
   {
     name: "Merak",

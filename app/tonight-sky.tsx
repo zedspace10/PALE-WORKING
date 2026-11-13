@@ -157,9 +157,9 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     truth:
       "Robotic missions have explored Mars from orbit and on the surface. Perseverance has studied rocks in Jezero Crater and cached samples intended for possible future analysis.",
     wonder:
-      "Mars has the largest volcano in the solar system, Olympus Mons, about two and a half times the height of Everest.",
+      "Mars has the tallest volcano in the Solar System, Olympus Mons, about two and a half times the height of Everest.",
     instruction:
-      "Mars has a distinctive reddish tint. It doesn't twinkle like stars do.",
+      "Mars has a distinctive reddish tint. It does not twinkle the way stars do.",
   },
   {
     id: "sirius",
@@ -187,7 +187,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Many cultures have recognised patterns in these stars, often telling very different stories about the same part of the sky.",
     instruction:
-      "Look for three stars in a straight line. That's Orion's belt, one of the most recognisable patterns in the sky.",
+      "Look for three stars in a straight line. That is Orion's belt, one of the most recognisable patterns in the sky.",
   },
   {
     id: "betelgeuse",
@@ -201,7 +201,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Betelgeuse varies in brightness and sheds material into space. Models agree it is enormous, but not on one exact boundary for its extended atmosphere.",
     instruction:
-      "Find the reddish orange star in Orion's shoulder. That's Betelgeuse.",
+      "Find the reddish orange star at Orion's shoulder. That is Betelgeuse.",
   },
   {
     id: "vega",
@@ -211,7 +211,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "star",
     color: "#E8F0FF",
     truth:
-      "Vega is 25 light years away. Due to Earth's axial precession, Vega will become the North Star in approximately 12,000 years. The night sky is always slowly changing.",
+      "Vega is 25 light years away. Because Earth's axis slowly wobbles, Vega will become the North Star in about 12,000 years. The night sky is always slowly changing.",
     wonder:
       "Carl Sagan chose Vega as the fictional source of the signal in his novel Contact. The literary choice is not evidence of a planet or civilisation there.",
     instruction:
@@ -239,9 +239,9 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     type: "galaxy",
     color: "#9966cc",
     truth:
-      "The pale band is the combined light of vast numbers of unresolved stars, mixed with dark dust, as we look through the Milky Way's disk from inside it. The galaxy as a whole is estimated to contain roughly 100 to 400 billion stars.",
+      "The pale band is the combined light of vast numbers of unresolved stars, mixed with dark dust, as we look through the Milky Way's disc from inside it. The galaxy as a whole is estimated to contain roughly 100 to 400 billion stars.",
     wonder:
-      "The Milky Way core is best seen from June to September in the northern hemisphere. The band of light you see is our galaxy seen edge on, from inside it.",
+      "The Milky Way's core is best seen from June to September in the northern hemisphere, low in the south. The band of light you see is our galaxy seen edge on, from inside it.",
     instruction:
       "Find the darkest part of the sky and look for a faint band of light stretching across it. Give your eyes time to adjust. It takes about 20 minutes.",
   },
@@ -268,7 +268,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     truth:
       "Five of the seven stars in the Plough are moving through space together. They were born from the same cloud of gas and are travelling in the same direction. They will eventually drift apart over millions of years.",
     wonder:
-      "The two stars at the end of the Plough's bowl form a useful guide toward Polaris. Northern navigators have long used the surrounding sky for orientation.",
+      "The two stars at the end of the Plough's bowl form a useful guide towards Polaris. Northern navigators have long used the surrounding sky for orientation.",
     instruction:
       "The Plough, called the Big Dipper in North America, is one of the most recognisable patterns in the northern sky. Look for seven stars in the shape of a saucepan.",
   },
@@ -298,7 +298,7 @@ const NIGHT_OBJECTS_BASE: NightObjectSeed[] = [
     wonder:
       "Scorpius and Orion occupy nearly opposite parts of the sky, so one is usually prominent when the other is not. Near seasonal transitions, parts of both can briefly be above opposite horizons.",
     instruction:
-      "Scorpius is best placed during Southern Hemisphere winter evenings. Look for a curved line of stars with the reddish star Antares near its heart.",
+      "Scorpius is best placed on winter evenings in the southern hemisphere. Look for a curved line of stars with the reddish star Antares near its heart.",
   },
 ];
 
@@ -970,8 +970,7 @@ function EndCard({
         Some are tiny dwarfs; others contain hundreds of billions of stars.
       </Text>
       <Text style={styles.endSub}>
-        The sky you're looking at tonight is the smallest possible fraction of
-        what exists.
+        The sky you are looking at tonight is a tiny fraction of what exists.
       </Text>
     </ScrollView>
   );

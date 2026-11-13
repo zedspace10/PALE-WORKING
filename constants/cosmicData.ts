@@ -374,7 +374,8 @@ const COSMIC_EVENTS_BASE: CosmicEventBase[] = [
   {
     year: 2004,
     title: "Mars rovers explore the surface",
-    description: "Spirit and Opportunity began exploring Mars robotically.",
+    description:
+      "Two rovers, Spirit and Opportunity, landed and began exploring Mars.",
   },
   {
     year: 2015,

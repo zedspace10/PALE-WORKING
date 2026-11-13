@@ -51,7 +51,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     description:
       "The universe cools enough for electrons to combine with protons, forming the first hydrogen atoms. For the first time, light can travel freely. This light, the cosmic microwave background, still surrounds us today in every direction.",
     perspective:
-      "Right now, ancient microwave radiation from when the universe became transparent is passing through your surroundings. It is the oldest electromagnetic light we can directly observe.",
+      "Right now, ancient microwave radiation from when the universe became transparent is passing through your surroundings. It is the oldest light we can directly observe.",
     color: "#FFB347",
     icon: "sun",
   },
@@ -98,7 +98,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "4.6 billion years ago",
     title: "Our Sun is born",
     description:
-      "A cloud of gas and dust collapses under its own gravity. At its centre, pressure and temperature become high enough to ignite nuclear fusion. Our Sun begins to shine. Around it, the remaining disk of material will become the planets.",
+      "A cloud of gas and dust collapses under its own gravity. At its centre, pressure and temperature become high enough to ignite nuclear fusion. Our Sun begins to shine. Around it, the remaining disc of material will become the planets.",
     perspective:
       "The same Sun has been shining for about 4.6 billion years. Its light reached the first life on Earth, and it reaches you today.",
     color: "#FFD700",
@@ -292,7 +292,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "12,000 years ago",
     title: "Settled societies expand",
     description:
-      "Humans domesticate plants and animals and begin to build permanent settlements. Cities follow, and writing appears about 5,000 years ago. What we call 'history' begins, though our species had existed for some 295,000 years before anyone wrote anything down.",
+      "Humans domesticate plants and animals and begin to build permanent settlements. Cities follow, and writing appears about 5,000 years ago. What we call history begins, though our species had existed for some 295,000 years before anyone wrote anything down.",
     perspective:
       "Farming began about 12,000 years ago. Art and music go back much further.",
     color: "#C8A060",

@@ -500,7 +500,7 @@ export function aimAt(dest: Destination, where: Coordinates, at: Date): Aim {
 export function heightWords(alt: number): string {
   if (alt < 20) return "low, just above the horizon";
   if (alt < 40) return "about a third of the way up the sky";
-  if (alt < 60) return "about half way up the sky";
+  if (alt < 60) return "about halfway up the sky";
   if (alt < 80) return "high up";
   return "almost straight overhead";
 }

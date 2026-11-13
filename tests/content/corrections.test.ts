@@ -92,7 +92,7 @@ describe("audited scientific corrections", () => {
     );
     expect(tonightSource).toMatch(/common barycentre/);
     expect(tonightSource).toMatch(/neighbouring constellation Perseus/);
-    expect(tonightSource).toMatch(/Southern Hemisphere winter evenings/);
+    expect(tonightSource).toMatch(/winter evenings in the southern hemisphere/);
   });
 
   it("builds an accessible source label", () => {
