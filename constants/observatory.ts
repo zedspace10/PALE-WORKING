@@ -36,9 +36,9 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     id: "pillars",
     location: "Pillars of Creation",
     locationDetail: "Eagle Nebula, a stellar nursery",
-    distance: "About 5,700 light years",
+    distance: "About 6,500 light years",
     reflection:
-      "These towering columns of gas and dust are regions of active star formation. The light we see left them roughly 5,700 years ago, so every image is a view into the past.",
+      "These towering columns of gas and dust are regions of active star formation. The light we see left them roughly 6,500 years ago, so every image is a view into the past.",
   },
   {
     id: "sagittarius-a",

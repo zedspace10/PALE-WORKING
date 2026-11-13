@@ -1,9 +1,15 @@
 import * as Sharing from "expo-sharing";
 import React, { useMemo, useRef, useState } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { captureRef } from "react-native-view-shot";
 
-import { MagicalAction } from "@/components/MagicalSurface";
 import { formatApproximateDistance } from "@/constants/personalInsights";
 import { bigKmWords } from "@/constants/youFacts";
 import { useColors } from "@/hooks/useColors";
@@ -80,17 +86,18 @@ export function ShareYourNumbers({ sunKm, galaxyKm, trips }: Props) {
 
   return (
     <View>
-      <MagicalAction
+      <TouchableOpacity
         onPress={share}
         disabled={busy}
         accessibilityRole="button"
         accessibilityHint="Makes a picture of your numbers to share"
-        contentStyle={styles.button}
+        style={styles.button}
       >
-        <Text style={[styles.buttonText, { color: colors.foreground }]}>
-          {busy ? "Making your picture" : "Share your numbers"}
+        <Feather name="share" size={16} color={colors.primary} />
+        <Text style={[styles.buttonText, { color: colors.primary }]}>
+          {busy ? "Making your picture" : "Share these numbers"}
         </Text>
-      </MagicalAction>
+      </TouchableOpacity>
       {problem ? (
         <Text style={[styles.problem, { color: colors.mutedForeground }]}>
           {problem}
@@ -162,16 +169,17 @@ export function ShareYourNumbers({ sunKm, galaxyKm, trips }: Props) {
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    flexDirection: "row",
     alignItems: "center",
+    gap: 8,
+    paddingVertical: 10,
+    alignSelf: "flex-start",
   },
-  buttonText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  buttonText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   problem: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
-    textAlign: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
   offscreen: { position: "absolute", left: -10_000, top: 0 },
   card: {

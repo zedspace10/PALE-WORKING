@@ -98,3 +98,61 @@ export function discoveryAtBirth(birthday: Date): DiscoveryCard | null {
     note: today,
   };
 }
+
+export interface Lap {
+  /** Which trip around the Sun this is: 31 for someone who has had 30 birthdays. */
+  number: number;
+  daysIn: number;
+  daysLeft: number;
+  /** 0 to 1, how far round this lap Earth has carried you. */
+  fraction: number;
+}
+
+/** This lap of the Sun, counted from the last birthday to the next. */
+export function currentLap(birthday: Date, now: Date): Lap {
+  const at = (year: number) =>
+    new Date(year, birthday.getMonth(), birthday.getDate());
+  let last = at(now.getFullYear());
+  if (last.getTime() > now.getTime()) last = at(now.getFullYear() - 1);
+  const next = at(last.getFullYear() + 1);
+  const day = 86_400_000;
+  const span = next.getTime() - last.getTime();
+  return {
+    number: Math.max(1, last.getFullYear() - birthday.getFullYear() + 1),
+    daysIn: Math.floor((now.getTime() - last.getTime()) / day),
+    daysLeft: Math.ceil((next.getTime() - now.getTime()) / day),
+    fraction: Math.min(1, Math.max(0, (now.getTime() - last.getTime()) / span)),
+  };
+}
+
+/** "28.8 billion" from "about 28.8 billion": the page says once that every figure is rounded. */
+export function withoutAbout(words: string): string {
+  return words.replace(/^about /, "");
+}
+
+/** "1st", "2nd", "31st". */
+export function ordinal(n: number): string {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const end = teen
+    ? "th"
+    : (({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ??
+      "th");
+  return `${n}${end}`;
+}
+
+/** The first line of the lifetime timeline: what was known of other worlds the year you were born. */
+export function knownWhenBorn(birthday: Date): string | null {
+  const year = birthday.getFullYear();
+  if (year < 1992) return "Nobody had yet found a planet around another star.";
+  if (year === 1992)
+    return "The first planets around another star were found that year.";
+  const known = EXOPLANETS_KNOWN_BY_END_OF[year - 1];
+  if (known === undefined || known >= 5000) return null;
+  const words =
+    known < 100
+      ? String(known)
+      : `about ${String(Math.round(known / 10) * 10).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+  return `We knew of ${words} planets around other stars.`;
+}
+
+export const KNOWN_TODAY = `We know of ${EXOPLANETS_NOW_WORDS} planets around other stars, and the count keeps growing.`;

@@ -319,12 +319,13 @@ describe("Note milestone notifications", () => {
 });
 
 describe("the switch on the Notes tab", () => {
-  it("sits on the Notes tab as well as the You tab, and stays in step", async () => {
+  it("sits on the Notes tab, beside the notes, and stays in step", async () => {
     const fs = await import("node:fs");
     const notes = fs.readFileSync("components/NotesScreen.tsx", "utf8");
     expect(notes).toContain("<NoteMilestonesToggle");
     expect(notes).toContain("onChange={setMilestonesOn}");
+    // It lives on Notes only, beside the notes it is about.
     const you = fs.readFileSync("app/(tabs)/you.tsx", "utf8");
-    expect(you).toContain("<NoteMilestonesToggle");
+    expect(you).not.toContain("<NoteMilestonesToggle");
   });
 });

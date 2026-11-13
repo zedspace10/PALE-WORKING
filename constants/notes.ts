@@ -182,7 +182,7 @@ export const DESTINATIONS: Destination[] = [
     "Eagle Nebula",
     18.3133,
     -13.817,
-    5700,
+    6500,
     "Home of the Pillars of Creation, where stars are forming.",
   ),
   place(
