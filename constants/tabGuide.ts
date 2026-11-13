@@ -23,7 +23,7 @@ export const GUIDE_STEPS: GuideStep[] = [
     tab: 0,
     route: "/(tabs)",
     title: "Home",
-    body: "Your pale blue dot, and where to start. Tonight's sky, the Time Machine and the Observatory are all here.",
+    body: "Your pale blue dot, and where to start. Tonight's Sky, the Time Machine and the Observatory are all here.",
   },
   {
     tab: 1,

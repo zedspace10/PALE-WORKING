@@ -24,6 +24,7 @@ import {
 import { CALENDAR_INTRO, calendarFor } from "@/constants/cosmicCalendar";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
+import { useGoBack } from "@/hooks/useGoBack";
 import { useResetScrollOnFocus } from "@/hooks/useResetScrollOnFocus";
 
 function EventCard({
@@ -108,6 +109,7 @@ export default function TimeMachineScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const goBack = useGoBack("/(tabs)");
   const scrollRef = useRef<ScrollView>(null);
   useResetScrollOnFocus(scrollRef);
 
@@ -141,8 +143,10 @@ export default function TimeMachineScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={goBack}
             style={styles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Back to Home"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <Feather
