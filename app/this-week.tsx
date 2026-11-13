@@ -19,6 +19,7 @@ import { dateWords } from "@/constants/thisWeek";
 import { markThisWeekSeen } from "@/constants/thisWeekNotification";
 import { ThisWeekToggle } from "@/components/ThisWeekToggle";
 import { useColors } from "@/hooks/useColors";
+import { useGoBack } from "@/hooks/useGoBack";
 import { useThisWeek } from "@/hooks/useThisWeek";
 
 const WARM = "#F3DDB0";
@@ -27,6 +28,7 @@ const WARM = "#F3DDB0";
 export default function ThisWeekScreen() {
   const colors = useColors();
   const router = useRouter();
+  const goBack = useGoBack("/(tabs)/explore");
   const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const pin = useThisWeek();
@@ -187,7 +189,7 @@ export default function ThisWeekScreen() {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={goBack}
         style={[
           styles.backBtn,
           { top: topPad + 12, backgroundColor: colors.background + "CC" },

@@ -28,6 +28,7 @@ import {
   skyFor,
 } from "@/constants/exploreSky";
 import { useColors } from "@/hooks/useColors";
+import { useGoBack } from "@/hooks/useGoBack";
 import { useExploreContext } from "@/hooks/useExploreContext";
 
 const WARM = "#F3DDB0";
@@ -39,6 +40,7 @@ const WARM = "#F3DDB0";
 export default function LocationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const goBack = useGoBack("/(tabs)/explore");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
@@ -220,7 +222,7 @@ export default function LocationScreen() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={goBack}
                 accessibilityRole="button"
                 style={[styles.link, styles.nextLink]}
               >
@@ -234,7 +236,7 @@ export default function LocationScreen() {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={goBack}
         style={[
           styles.backBtn,
           {

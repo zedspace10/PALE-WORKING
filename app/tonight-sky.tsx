@@ -36,6 +36,7 @@ import { compassWords } from "@/constants/notes";
 import { findStarByAge, getMoonPhase } from "@/constants/starCatalog";
 import { useBirthday } from "@/hooks/useBirthday";
 import { useColors } from "@/hooks/useColors";
+import { goBackOr } from "@/hooks/useGoBack";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 import {
@@ -1033,7 +1034,7 @@ function LocationStateScreen({
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StarField count={60} containerOpacity={0.3} />
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => goBackOr(router, "/(tabs)")}
         accessibilityRole="button"
         accessibilityLabel="Back"
         style={{
@@ -1161,7 +1162,7 @@ function DaylightScreen({
     <View style={[styles.fullCenter, { backgroundColor: colors.background }]}>
       <StarField count={60} containerOpacity={0.15} />
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => goBackOr(router, "/(tabs)")}
         accessibilityRole="button"
         accessibilityLabel="Back"
         style={{
@@ -1467,7 +1468,7 @@ export default function TonightSkyScreen() {
       <View style={[styles.fullCenter, { backgroundColor: colors.background }]}>
         <StarField count={80} containerOpacity={0.4} />
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => goBackOr(router, "/(tabs)")}
           accessibilityRole="button"
           accessibilityLabel="Back"
           style={{
@@ -1517,7 +1518,7 @@ export default function TonightSkyScreen() {
 
       {/* Back button always visible, outside fade animation */}
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => goBackOr(router, "/(tabs)")}
         accessibilityRole="button"
         accessibilityLabel="Back"
         style={{
