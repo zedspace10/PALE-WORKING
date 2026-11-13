@@ -62,7 +62,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The Pale Blue Dot",
     distance: "6 billion kilometres from the Sun",
     reflection:
-      "In 1990, as Voyager 1 was leaving the solar system, Carl Sagan convinced NASA to turn its camera back toward Earth. Our planet appeared as less than a single pixel, caught in a ray of scattered sunlight.",
+      "In 1990, as Voyager 1 was leaving the Solar System, Carl Sagan convinced NASA to turn its camera back towards Earth. Our planet appeared as less than a single pixel, caught in a ray of scattered sunlight.",
   },
   {
     id: "betelgeuse",
@@ -220,7 +220,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   },
   {
     id: "galactic-center",
-    location: "The Centre of the Milky Way",
+    location: "The centre of the Milky Way",
     locationDetail: "The heart of our galaxy, hidden by dust",
     distance: "26,000 light years",
     reflection:
@@ -244,7 +244,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   },
   {
     id: "edge-observable",
-    location: "The Edge of the Observable Universe",
+    location: "The edge of the observable universe",
     locationDetail: "Our present cosmological horizon",
     distance: "46.5 billion light years",
     reflection:

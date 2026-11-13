@@ -310,7 +310,7 @@ export function getSkyEvents(
       estimate: {
         value: `${shower.peak[0]}-${shower.peak[1]}`,
         accuracy: "typical-window",
-        note: "Recurring typical window, not a year-specific peak forecast.",
+        note: "Recurring typical window, not a year specific peak forecast.",
       },
     });
   }
