@@ -15,10 +15,8 @@ import { MagicalAction } from "@/components/MagicalSurface";
 import { PictureCredits } from "@/components/PictureCredits";
 import { ShareYourNumbers } from "@/components/ShareYourNumbers";
 import { StarField } from "@/components/StarField";
-import { COSMIC_EVENTS } from "@/constants/cosmicData";
 import {
   formatApproximateDistance,
-  getEventsAfterBirth,
   getPersonalTravelMetrics,
   parseBirthdayInput,
 } from "@/constants/personalInsights";
@@ -27,11 +25,9 @@ import {
   bigKmWords,
   currentLap,
   EXOPLANETS_NOW_WORDS,
-  GALACTIC_YEAR_MYR,
   galaxyDistanceKm,
   knownWhenBorn,
   ordinal,
-  SUN_GALACTIC_KM_S,
   withoutAbout,
 } from "@/constants/youFacts";
 import { useBirthday } from "@/hooks/useBirthday";
@@ -44,11 +40,6 @@ function formatBirthdayTyping(text: string): string {
   if (digits.length <= 2) return digits;
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-}
-
-/** "11,201": commas without relying on the phone's number formatting. */
-function withCommas(n: number): string {
-  return String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 const ORBIT = 92;
@@ -211,7 +202,6 @@ export default function YouScreen() {
 
   const metrics = getPersonalTravelMetrics(birthday, now);
   const lap = currentLap(birthday, now);
-  const myEvents = getEventsAfterBirth(COSMIC_EVENTS, birthday);
   const galaxyKm = galaxyDistanceKm(birthday, now);
   const thenLine = knownWhenBorn(birthday);
   const laps = metrics.completedSolarOrbits;
@@ -225,6 +215,7 @@ export default function YouScreen() {
   );
   const milkyWayKm = withoutAbout(bigKmWords(galaxyKm));
   const strong = { color: colors.primary, fontFamily: "Inter_600SemiBold" };
+  const then = thenLine ? thenLine.replace(" that year", "") : null;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -246,24 +237,32 @@ export default function YouScreen() {
             : `Since ${bornOn}, you have been around the Sun ${laps} ${laps === 1 ? "time" : "times"}.`}
         </Text>
 
-        <Text style={[styles.para, { color: colors.foreground }]}>
-          In that time, Earth has carried you about{" "}
-          <Text style={strong}>{sunKm} km</Text> around the Sun, at about 30 km
-          every second.
-        </Text>
-        <Text style={[styles.para, { color: colors.foreground }]}>
-          The Sun has carried all of us about{" "}
+        <Text style={[styles.para, { color: colors.mutedForeground }]}>
+          That is about{" "}
+          <Text style={strong}>{sunKm} km</Text> with Earth, and about{" "}
           <Text style={strong}>{milkyWayKm} km</Text>{" "}
-          {"around the middle of the Milky Way"}, at about {SUN_GALACTIC_KM_S}{" "}
-          km every second. One lap of
-          the galaxy takes it about {GALACTIC_YEAR_MYR} million years. The last
-          time it was where it is now, the first dinosaurs were appearing.
+          {"around the middle of the Milky Way"} with the Sun.
         </Text>
 
-        <Text style={[styles.small, { color: colors.mutedForeground }]}>
-          That is {withCommas(metrics.ageDays)} days, or{" "}
-          {withCommas(metrics.ageHours)} hours. Every figure here is rounded,
-          and worked out on this phone.
+        <View style={styles.lapRow}>
+          <LapDrawing fraction={lap.fraction} />
+          <Text style={[styles.body, styles.lapText, { color: colors.foreground }]}>
+            {lap.daysIn} {lap.daysIn === 1 ? "day" : "days"} into your{" "}
+            {ordinal(lap.number)} lap.
+          </Text>
+        </View>
+
+        {then ? (
+          <Text style={[styles.para, { color: colors.mutedForeground }]}>
+            The year you were born,{" "}
+            {then.charAt(0).toLowerCase() + then.slice(1)} Today we know of{" "}
+            {EXOPLANETS_NOW_WORDS}.
+          </Text>
+        ) : null}
+
+        <Text style={[styles.para, { color: colors.mutedForeground }]}>
+          Most of the hydrogen in you was made in the first few minutes after
+          the Big Bang. It is about 13.8 billion years old.
         </Text>
 
         <ShareYourNumbers
@@ -271,67 +270,6 @@ export default function YouScreen() {
           galaxyKm={galaxyKm}
           trips={laps}
         />
-
-        {/* This lap, from the last birthday to the next. */}
-        <Text
-          style={[styles.heading, { color: colors.foreground }]}
-          accessibilityRole="header"
-        >
-          Your {ordinal(lap.number)} lap
-        </Text>
-        <View style={styles.lapRow}>
-          <LapDrawing fraction={lap.fraction} />
-          <View style={styles.lapText}>
-            <Text style={[styles.body, { color: colors.foreground }]}>
-              {lap.daysIn} {lap.daysIn === 1 ? "day" : "days"} in, and{" "}
-              {lap.daysLeft} to go until your birthday.
-            </Text>
-            <Text style={[styles.aside, { color: colors.mutedForeground }]}>
-              The lap starts at the top, on your birthday. The blue dot is
-              Earth today.
-            </Text>
-          </View>
-        </View>
-
-        {/* What we knew the year you were born, and what has been found since. */}
-        <Text
-          style={[styles.heading, { color: colors.foreground }]}
-          accessibilityRole="header"
-        >
-          In your lifetime
-        </Text>
-        {thenLine ? (
-          <Text style={[styles.para, { color: colors.foreground }]}>
-            The year you were born,{" "}
-            {thenLine.replace(" that year", "").charAt(0).toLowerCase() +
-              thenLine.replace(" that year", "").slice(1)}{" "}
-            Today we know of {EXOPLANETS_NOW_WORDS}.
-          </Text>
-        ) : null}
-        {myEvents.length > 0 ? (
-          <Text style={[styles.subhead, { color: colors.mutedForeground }]}>
-            Since then
-          </Text>
-        ) : null}
-        {myEvents.map((e) => (
-          <View key={`${e.year}-${e.title}`} style={styles.event}>
-            <Text style={[styles.eventYear, { color: colors.mutedForeground }]}>
-              {e.year}
-            </Text>
-            <Text style={[styles.eventText, { color: colors.foreground }]}>
-              <Text style={{ fontFamily: "Inter_600SemiBold" }}>{e.title}. </Text>
-              <Text style={{ color: colors.mutedForeground }}>
-                {e.description}
-              </Text>
-            </Text>
-          </View>
-        ))}
-
-        <Text style={[styles.closing, { color: colors.foreground }]}>
-          Most of the hydrogen in you was made in the first few minutes after
-          the Big Bang. Every glass of water you drink holds hydrogen about 13.8
-          billion years old.
-        </Text>
 
         <View style={styles.links}>
           <TouchableOpacity
@@ -377,8 +315,8 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   lead: {
-    fontSize: 22,
-    lineHeight: 30,
+    fontSize: 24,
+    lineHeight: 32,
     fontFamily: "Inter_500Medium",
     letterSpacing: -0.3,
     marginTop: 14,
@@ -449,7 +387,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 10,
   },
-  lapRow: { flexDirection: "row", alignItems: "center", gap: 20 },
+  lapRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+    marginTop: 8,
+    marginBottom: 22,
+  },
   lapText: { flex: 1 },
   event: {
     flexDirection: "row",
