@@ -71,7 +71,7 @@ describe("The You tab", () => {
   const card = read("components/ShareYourNumbers.tsx");
 
   it("shows the galaxy, the discoveries and the share button", () => {
-    expect(you).toContain("Around the Milky Way");
+    expect(you).toContain("around the middle of the Milky Way");
     expect(you).toContain("knownWhenBorn(birthday)");
     expect(you).toContain("<LapDrawing");
     expect(you).toContain("<ShareYourNumbers");

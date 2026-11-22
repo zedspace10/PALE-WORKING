@@ -230,6 +230,7 @@ export default function YouScreen() {
     formatApproximateDistance(metrics.approximateOrbitDistanceKm),
   );
   const milkyWayKm = withoutAbout(bigKmWords(galaxyKm));
+  const strong = { color: colors.primary, fontFamily: "Inter_600SemiBold" };
   const then = thenLine ? thenLine.replace(" that year", "") : null;
 
   return (
@@ -247,44 +248,30 @@ export default function YouScreen() {
         <Text style={[styles.title, { color: colors.foreground }]}>You</Text>
 
         <LapDrawing fraction={lap.fraction} startLabel={birthdayDay} />
+        <Text style={[styles.lapCaption, { color: colors.mutedForeground }]}>
+          {lap.daysIn} {lap.daysIn === 1 ? "day" : "days"} into your{" "}
+          {ordinal(lap.number)} lap.
+        </Text>
 
         <Text style={[styles.lead, { color: colors.foreground }]}>
-          Your {ordinal(lap.number)} lap of the Sun
-        </Text>
-        <Text style={[styles.leadNote, { color: colors.mutedForeground }]}>
-          {lap.daysIn} {lap.daysIn === 1 ? "day" : "days"} in,{" "}
-          {lap.daysLeft} to go.
+          {laps === 0
+            ? `Since ${bornOn}, you have been on your first trip around the Sun.`
+            : `Since ${bornOn}, you have been around the Sun ${laps} ${laps === 1 ? "time" : "times"}.`}
         </Text>
 
-        <Text style={[styles.heading, { color: colors.mutedForeground }]}>
-          Since {bornOn}, you have travelled about
+        <Text style={[styles.para, { color: colors.mutedForeground }]}>
+          That is about{" "}
+          <Text style={strong}>{sunKm} km</Text> with Earth, and about{" "}
+          <Text style={strong}>{milkyWayKm} km</Text>{" "}
+          {"around the middle of the Milky Way"} with the Sun.
         </Text>
-        <View style={[styles.row, { borderColor: colors.luminousBorder }]}>
-          <Text style={[styles.rowLabel, { color: colors.mutedForeground }]}>
-            Around the Sun
-          </Text>
-          <Text style={[styles.rowValue, { color: colors.foreground }]}>
-            {sunKm} km
-          </Text>
-        </View>
-        <View style={[styles.row, { borderColor: colors.luminousBorder }]}>
-          <Text style={[styles.rowLabel, { color: colors.mutedForeground }]}>
-            Around the Milky Way
-          </Text>
-          <Text style={[styles.rowValue, { color: colors.foreground }]}>
-            {milkyWayKm} km
-          </Text>
-        </View>
 
         {then ? (
-          <>
-            <Text style={[styles.heading, { color: colors.mutedForeground }]}>
-              The year you were born
-            </Text>
-            <Text style={[styles.para, { color: colors.foreground }]}>
-              {then} Today we know of {EXOPLANETS_NOW_WORDS}.
-            </Text>
-          </>
+          <Text style={[styles.para, { color: colors.mutedForeground }]}>
+            The year you were born,{" "}
+            {then.charAt(0).toLowerCase() + then.slice(1)} Today we know of{" "}
+            {EXOPLANETS_NOW_WORDS}.
+          </Text>
         ) : null}
 
         <Text style={[styles.closing, { color: colors.mutedForeground }]}>
@@ -355,55 +342,35 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     marginBottom: 2,
   },
-  lead: {
-    fontSize: 24,
-    lineHeight: 31,
-    fontFamily: "Inter_500Medium",
-    letterSpacing: -0.3,
-    textAlign: "center",
-  },
-  leadNote: {
+  lapCaption: {
     fontSize: 15,
     lineHeight: 22,
     fontFamily: "Inter_400Regular",
     textAlign: "center",
-    marginTop: 6,
+    marginTop: -6,
+    marginBottom: 34,
   },
-  heading: {
-    fontSize: 13,
+  lead: {
+    fontSize: 24,
+    lineHeight: 32,
     fontFamily: "Inter_500Medium",
-    marginTop: 40,
-    marginBottom: 6,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    gap: 16,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  rowLabel: {
-    flex: 1,
-    fontSize: 15,
-    lineHeight: 21,
-    fontFamily: "Inter_400Regular",
-  },
-  rowValue: {
-    fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+    marginBottom: 16,
   },
   para: {
     fontSize: 16,
     lineHeight: 25,
     fontFamily: "Inter_400Regular",
+    marginBottom: 14,
   },
   closing: {
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 25,
     fontFamily: "Inter_400Regular",
-    marginTop: 40,
+    marginTop: 18,
+    paddingTop: 22,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(160,170,185,0.25)",
   },
   onboardText: {
     fontSize: 15,
