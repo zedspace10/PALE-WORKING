@@ -9,6 +9,10 @@
  * No network, no permissions.
  */
 
+import { equatorialToHorizontal } from "@/constants/astronomy";
+import type { Coordinates } from "@/constants/location";
+import { getSolarAltitude } from "@/constants/solar";
+
 const DEG = Math.PI / 180;
 const AU_KM = 149_597_870.7;
 const LIGHT_KM_PER_MIN = 17_987_547.48;
@@ -179,16 +183,22 @@ export function formatLightTime(minutes: number): string {
   return rem === 0 ? hours : `${hours} ${rem} minutes`;
 }
 
-export type SkyPlacement = "evening" | "morning" | "all-night" | "in-glare";
+export type SkyPlacement = "evening" | "all-night" | "late" | "morning" | "in-glare";
 
 /**
- * Where a planet sits in the sky relative to the Sun, which needs no location: east of the Sun it
- * follows the Sun down and shows after sunset, west of it it rises before dawn, opposite the Sun it
- * is up all night, and too close to the Sun it is lost in the glare.
+ * When a planet can be seen tonight. Too close to the Sun, it is lost in the glare. Otherwise this
+ * follows the planet's real height through the coming night: up after dark, up all night, rising
+ * later in the evening, or only up before dawn. Going by its angle from the Sun alone cannot tell
+ * a planet that rises at 10pm from one that rises at 5am, and a planet's height in the sky also
+ * depends on how far north it is.
+ *
+ * With no location, PALE works this out for the middle of the UK at the phone's own time zone,
+ * which is close enough for anyone in Britain or northern Europe.
  */
 export function getPlanetSkyPlacement(
   planet: PlanetId,
   date: Date = new Date(),
+  where: Coordinates | null = null,
 ): { elongation: number; placement: SkyPlacement } {
   const d = dayNumber(date);
   const p = heliocentric(ELEMENTS[planet], d);
@@ -202,18 +212,51 @@ export function getPlanetSkyPlacement(
   const elongation =
     Math.acos(Math.max(-1, Math.min(1, dot / (gl * sl)))) / DEG;
 
-  // Positive when the planet is east of the Sun along the ecliptic.
-  const east =
-    rev(Math.atan2(g.y, g.x) / DEG - Math.atan2(s.y, s.x) / DEG) < 180;
-
   const glare = planet === "mercury" ? 18 : 15;
-  const placement: SkyPlacement =
-    elongation < glare
-      ? "in-glare"
-      : elongation > 145
-        ? "all-night"
-        : east
-          ? "evening"
-          : "morning";
-  return { elongation, placement };
+  if (elongation < glare) return { elongation, placement: "in-glare" };
+  return { elongation, placement: nightPlacement(planet, date, where) };
+}
+
+function nightPlacement(
+  planet: PlanetId,
+  date: Date,
+  where: Coordinates | null,
+): SkyPlacement {
+  const place: Coordinates = where ?? {
+    lat: 52.5,
+    // The phone's time zone gives a rough longitude: each hour is 15 degrees.
+    lng: Math.max(-180, Math.min(180, -date.getTimezoneOffset() / 4)),
+  };
+  // Tonight runs from 3pm to 9am local time. Just after midnight, that is the night under way.
+  const start = new Date(date);
+  if (start.getHours() < 9) start.setDate(start.getDate() - 1);
+  start.setHours(15, 0, 0, 0);
+  const step = 20 * 60_000;
+  const dark: { t: number; up: boolean }[] = [];
+  for (let t = start.getTime(); t <= start.getTime() + 18 * 3_600_000; t += step) {
+    const at = new Date(t);
+    // Dark enough to see a planet: the Sun at least 6 degrees down.
+    if (getSolarAltitude(place.lat, place.lng, at) > -6) continue;
+    const pos = getPlanetPosition(planet, at);
+    dark.push({ t, up: equatorialToHorizontal(pos, place, at).alt > 5 });
+  }
+  if (dark.length === 0) return "in-glare";
+  const first = dark[0].t;
+  const last = dark[dark.length - 1].t;
+  const midnight = new Date(start);
+  midnight.setDate(midnight.getDate() + 1);
+  midnight.setHours(0, 0, 0, 0);
+  const upIn = (from: number, to: number) =>
+    dark.some((x) => x.t >= from && x.t <= to && x.up);
+  // The evening: the first two hours of darkness, or until 9.30pm if that is later.
+  const eveningEnd = Math.max(first + 2 * 3_600_000, midnight.getTime() - 2.5 * 3_600_000);
+  const evening = upIn(first, eveningEnd);
+  const lateNight = upIn(eveningEnd, midnight.getTime() + 2 * 3_600_000);
+  const smallHours = upIn(midnight.getTime() + 3_600_000, midnight.getTime() + 3 * 3_600_000);
+  const dawn = upIn(last - 2 * 3_600_000, last);
+  if (evening && (dawn || smallHours)) return "all-night";
+  if (evening) return "evening";
+  if (lateNight) return "late";
+  if (dawn) return "morning";
+  return "in-glare";
 }

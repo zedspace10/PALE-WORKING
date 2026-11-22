@@ -26,9 +26,9 @@ import { requestGuide } from "@/constants/tabGuide";
 import {
   bigKmWords,
   currentLap,
+  EXOPLANETS_NOW_WORDS,
   GALACTIC_YEAR_MYR,
   galaxyDistanceKm,
-  KNOWN_TODAY,
   knownWhenBorn,
   ordinal,
   SUN_GALACTIC_KM_S,
@@ -215,6 +215,16 @@ export default function YouScreen() {
   const galaxyKm = galaxyDistanceKm(birthday, now);
   const thenLine = knownWhenBorn(birthday);
   const laps = metrics.completedSolarOrbits;
+  const bornOn = birthday.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const sunKm = withoutAbout(
+    formatApproximateDistance(metrics.approximateOrbitDistanceKm),
+  );
+  const milkyWayKm = withoutAbout(bigKmWords(galaxyKm));
+  const strong = { color: colors.primary, fontFamily: "Inter_600SemiBold" };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -232,43 +242,28 @@ export default function YouScreen() {
 
         <Text style={[styles.lead, { color: colors.foreground }]}>
           {laps === 0
-            ? "You are on your first trip around the Sun."
-            : `You have been around the Sun ${laps} ${laps === 1 ? "time" : "times"}. This is your ${ordinal(lap.number)} lap.`}
+            ? `Since ${bornOn}, you have been on your first trip around the Sun.`
+            : `Since ${bornOn}, you have been around the Sun ${laps} ${laps === 1 ? "time" : "times"}.`}
         </Text>
 
-        {/* How far: with Earth around the Sun, and with the Sun around the galaxy. */}
-        <View style={styles.block}>
-          <Text style={[styles.figure, { color: colors.primary }]}>
-            {withoutAbout(
-              formatApproximateDistance(metrics.approximateOrbitDistanceKm),
-            )}{" "}
-            km
-          </Text>
-          <Text style={[styles.body, { color: colors.foreground }]}>
-            with Earth, around the Sun, at about 30 km every second.
-          </Text>
-        </View>
-
-        <View style={[styles.rule, { backgroundColor: colors.border }]} />
-
-        <View style={styles.block}>
-          <Text style={[styles.figure, { color: colors.primary }]}>
-            {withoutAbout(bigKmWords(galaxyKm))} km
-          </Text>
-          <Text style={[styles.body, { color: colors.foreground }]}>
-            with the Sun, around the middle of the Milky Way, at about{" "}
-            {SUN_GALACTIC_KM_S} km every second.
-          </Text>
-          <Text style={[styles.aside, { color: colors.mutedForeground }]}>
-            One lap of the galaxy takes the Sun about {GALACTIC_YEAR_MYR}{" "}
-            million years. The last time it was here, the first dinosaurs were
-            appearing.
-          </Text>
-        </View>
+        <Text style={[styles.para, { color: colors.foreground }]}>
+          In that time, Earth has carried you about{" "}
+          <Text style={strong}>{sunKm} km</Text> around the Sun, at about 30 km
+          every second.
+        </Text>
+        <Text style={[styles.para, { color: colors.foreground }]}>
+          The Sun has carried all of us about{" "}
+          <Text style={strong}>{milkyWayKm} km</Text>{" "}
+          {"around the middle of the Milky Way"}, at about {SUN_GALACTIC_KM_S}{" "}
+          km every second. One lap of
+          the galaxy takes it about {GALACTIC_YEAR_MYR} million years. The last
+          time it was where it is now, the first dinosaurs were appearing.
+        </Text>
 
         <Text style={[styles.small, { color: colors.mutedForeground }]}>
-          {withCommas(metrics.ageDays)} days, or {withCommas(metrics.ageHours)}{" "}
-          hours. Every figure here is rounded, and worked out on this phone.
+          That is {withCommas(metrics.ageDays)} days, or{" "}
+          {withCommas(metrics.ageHours)} hours. Every figure here is rounded,
+          and worked out on this phone.
         </Text>
 
         <ShareYourNumbers
@@ -282,7 +277,7 @@ export default function YouScreen() {
           style={[styles.heading, { color: colors.foreground }]}
           accessibilityRole="header"
         >
-          This lap
+          Your {ordinal(lap.number)} lap
         </Text>
         <View style={styles.lapRow}>
           <LapDrawing fraction={lap.fraction} />
@@ -293,88 +288,50 @@ export default function YouScreen() {
             </Text>
             <Text style={[styles.aside, { color: colors.mutedForeground }]}>
               The lap starts at the top, on your birthday. The blue dot is
-              Earth today, and the dotted part is still to come.
+              Earth today.
             </Text>
           </View>
         </View>
 
-        {/* Atomic age */}
-        <View style={[styles.quote, { borderLeftColor: colors.primary }]}>
-          <Text style={[styles.quoteText, { color: colors.foreground }]}>
-            Most of the hydrogen in you was made in the first moments after the
-            Big Bang. Every glass of water you drink holds hydrogen about 13.8
-            billion years old.
-          </Text>
-        </View>
-
-        {/* What we knew the year you were born, what has been found since, and today. */}
+        {/* What we knew the year you were born, and what has been found since. */}
         <Text
           style={[styles.heading, { color: colors.foreground }]}
           accessibilityRole="header"
         >
           In your lifetime
         </Text>
-        <View style={styles.timeline}>
-          <View
-            style={[styles.timelineLine, { backgroundColor: colors.border }]}
-          />
-          {[
-            {
-              key: "born",
-              year: String(birthday.getFullYear()),
-              title: "You were born",
-              text: thenLine,
-            },
-            ...myEvents.map((e) => ({
-              key: `${e.year}-${e.title}`,
-              year: String(e.year),
-              title: e.title,
-              text: e.description,
-            })),
-            ...(thenLine
-              ? [
-                  {
-                    key: "today",
-                    year: "Now",
-                    title: "Today",
-                    text: KNOWN_TODAY,
-                  },
-                ]
-              : []),
-          ].map((item) => (
-            <View key={item.key} style={styles.timelineItem}>
-              <Text style={[styles.timelineYear, { color: colors.primary }]}>
-                {item.year}
+        {thenLine ? (
+          <Text style={[styles.para, { color: colors.foreground }]}>
+            The year you were born,{" "}
+            {thenLine.replace(" that year", "").charAt(0).toLowerCase() +
+              thenLine.replace(" that year", "").slice(1)}{" "}
+            Today we know of {EXOPLANETS_NOW_WORDS}.
+          </Text>
+        ) : null}
+        {myEvents.length > 0 ? (
+          <Text style={[styles.subhead, { color: colors.mutedForeground }]}>
+            Since then
+          </Text>
+        ) : null}
+        {myEvents.map((e) => (
+          <View key={`${e.year}-${e.title}`} style={styles.event}>
+            <Text style={[styles.eventYear, { color: colors.mutedForeground }]}>
+              {e.year}
+            </Text>
+            <Text style={[styles.eventText, { color: colors.foreground }]}>
+              <Text style={{ fontFamily: "Inter_600SemiBold" }}>{e.title}. </Text>
+              <Text style={{ color: colors.mutedForeground }}>
+                {e.description}
               </Text>
-              <View
-                style={[
-                  styles.timelineDot,
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: colors.primary,
-                  },
-                ]}
-              />
-              <View style={styles.timelineBody}>
-                <Text
-                  style={[styles.timelineTitle, { color: colors.foreground }]}
-                >
-                  {item.title}
-                </Text>
-                {item.text ? (
-                  <Text
-                    style={[
-                      styles.timelineText,
-                      { color: colors.mutedForeground },
-                    ]}
-                  >
-                    {item.text}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-          ))}
-        </View>
+            </Text>
+          </View>
+        ))}
+
+        <Text style={[styles.closing, { color: colors.foreground }]}>
+          Most of the hydrogen in you was made in the first few minutes after
+          the Big Bang. Every glass of water you drink holds hydrogen about 13.8
+          billion years old.
+        </Text>
 
         <View style={styles.links}>
           <TouchableOpacity
@@ -410,7 +367,7 @@ export default function YouScreen() {
   );
 }
 
-const YEAR_COL = 46;
+const YEAR_COL = 44;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -420,12 +377,18 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   lead: {
-    fontSize: 21,
-    lineHeight: 29,
+    fontSize: 22,
+    lineHeight: 30,
     fontFamily: "Inter_500Medium",
     letterSpacing: -0.3,
     marginTop: 14,
-    marginBottom: 30,
+    marginBottom: 18,
+  },
+  para: {
+    fontSize: 16,
+    lineHeight: 25,
+    fontFamily: "Inter_400Regular",
+    marginBottom: 14,
   },
   onboardText: {
     fontSize: 15,
@@ -455,13 +418,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 0.2,
   },
-  block: { gap: 6 },
-  figure: {
-    fontSize: 38,
-    lineHeight: 44,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -1.4,
-  },
   body: {
     fontSize: 16,
     lineHeight: 24,
@@ -477,68 +433,45 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     fontFamily: "Inter_400Regular",
-    marginTop: 26,
-    marginBottom: 14,
-  },
-  rule: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 24,
-    width: 48,
+    marginTop: 4,
+    marginBottom: 10,
   },
   heading: {
     fontSize: 18,
     fontFamily: "Inter_600SemiBold",
     letterSpacing: -0.2,
-    marginTop: 44,
-    marginBottom: 16,
+    marginTop: 40,
+    marginBottom: 14,
+  },
+  subhead: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    marginTop: 8,
+    marginBottom: 10,
   },
   lapRow: { flexDirection: "row", alignItems: "center", gap: 20 },
   lapText: { flex: 1 },
-  quote: {
-    borderLeftWidth: 2,
-    paddingLeft: 18,
-    marginTop: 44,
-  },
-  quoteText: {
-    fontSize: 17,
-    lineHeight: 27,
-    fontFamily: "Inter_400Regular",
-  },
-  timeline: { position: "relative" },
-  timelineLine: {
-    position: "absolute",
-    left: YEAR_COL + 4,
-    top: 8,
-    bottom: 8,
-    width: 1,
-  },
-  timelineItem: {
+  event: {
     flexDirection: "row",
-    paddingBottom: 22,
+    paddingVertical: 9,
   },
-  timelineYear: {
+  eventYear: {
     width: YEAR_COL,
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    paddingTop: 1,
+    lineHeight: 21,
+    fontFamily: "Inter_500Medium",
   },
-  timelineDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    borderWidth: 1.5,
-    marginTop: 5,
-    marginRight: 14,
-  },
-  timelineBody: { flex: 1, gap: 3 },
-  timelineTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-  },
-  timelineText: {
-    fontSize: 13,
-    lineHeight: 19,
+  eventText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 21,
     fontFamily: "Inter_400Regular",
+  },
+  closing: {
+    fontSize: 16,
+    lineHeight: 25,
+    fontFamily: "Inter_400Regular",
+    marginTop: 36,
   },
   links: {
     flexDirection: "row",

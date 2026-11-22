@@ -342,64 +342,62 @@ const COSMIC_EVENTS_BASE: CosmicEventBase[] = [
   {
     year: 1957,
     title: "First satellite in orbit",
-    description: "Sputnik showed that we could reach beyond our world.",
+    description: "Sputnik 1, a metal ball about the size of a beach ball, beeped from orbit for three weeks.",
   },
   {
     year: 1961,
-    title: "First human in space",
-    description: "Yuri Gagarin circled Earth once, in 108 minutes.",
+    title: "First person in space",
+    description: "Yuri Gagarin went once around the Earth, in 108 minutes.",
   },
   {
     year: 1969,
     title: "First steps on the Moon",
-    description: "Humanity walked on another world.",
+    description: "Neil Armstrong and Buzz Aldrin walked on the Moon while Michael Collins circled above them.",
   },
   {
     year: 1977,
-    title: "Voyager 1 launched",
-    description:
-      "Now in interstellar space, and the farthest thing people have ever made.",
+    title: "Voyager 1 sets off",
+    description: "It has been travelling ever since, and is now the most distant thing people have made.",
   },
   {
     year: 1990,
-    title: "Hubble Space Telescope",
-    description:
-      "It showed the universe in sharper detail than ever before, and helped measure how old it is and how fast it is expanding.",
+    title: "Hubble goes up",
+    description: "Its measurements helped work out how fast the universe is expanding.",
   },
   {
     year: 1995,
-    title: "First planet found around a star like the Sun",
-    description: "51 Pegasi b. Other stars have worlds too.",
+    title: "A planet around another Sun",
+    description: "Michel Mayor and Didier Queloz found 51 Pegasi b, the first planet known to circle a star like ours.",
   },
   {
     year: 2004,
-    title: "Mars rovers explore the surface",
-    description:
-      "Two rovers, Spirit and Opportunity, landed and began exploring Mars.",
+    title: "Two rovers land on Mars",
+    description: "Spirit and Opportunity found signs that water once soaked the ground. Opportunity kept going for 14 years.",
   },
   {
     year: 2015,
-    title: "Gravitational waves detected",
-    description:
-      "Detectors measured spacetime ripples from two black holes merging roughly 1.3 billion years earlier.",
+    title: "Ripples in space itself",
+    description: "Detectors picked up gravitational waves for the first time, from two black holes that merged 1.3 billion years ago.",
   },
   {
     year: 2019,
-    title: "First image of a black hole",
-    description:
-      "The Event Horizon Telescope released the first image of a black hole's shadow.",
+    title: "A picture of a black hole",
+    description: "The shadow of the black hole at the heart of the galaxy M87, 55 million light years away.",
   },
   {
     year: 2021,
-    title: "James Webb Space Telescope",
-    description:
-      "The telescope launched to study the early universe, stars, galaxies, and distant worlds.",
+    title: "Webb launches",
+    description: "It went up on Christmas Day, and now sees light from some of the first galaxies.",
   },
   {
     year: 2022,
-    title: "Webb detects carbon dioxide on a distant world",
-    description:
-      "Webb found clear evidence of carbon dioxide in the atmosphere of the hot gas giant WASP-39 b.",
+    title: "Air on another world",
+    description: "Webb found carbon dioxide around WASP-39 b, a hot giant planet about 700 light years away.",
+  },
+  {
+    year: 2026,
+    title: "Voyager 1 is a light day away",
+    description: "A radio message to it now takes a whole day to arrive.",
   },
 ];
 
@@ -415,6 +413,7 @@ const COSMIC_EVENT_DATES: Record<number, string> = {
   2019: "2019-04-10",
   2021: "2021-12-25",
   2022: "2022-08-25",
+  2026: "2026-11-18",
 };
 
 const COSMIC_EVENT_SOURCE_BY_YEAR: Record<
@@ -432,6 +431,7 @@ const COSMIC_EVENT_SOURCE_BY_YEAR: Record<
   2019: ["ehtFirstImage"],
   2021: ["nasaWebb"],
   2022: ["nasaWebbCarbonDioxide"],
+  2026: ["nasaVoyager"],
 };
 
 export const COSMIC_EVENTS: CosmicEvent[] = COSMIC_EVENTS_BASE.map((event) => ({

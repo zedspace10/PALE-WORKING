@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { getPlanetSkyPlacement } from "@/constants/planets";
 
 // Late October 2026: Venus has just passed between Earth and the Sun (inferior conjunction on
-// 24 October), Saturn was opposite the Sun on 4 October, and Mars and Jupiter rise before dawn.
+// 24 October), Saturn was opposite the Sun on 4 October, and Mars and Jupiter rise around midnight.
+// Worked out for the middle of the UK, as the app does with no location.
 const when = new Date("2026-10-28T20:00:00Z");
 
 describe("planet placement without a location", () => {
@@ -17,9 +18,14 @@ describe("planet placement without a location", () => {
     expect(saturn.elongation).toBeGreaterThan(145);
   });
 
-  it("puts Mars and Jupiter in the morning sky", () => {
-    expect(getPlanetSkyPlacement("mars", when).placement).toBe("morning");
-    expect(getPlanetSkyPlacement("jupiter", when).placement).toBe("morning");
+  it("has Mars and Jupiter rising later in the night, not only before dawn", () => {
+    expect(getPlanetSkyPlacement("mars", when).placement).toBe("late");
+    expect(getPlanetSkyPlacement("jupiter", when).placement).toBe("late");
+  });
+
+  it("follows a planet through the year: Saturn rises after midnight in June 2027", () => {
+    expect(getPlanetSkyPlacement("saturn", new Date("2027-06-20T21:00:00Z")).placement).toBe("late");
+    expect(getPlanetSkyPlacement("jupiter", new Date("2027-06-20T21:00:00Z")).placement).toBe("evening");
   });
 
   it("never gives an elongation outside 0 to 180 degrees", () => {

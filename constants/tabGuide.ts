@@ -47,7 +47,7 @@ export const GUIDE_STEPS: GuideStep[] = [
     tab: 4,
     route: "/(tabs)/explore",
     title: "Explore",
-    body: "Places in the universe, from the Moon to the edge of what we can see, and a new Hubble or Webb picture every week.",
+    body: "Places in the universe, from the Moon to the edge of what we can see, and new pictures from Hubble, Webb and other telescopes.",
   },
 ];
 

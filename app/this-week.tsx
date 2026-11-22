@@ -24,7 +24,7 @@ import { useThisWeek } from "@/hooks/useThisWeek";
 
 const WARM = "#F3DDB0";
 
-/** This week's picture from Hubble or Webb: the picture, a short plain write-up, and its credit. */
+/** This week's picture from Hubble, Webb or another telescope: the picture, a short plain write-up, and its credit. */
 export default function ThisWeekScreen() {
   const colors = useColors();
   const router = useRouter();

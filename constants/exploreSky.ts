@@ -151,6 +151,11 @@ const PLACEMENT: Record<
     tone: "up",
     line: "In the evening sky. Look west after sunset for a steady point that does not twinkle.",
   },
+  late: {
+    chip: "Later tonight",
+    tone: "later",
+    line: "Rises later in the evening and is up until dawn. Look east for a steady point that does not twinkle.",
+  },
   morning: {
     chip: "Before dawn",
     tone: "later",
@@ -182,7 +187,7 @@ export function skyFor(
     case "moon":
       return moonSky(where, now);
     case "planet":
-      return PLACEMENT[getPlanetSkyPlacement(sky.planet, now).placement];
+      return PLACEMENT[getPlanetSkyPlacement(sky.planet, now, where).placement];
     case "fixed":
       return where
         ? fixedSky(sky.ra, sky.dec, where, now)

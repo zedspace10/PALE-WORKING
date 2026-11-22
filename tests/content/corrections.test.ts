@@ -51,16 +51,15 @@ describe("audited scientific corrections", () => {
 
   it("corrects audited observatory and star claims", () => {
     const content = textFor(OBSERVATORY_ENTRIES);
-    expect(content).toMatch(/nearest major galactic neighbour/i);
-    expect(content).toMatch(
-      /has not yet passed the Solar System's distant Oort Cloud/i,
-    );
-    expect(content).toMatch(/total distributed mass/i);
+    expect(content).toMatch(/nearest big galaxy/i);
+    expect(content).toMatch(/has not yet reached the Oort Cloud/i);
+    // The Sun circles the whole galaxy, not the central black hole.
+    expect(content).toMatch(/circles the whole galaxy/i);
     expect(content).toMatch(/methane and ethane/i);
-    expect(content).toMatch(/subsurface ocean of liquid water/i);
-    expect(content).toMatch(/much disputed/i);
-    expect(content).toMatch(/not a known physical edge/i);
-    expect(content).toMatch(/northern constellation Cassiopeia/i);
+    expect(content).toMatch(/ocean of liquid water/i);
+    expect(content).toMatch(/still disputed/i);
+    expect(content).toMatch(/not the edge of the universe/i);
+    expect(content).toMatch(/ordinary star in Cassiopeia/i);
     expect(content).not.toMatch(
       /window into another universe|forever hidden|infinite unknown/i,
     );

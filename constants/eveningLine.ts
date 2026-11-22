@@ -44,13 +44,18 @@ export function eveningLine(
   const hour = now.getHours();
   const evening = hour >= 15 && hour < 24;
   for (const [id, name] of PLANETS) {
-    const { placement } = getPlanetSkyPlacement(id, now);
+    const { placement } = getPlanetSkyPlacement(id, now, where);
     if (placement === "all-night") return `${name} is out tonight.`;
     if (placement === "evening" && evening)
       return `${name} is in the evening sky.`;
   }
   for (const [id, name] of PLANETS) {
-    if (getPlanetSkyPlacement(id, now).placement === "morning") {
+    if (getPlanetSkyPlacement(id, now, where).placement === "late") {
+      return `${name} rises later tonight.`;
+    }
+  }
+  for (const [id, name] of PLANETS) {
+    if (getPlanetSkyPlacement(id, now, where).placement === "morning") {
       return `${name} rises before dawn.`;
     }
   }

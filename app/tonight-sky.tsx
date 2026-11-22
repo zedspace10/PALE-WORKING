@@ -999,6 +999,7 @@ const NAKED_EYE_PLANETS: PlanetId[] = [
 ];
 const PLACEMENT_WORDS: Record<SkyPlacement, string> = {
   evening: "In the evening sky, after sunset",
+  late: "Rises later tonight, and is up until dawn",
   morning: "In the morning sky, before dawn",
   "all-night": "Up for most of the night",
   "in-glare": "Too close to the Sun to see",
@@ -1079,6 +1080,10 @@ function LocationStateScreen({
               <Text style={styles.everywhereName}>{PLANET_NAMES[p.id]}</Text>
               <Text style={styles.everywhereLine}>
                 {PLACEMENT_WORDS[p.placement]}
+              </Text>
+              <Text style={styles.everywhereFaint}>
+                The light you see left it{" "}
+                {formatLightTime(getPlanetPosition(p.id, now).lightMinutes)} ago.
               </Text>
             </View>
           ))}

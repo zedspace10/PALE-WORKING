@@ -107,7 +107,7 @@ describe("honest personal metrics", () => {
       path.resolve(process.cwd(), "app/(tabs)/you.tsx"),
       "utf8",
     );
-    expect(source).toMatch(/first moments\s+after\s+the\s+Big\s+Bang/i);
+    expect(source).toMatch(/first (moments|few\s+minutes)\s+after\s+the\s+Big\s+Bang/i);
     expect(source).toMatch(/13\.8\s+billion\s+years\s+old/);
     // No mention of stars dying anywhere in the reflection.
     expect(source).not.toMatch(/died|dying|death/i);
