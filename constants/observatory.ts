@@ -19,10 +19,10 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
   {
     id: "andromeda",
     location: "Andromeda Galaxy",
-    locationDetail: "Our nearest major galactic neighbour",
+    locationDetail: "The nearest big galaxy to ours",
     distance: "2.5 million light years",
     reflection:
-      "Light reaching Earth from Andromeda began its journey before modern humans existed. Tonight you see the galaxy as it was 2.5 million years ago.",
+      "The light reaching your eyes from Andromeda tonight set off 2.5 million years ago, before there were any modern humans to see it.",
   },
   {
     id: "voyager",
@@ -30,15 +30,15 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The farthest thing people have made",
     distance: "About 26 billion kilometres from Earth",
     reflection:
-      "A machine no heavier than a small car, launched in 1977, is now travelling through interstellar space beyond the heliosphere. It has not yet passed the Solar System's distant Oort Cloud. It carries a golden record with sounds and images from Earth.",
+      "About the weight of a small car, launched in 1977. It has left the bubble of the Sun's wind, but has not yet reached the Oort Cloud, the distant edge of the Solar System. On 18 November 2026 it became a full light day away. It carries a golden record of sounds and pictures from Earth.",
   },
   {
     id: "pillars",
     location: "Pillars of Creation",
-    locationDetail: "Eagle Nebula, a stellar nursery",
+    locationDetail: "Eagle Nebula, where stars are forming",
     distance: "About 6,500 light years",
     reflection:
-      "These towering columns of gas and dust are regions of active star formation. The light we see left them roughly 6,500 years ago, so every image is a view into the past.",
+      "Columns of gas and dust light years tall, with new stars forming inside them. The light in every picture of them left about 6,500 years ago.",
   },
   {
     id: "sagittarius-a",
@@ -46,15 +46,15 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The black hole at the centre of the Milky Way",
     distance: "26,000 light years",
     reflection:
-      "At the heart of our galaxy sits a black hole about four million times the mass of our Sun. Nearby stars orbit it directly; farther out, including our Sun, stars orbit the Milky Way's total distributed mass. The Sun takes roughly 230 million years to circle the galaxy.",
+      "A black hole about four million times the mass of the Sun. The stars closest to it circle it in a few years. The Sun is far too far out to feel it much: it circles the whole galaxy instead, once every 230 million years or so.",
   },
   {
     id: "proxima",
     location: "Proxima Centauri",
-    locationDetail: "The nearest star beyond our Sun",
+    locationDetail: "The nearest star beyond the Sun",
     distance: "4.24 light years",
     reflection:
-      "The closest star beyond our own Sun is 4.24 light years away. At Voyager 1's speed, the journey would take about 75,000 years.",
+      "Its light takes 4.24 years to reach us. At Voyager 1's speed, getting there would take about 75,000 years.",
   },
   {
     id: "pale-blue-dot",
@@ -62,23 +62,23 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The Pale Blue Dot",
     distance: "6 billion kilometres from the Sun",
     reflection:
-      "In 1990, as Voyager 1 was leaving the Solar System, Carl Sagan convinced NASA to turn its camera back towards Earth. Our planet appeared as less than a single pixel, caught in a ray of scattered sunlight.",
+      "In 1990, as Voyager 1 headed out of the Solar System, Carl Sagan persuaded NASA to turn its camera back towards home. Earth came out smaller than a single pixel, sitting in a ray of scattered sunlight.",
   },
   {
     id: "betelgeuse",
     location: "Betelgeuse",
-    locationDetail: "The red supergiant at Orion's shoulder",
+    locationDetail: "The red giant at Orion's shoulder",
     distance: "About 550 to 700 light years",
     reflection:
-      "Betelgeuse is a red supergiant so large that, placed where our Sun is, its surface would reach beyond Mars and perhaps towards Jupiter. Its exact size and distance are hard to measure. In 2025 astronomers reported a small companion star orbiting close to it.",
+      "Put Betelgeuse where the Sun is and its surface would reach past Mars, maybe towards Jupiter. Its exact size and distance are hard to pin down. In 2025, astronomers reported a small star circling close to it.",
   },
   {
     id: "bootes-void",
     location: "The Boötes Void",
-    locationDetail: "A huge, nearly empty region of the cosmic web",
+    locationDetail: "A huge, nearly empty stretch of space",
     distance: "700 million light years",
     reflection:
-      "The Boötes Void is a vast, unusually underdense region of the cosmic web, about 330 million light years across. It is not completely empty: galaxies have been observed inside it, just far fewer than in denser regions.",
+      "About 330 million light years across, with far fewer galaxies than it should have. Not quite empty: a few dozen have been found inside it.",
   },
   {
     id: "cosmic-background",
@@ -86,23 +86,23 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "Light from 380,000 years after the Big Bang",
     distance: "45.7 billion light years",
     reflection:
-      "The faint hiss of cosmic microwave radiation that permeates all of space is the afterglow of the Big Bang, light from 380,000 years after the universe began. It is the oldest light we can observe, and it reaches us from every direction.",
+      "The oldest light there is. It was released when the universe was 380,000 years old, and it still reaches us from every direction, as a faint glow of microwaves.",
   },
   {
     id: "orion-nebula",
     location: "The Orion Nebula",
-    locationDetail: "A stellar nursery visible to the naked eye",
+    locationDetail: "A star nursery you can see without a telescope",
     distance: "1,344 light years",
     reflection:
-      "The Orion Nebula is a stellar nursery where hundreds of new stars are being born right now. It is visible to the naked eye on a clear night, a smudge of light below Orion's belt.",
+      "Hundreds of new stars are forming here. On a clear night it shows as a soft smudge just below Orion's Belt.",
   },
   {
     id: "titan",
     location: "Titan",
-    locationDetail: "Saturn's moon, a world with lakes and weather",
+    locationDetail: "Saturn's moon, with lakes and weather",
     distance: "About 1.4 billion kilometres",
     reflection:
-      "Saturn's moon Titan has clouds, rain, rivers, and lakes of liquid methane and ethane on its surface. Beneath its crust of water ice, evidence points to a global subsurface ocean of liquid water.",
+      "Titan has clouds, rain, rivers and lakes, but they are made of methane and ethane. Under its icy crust there is probably an ocean of liquid water.",
   },
   {
     id: "olympus-mons",
@@ -110,25 +110,25 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The tallest volcano known in the Solar System",
     distance: "On Mars, about 225 million kilometres away on average",
     reflection:
-      "Olympus Mons rises about 22 kilometres above the plains of Mars, around two and a half times the height of Everest. Its base is about 600 kilometres wide, enough to cover most of the British Isles.",
+      "It stands about 22 km high, two and a half times the height of Everest. Its base is about 600 km wide, roughly the area of the British Isles.",
   },
   {
     id: "kepler-442b",
     location: "Kepler-442b",
     locationDetail:
-      "A planet a little bigger than Earth, in its star's habitable zone",
+      "A planet a little bigger than Earth",
     distance: "1,200 light years",
     reflection:
-      "Kepler-442b is about 1.34 times Earth's radius and orbits an orange K type star in a region where surface liquid water could be possible under suitable atmospheric conditions. Its composition and atmosphere have not been measured, and there is no evidence that it hosts life.",
+      "About a third wider than Earth, circling an orange star at a distance where water could be liquid. Nobody yet knows what it is made of, or whether it has any air.",
   },
   {
     id: "europa",
     location: "Europa",
     locationDetail:
-      "Jupiter's moon, with strong evidence of an ocean beneath the ice",
+      "Jupiter's moon, with an ocean under the ice",
     distance: "Between 590 and 970 million kilometres from Earth",
     reflection:
-      "Multiple lines of evidence point to a salty global ocean beneath Europa's icy shell, potentially holding more water than Earth's oceans. Tidal flexing can supply heat, making Europa a leading target in the search for habitable environments; no evidence of life there has been found.",
+      "Under its icy shell there is very likely a salty ocean, holding more water than all of Earth's seas. Jupiter's pull flexes the moon and keeps it warm inside. No sign of life has been found there.",
   },
   {
     id: "messier-87",
@@ -136,55 +136,55 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The galaxy whose black hole was first photographed",
     distance: "55 million light years",
     reflection:
-      "In 2019, humanity took its first photograph of a black hole, the supermassive black hole at the centre of Messier 87. It took years of international work, linking observatories across the world into one telescope as wide as Earth. It showed the dark shadow of the black hole against the glowing gas around it.",
+      "In 2019, observatories all over the world worked together as one telescope the size of Earth. They captured the dark shadow of the black hole at the centre of this galaxy, against the glowing gas around it.",
   },
   {
     id: "barnards-star",
     location: "Barnard's Star",
-    locationDetail: "The star with the highest known proper motion",
+    locationDetail: "The fastest moving star in our sky",
     distance: "5.96 light years",
     reflection:
-      "Barnard's Star has the highest measured proper motion against the background sky, enough for its plotted position to shift over a human lifetime. It is too faint to see without optical aid.",
+      "No star moves across our sky faster. Its position shifts by about the width of the Moon in a lifetime. It is too faint to see without a telescope.",
   },
   {
     id: "whirlpool-galaxy",
     location: "The Whirlpool Galaxy",
-    locationDetail: "M51, two interacting galaxies",
+    locationDetail: "M51, two galaxies pulling at each other",
     distance: "31 million light years",
     reflection:
-      "The Whirlpool Galaxy and its companion are interacting, with tidal forces shaping their stars and gas. They may eventually merge. Direct collisions between individual stars are extraordinarily unlikely because the distances between stars are so large.",
+      "The Whirlpool and its small companion are tugging on each other's stars and gas, and may one day merge. Even then, the stars themselves would almost never collide: there is that much space between them.",
   },
   {
     id: "vega",
     location: "Vega",
-    locationDetail: "The brightest star in Lyra, our former north star",
+    locationDetail: "The bright star in Lyra, once our North Star",
     distance: "25 light years",
     reflection:
-      "Vega lay near Earth's north celestial pole thousands of years ago and will approach it again roughly twelve thousand years from now. Axial precession traces a cycle of about 26,000 years, so no pole star is permanent.",
+      "Earth's axis slowly wobbles, once every 26,000 years. Vega was near the North Pole of the sky about 14,000 years ago, and will be again in about 12,000 years.",
   },
   {
     id: "lagoon-nebula",
     location: "The Lagoon Nebula",
-    locationDetail: "A glowing cloud of creation in Sagittarius",
+    locationDetail: "A glowing cloud where stars are forming",
     distance: "4,100 light years",
     reflection:
-      "The Lagoon Nebula glows pink because the intense radiation of newly formed stars inside it ionises hydrogen gas, causing it to emit light.",
+      "It glows pink because light from the young stars inside it makes the hydrogen gas shine.",
   },
   {
     id: "hercules-corona-borealis",
     location: "Hercules-Corona Borealis Great Wall",
-    locationDetail: "A proposed and much disputed giant pattern",
+    locationDetail: "A proposed giant structure, still disputed",
     distance: "10 billion light years",
     reflection:
-      "A statistical clustering of gamma ray bursts has been interpreted as a structure spanning several billion light years. Whether it represents one physical object is disputed, and it should not be treated as a confirmed cosmic wall.",
+      "A cluster of gamma ray bursts in one part of the sky has been read as a structure billions of light years long. Many astronomers doubt it is one real object.",
   },
   {
     id: "tau-ceti",
     location: "Tau Ceti",
-    locationDetail: "A nearby star like the Sun, with possible planets",
+    locationDetail: "A nearby star much like the Sun",
     distance: "11.9 light years",
     reflection:
-      "Tau Ceti is a nearby star broadly similar to the Sun. Researchers have reported several planet candidates from subtle changes in its radial velocity, but the candidate list and their properties depend on difficult signal analysis. No life has been detected there.",
+      "A quiet star similar to ours, 11.9 light years away. Several possible planets have been reported around it, but they are hard to confirm. No sign of life has been found.",
   },
   {
     id: "great-red-spot",
@@ -192,31 +192,31 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "A storm on Jupiter wider than Earth",
     distance: "Between 590 and 970 million kilometres from Earth",
     reflection:
-      "The Great Red Spot is a storm on Jupiter that is wider than our whole planet. People have watched it without a break since at least 1831, and it may be far older. In recent decades it has been slowly shrinking.",
+      "A storm wider than our whole planet. People have watched it without a break since at least 1831. It has been slowly shrinking for decades.",
   },
   {
     id: "carina-nebula",
     location: "The Carina Nebula",
-    locationDetail: "Home to some of the most massive stars known",
+    locationDetail: "Home to some of the biggest stars known",
     distance: "7,500 light years",
     reflection:
-      "The Carina Nebula holds some of the most massive and luminous stars known, including the restless Eta Carinae system. In the 1840s Eta Carinae flared until it was one of the brightest stars in the night sky, then faded from view without a telescope.",
+      "Some of the most massive stars known live here, including Eta Carinae. In the 1840s it flared up to become one of the brightest stars in the sky, then faded out of sight.",
   },
   {
     id: "perseus-cluster",
     location: "The Perseus Galaxy Cluster",
-    locationDetail: "Pressure waves in a cluster's hot gas",
+    locationDetail: "A cluster of galaxies with a sound in its gas",
     distance: "250 million light years",
     reflection:
-      "X-ray observations revealed ripples in the Perseus Cluster's hot gas that researchers interpreted as pressure waves driven by its central black hole. Converted to a pitch, their frequency is about a B flat 57 octaves below middle C, far below human hearing.",
+      "X-ray telescopes found ripples in the cluster's hot gas, pushed out by its central black hole. As a note, they would be a B flat about 57 octaves below middle C.",
   },
   {
     id: "pleiades",
     location: "The Pleiades",
-    locationDetail: "The Seven Sisters, a young star cluster in Taurus",
+    locationDetail: "The Seven Sisters, a young cluster in Taurus",
     distance: "444 light years",
     reflection:
-      "The Pleiades are a family of stars born together about 100 million years ago, long after the first dinosaurs walked on Earth. Cultures across the world, from Aboriginal Australia to ancient Greece to Japan, tell stories about them. In Japan they are called Subaru.",
+      "A family of stars born together about 100 million years ago, long after the first dinosaurs. People all over the world have told stories about them. In Japan they are called Subaru.",
   },
   {
     id: "galactic-center",
@@ -224,7 +224,7 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The heart of our galaxy, hidden by dust",
     distance: "26,000 light years",
     reflection:
-      "The centre of our galaxy is hidden from optical telescopes by clouds of dust and gas, but visible in infrared and radio waves. Stars there orbit the central black hole in years, not millions of years.",
+      "Dust hides the centre of our galaxy from ordinary telescopes, but infrared and radio light get through. Stars there race round the central black hole in years.",
   },
   {
     id: "cosmic-web",
@@ -232,31 +232,31 @@ const OBSERVATORY_ENTRIES_BASE: ObservatoryEntryBase[] = [
     locationDetail: "The shape of the universe on the largest scales",
     distance: "Spanning the observable universe",
     reflection:
-      "At the largest scales, galaxies gather into filaments and sheets separated by vast voids. Images can resemble neural networks or fungal mycelium, but that visual similarity does not mean the systems share a physical mechanism.",
+      "Galaxies are not spread out evenly. They gather along long threads and sheets, with huge empty spaces in between.",
   },
   {
     id: "eridanus-void",
     location: "The Eridanus Supervoid",
-    locationDetail: "A proposed supervoid aligned with the CMB Cold Spot",
+    locationDetail: "A possible giant void, still debated",
     distance: "About 3 billion light years",
     reflection:
-      "Galaxy surveys have found an underdense region in the direction of the cosmic microwave background Cold Spot. Its size and ability to explain the Cold Spot remain debated; current evidence does not support more exotic explanations.",
+      "Surveys have found fewer galaxies than expected in the direction of a cold patch in the oldest light. How big this region is, and whether it explains the cold patch, is still argued over.",
   },
   {
     id: "edge-observable",
     location: "The edge of the observable universe",
-    locationDetail: "Our present cosmological horizon",
+    locationDetail: "As far as we can see",
     distance: "46.5 billion light years",
     reflection:
-      "Matter whose ancient light reaches us today is now estimated to be about 46.5 billion light years away in comoving distance because space expanded while the light travelled for about 13.8 billion years. This is an observational horizon, not a known physical edge of the universe.",
+      "The oldest light reaching us set off about 13.8 billion years ago. Space has stretched while it travelled, so where it came from is now about 46.5 billion light years away. This is the edge of what we can see, not the edge of the universe.",
   },
   {
     id: "alpha-centauri",
     location: "Alpha Centauri",
-    locationDetail: "Our nearest stellar system, with three suns",
+    locationDetail: "Our nearest neighbours, three stars",
     distance: "4.37 light years",
     reflection:
-      "Alpha Centauri is a system of three stars: Alpha Centauri A and B orbit each other, while Proxima Centauri is a much wider companion and slightly closer to us. From there, our Sun would appear as a modest star in the northern constellation Cassiopeia.",
+      "Three stars: Alpha Centauri A and B circle each other, and little Proxima, slightly closer to us, circles them both from far out. From there, our Sun would look like an ordinary star in Cassiopeia.",
   },
 ];
 

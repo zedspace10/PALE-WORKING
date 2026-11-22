@@ -110,7 +110,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "4.54 billion years ago",
     title: "Earth forms",
     description:
-      "Dust, rocks, and ice clump together over millions of years, growing larger with each collision. Earth forms as a hot young planet. Leading models propose that one or more major impacts sent mixed material into orbit, where it coalesced into the Moon; the details remain under study.",
+      "Dust, rock and ice clump together over millions of years, and Earth forms as a hot young planet. The Moon most likely formed from material thrown out when something huge hit the young Earth, though the details are still being worked out.",
     perspective:
       "Rocks brought back from the Moon are strikingly similar to rocks from Earth's mantle. That is one of the main clues to how the Moon formed.",
     color: "#7BA9F0",
@@ -147,7 +147,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "2.4 billion years ago",
     title: "The great oxygenation",
     description:
-      "Oxygen produced by photosynthetic microbes begins accumulating in the atmosphere and oceans. It transforms Earth's chemistry, harms many anaerobic organisms, and helps create conditions later used by complex life; calling it Earth's first mass extinction is debated.",
+      "Tiny microbes in the sea start making oxygen, and it slowly builds up in the air and the water. It changes Earth's chemistry for good and poisons many microbes that cannot live with it. Whether to call it Earth's first mass extinction is debated.",
     perspective:
       "The oxygen you are breathing was made by living things, first microbes and later plants.",
     color: "#80C080",
@@ -159,7 +159,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "2 billion years ago",
     title: "Complex cells emerge",
     description:
-      "An ancestral cell forms a lasting partnership with a bacterium that becomes the mitochondrion. This is a key step in eukaryotic evolution. Most cells in your body retain mitochondria descended from that ancient partnership; mature red blood cells are one exception.",
+      "One cell takes in a bacterium, and the two never part. The bacterium becomes the mitochondrion, the power supply inside every complex cell. Most cells in your body retain mitochondria descended from that partnership; mature red blood cells are one exception.",
     perspective:
       "Your mitochondria still carry a small set of their own DNA, left over from when their ancestors were free living bacteria.",
     color: "#90D4B0",
@@ -171,7 +171,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "600 million years ago",
     title: "The first animals",
     description:
-      "Animals appear in the oceans after multicellular life had already evolved in other lineages. The earliest had soft bodies, and the exact relationships among them remain an active area of research.",
+      "The first animals appear in the sea. They have soft bodies, and how they are related to one another is still being worked out.",
     perspective:
       "Animals are a recent branch on a much older tree of life, preceded by billions of years of microbial evolution and earlier multicellular lineages.",
     color: "#80B0D0",
@@ -183,7 +183,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "540 million years ago",
     title: "The Cambrian explosion",
     description:
-      "Over tens of millions of years, many major animal groups become conspicuous in the fossil record. Eyes, limbs, shells, and new kinds of hunter and prey spread through increasingly complex marine ecosystems.",
+      "Over tens of millions of years, most of the main kinds of animal show up in the fossil record. Eyes, legs and shells appear, and the seas fill with hunters and hunted.",
     perspective:
       "The basic layout of your body, with two matching sides and a head with eyes at the front, was already around in animals more than 500 million years ago.",
     color: "#A0B890",
@@ -195,7 +195,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "Between roughly 470 and 360 million years ago",
     title: "Life moves to land",
     description:
-      "Plants spread across land and help transform bare surfaces into soils. Arthropods follow, and much later some vertebrate lineages evolve limbs and adaptations for moving and breathing on land.",
+      "Plants spread across bare rock and help turn it into soil. Insects and their relatives follow, and much later some fish grow legs and lungs and walk out of the water.",
     perspective:
       "The bones in your arm match the bones in the fins of the fish that first moved onto land, and many of the same genes build both.",
     color: "#70A860",
@@ -244,7 +244,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "6 million years ago",
     title: "Human ancestors emerge",
     description:
-      "In Africa, the lineage leading to modern humans diverges from the lineage leading to chimpanzees. Early hominins walk upright and have smaller brains than later Homo; whether the earliest species made tools is unresolved.",
+      "In Africa, our line splits from the line that leads to chimpanzees. Our early relatives walk upright, with smaller brains than later humans. Whether the very first of them made tools is not known.",
     perspective:
       "Chimpanzees and bonobos are our closest living relatives. Comparisons often put shared aligned DNA around 98 to 99%, but the exact percentage depends on what sequences and differences are counted.",
     color: "#C8A96E",
@@ -256,7 +256,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "1 million years ago",
     title: "Control of fire",
     description:
-      "Evidence suggests early humans were using fire by this broad period, although the timing of habitual control is debated. Fire offered warmth, protection, and eventually cooking; cooking may have influenced human evolution, but it is not a single proven cause of brain growth.",
+      "Early humans were using fire by about this time, though when they could light and keep it every day is still argued over. Fire gave warmth, safety and, in time, cooked food.",
     perspective:
       "Every campfire, candle and electric light carries on something early humans were already doing about a million years ago.",
     color: "#E8803A",
@@ -268,7 +268,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "300,000 years ago",
     title: "Homo sapiens appears",
     description:
-      "Homo sapiens emerges in Africa. Evidence for symbolic behaviour, ornamentation, burial practices, and visual art appears unevenly across later sites and dates, and new discoveries continue to refine that timeline.",
+      "Our own species appears in Africa. Signs of jewellery, burial and art turn up gradually across later sites, and new finds keep changing the picture.",
     perspective:
       "People like us have been around for about 300,000 years. Writing covers less than the last 2% of that.",
     color: "#C8A96E",
@@ -280,7 +280,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "70,000 years ago",
     title: "The great migration",
     description:
-      "Several dispersals of Homo sapiens leave Africa, with a major expansion contributing much of the ancestry of people living outside Africa. Those groups mixed with Neanderthals, Denisovans, and other human populations along the way.",
+      "Groups of modern humans leave Africa more than once. One large wave gave rise to much of the ancestry of people living outside Africa today. Along the way they met, and had children with, Neanderthals, Denisovans and others.",
     perspective:
       "All living humans share deep African ancestry. Later migrations and mixing made our family tree more like a network than a single line.",
     color: "#B89060",
@@ -318,7 +318,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "1,000 years from now",
     title: "A thousand years from now",
     description:
-      "If human societies persist for another thousand years, their technologies and institutions may be profoundly different from ours. The details cannot be predicted from current evidence.",
+      "Nobody can say what life will be like a thousand years from now. Our tools, and the way we live, may be almost unrecognisable.",
     perspective:
       "A thousand years is long enough for institutions and assumptions to change beyond recognition. Any specific picture of that future is speculation, not forecast.",
     color: "#8B9BB4",
@@ -354,7 +354,7 @@ const TIME_MACHINE_EVENTS_BASE: TimeMachineEventBase[] = [
     when: "Several billion years from now, timing uncertain",
     title: "A possible Andromeda encounter",
     description:
-      "Andromeda is approaching the Milky Way, but newer measurements make a direct collision within the next several billion years uncertain. If a close encounter or merger occurs, it would unfold over billions of years.",
+      "Andromeda is heading towards the Milky Way. Newer measurements make a direct collision in the next few billion years uncertain. If the two do meet, it will take billions of years to play out.",
     perspective:
       "Even in a merger, the stars would almost never hit each other, because the gaps between them are so large. The gas clouds would collide.",
     color: "#9088C0",

@@ -8,7 +8,7 @@ import { useColors } from "@/hooks/useColors";
 
 const WARM = "#F3DDB0";
 
-/** One quiet row at the top of Explore: this week's picture from Hubble or Webb. */
+/** One quiet row at the top of Explore: this week's picture from a space telescope. */
 export function ThisWeekRow({
   pin,
   onPress,

@@ -1,5 +1,5 @@
 /**
- * This week's picture from Hubble or Webb, chosen and written up on stellaraspace.com and shown
+ * This week's picture from Hubble, Webb or another telescope, chosen and written up on stellaraspace.com and shown
  * at the top of Explore. The app downloads it from the site about once a day and keeps the last
  * copy, so it still shows offline. Nothing about the person is sent.
  */
