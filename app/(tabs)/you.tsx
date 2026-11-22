@@ -42,43 +42,54 @@ function formatBirthdayTyping(text: string): string {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 
-const ORBIT = 92;
+const ORBIT = 232;
 
 /**
  * This lap, drawn: the Sun in the middle, the whole orbit faint, the part already travelled
  * brighter, and Earth where it is now. The lap starts at the top, on the birthday.
  */
-function LapDrawing({ fraction }: { fraction: number }) {
+function LapDrawing({ fraction, startLabel }: { fraction: number; startLabel: string }) {
   const colors = useColors();
   const c = ORBIT / 2;
-  const r = c - 8;
+  const r = c - 14;
   const angle = fraction * Math.PI * 2;
   const x = c + r * Math.sin(angle);
   const y = c - r * Math.cos(angle);
   const large = fraction > 0.5 ? 1 : 0;
   return (
-    <Svg width={ORBIT} height={ORBIT}>
-      <Circle
-        cx={c}
-        cy={c}
-        r={r}
-        stroke={colors.mutedForeground}
-        strokeOpacity={0.45}
-        strokeWidth={1}
-        strokeDasharray="1.5 4"
-        fill="none"
-      />
-      {fraction > 0.003 ? (
-        <Path
-          d={`M${c} ${c - r}A${r} ${r} 0 ${large} 1 ${x} ${y}`}
-          stroke={colors.primary}
-          strokeWidth={2}
+    <View style={styles.lapWrap}>
+      <Text style={[styles.lapStart, { color: colors.mutedForeground }]}>
+        {startLabel}
+      </Text>
+      <Svg width={ORBIT} height={ORBIT}>
+        <Circle
+          cx={c}
+          cy={c}
+          r={r}
+          stroke={colors.mutedForeground}
+          strokeOpacity={0.4}
+          strokeWidth={1}
+          strokeDasharray="1.5 5"
           fill="none"
         />
-      ) : null}
-      <Circle cx={c} cy={c} r={4} fill="#F5D58A" />
-      <Circle cx={x} cy={y} r={4.5} fill={colors.primary} />
-    </Svg>
+        <Path
+          d={`M${c} ${c - r - 7}V${c - r + 7}`}
+          stroke={colors.mutedForeground}
+          strokeOpacity={0.7}
+          strokeWidth={1}
+        />
+        {fraction > 0.003 ? (
+          <Path
+            d={`M${c} ${c - r}A${r} ${r} 0 ${large} 1 ${x} ${y}`}
+            stroke={colors.primary}
+            strokeWidth={2}
+            fill="none"
+          />
+        ) : null}
+        <Circle cx={c} cy={c} r={7} fill="#F5D58A" />
+        <Circle cx={x} cy={y} r={5.5} fill={colors.primary} />
+      </Svg>
+    </View>
   );
 }
 
@@ -94,6 +105,7 @@ export default function YouScreen() {
   } = useBirthday();
   const [dateInput, setDateInput] = useState("");
   const [error, setError] = useState("");
+  const [showCredits, setShowCredits] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   useResetScrollOnFocus(scrollRef);
 
@@ -210,11 +222,14 @@ export default function YouScreen() {
     month: "long",
     year: "numeric",
   });
+  const birthdayDay = birthday.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+  });
   const sunKm = withoutAbout(
     formatApproximateDistance(metrics.approximateOrbitDistanceKm),
   );
   const milkyWayKm = withoutAbout(bigKmWords(galaxyKm));
-  const strong = { color: colors.primary, fontFamily: "Inter_600SemiBold" };
   const then = thenLine ? thenLine.replace(" that year", "") : null;
 
   return (
@@ -231,36 +246,48 @@ export default function YouScreen() {
       >
         <Text style={[styles.title, { color: colors.foreground }]}>You</Text>
 
+        <LapDrawing fraction={lap.fraction} startLabel={birthdayDay} />
+
         <Text style={[styles.lead, { color: colors.foreground }]}>
-          {laps === 0
-            ? `Since ${bornOn}, you have been on your first trip around the Sun.`
-            : `Since ${bornOn}, you have been around the Sun ${laps} ${laps === 1 ? "time" : "times"}.`}
+          Your {ordinal(lap.number)} lap of the Sun
+        </Text>
+        <Text style={[styles.leadNote, { color: colors.mutedForeground }]}>
+          {lap.daysIn} {lap.daysIn === 1 ? "day" : "days"} in,{" "}
+          {lap.daysLeft} to go.
         </Text>
 
-        <Text style={[styles.para, { color: colors.mutedForeground }]}>
-          That is about{" "}
-          <Text style={strong}>{sunKm} km</Text> with Earth, and about{" "}
-          <Text style={strong}>{milkyWayKm} km</Text>{" "}
-          {"around the middle of the Milky Way"} with the Sun.
+        <Text style={[styles.heading, { color: colors.mutedForeground }]}>
+          Since {bornOn}, you have travelled about
         </Text>
-
-        <View style={styles.lapRow}>
-          <LapDrawing fraction={lap.fraction} />
-          <Text style={[styles.body, styles.lapText, { color: colors.foreground }]}>
-            {lap.daysIn} {lap.daysIn === 1 ? "day" : "days"} into your{" "}
-            {ordinal(lap.number)} lap.
+        <View style={[styles.row, { borderColor: colors.luminousBorder }]}>
+          <Text style={[styles.rowLabel, { color: colors.mutedForeground }]}>
+            Around the Sun
+          </Text>
+          <Text style={[styles.rowValue, { color: colors.foreground }]}>
+            {sunKm} km
+          </Text>
+        </View>
+        <View style={[styles.row, { borderColor: colors.luminousBorder }]}>
+          <Text style={[styles.rowLabel, { color: colors.mutedForeground }]}>
+            Around the Milky Way
+          </Text>
+          <Text style={[styles.rowValue, { color: colors.foreground }]}>
+            {milkyWayKm} km
           </Text>
         </View>
 
         {then ? (
-          <Text style={[styles.para, { color: colors.mutedForeground }]}>
-            The year you were born,{" "}
-            {then.charAt(0).toLowerCase() + then.slice(1)} Today we know of{" "}
-            {EXOPLANETS_NOW_WORDS}.
-          </Text>
+          <>
+            <Text style={[styles.heading, { color: colors.mutedForeground }]}>
+              The year you were born
+            </Text>
+            <Text style={[styles.para, { color: colors.foreground }]}>
+              {then} Today we know of {EXOPLANETS_NOW_WORDS}.
+            </Text>
+          </>
         ) : null}
 
-        <Text style={[styles.para, { color: colors.mutedForeground }]}>
+        <Text style={[styles.closing, { color: colors.mutedForeground }]}>
           Most of the hydrogen in you was made in the first few minutes after
           the Big Bang. It is about 13.8 billion years old.
         </Text>
@@ -297,15 +324,23 @@ export default function YouScreen() {
               Change birthday
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setShowCredits((v) => !v)}
+            style={styles.linkBtn}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showCredits }}
+          >
+            <Text style={[styles.linkText, { color: colors.mutedForeground }]}>
+              Picture credits
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <PictureCredits />
+        {showCredits ? <PictureCredits /> : null}
       </ScrollView>
     </View>
   );
 }
-
-const YEAR_COL = 44;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -314,19 +349,61 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     letterSpacing: -0.4,
   },
+  lapWrap: { alignItems: "center", marginTop: 18, marginBottom: 22 },
+  lapStart: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+    marginBottom: 2,
+  },
   lead: {
     fontSize: 24,
-    lineHeight: 32,
+    lineHeight: 31,
     fontFamily: "Inter_500Medium",
     letterSpacing: -0.3,
-    marginTop: 14,
-    marginBottom: 18,
+    textAlign: "center",
+  },
+  leadNote: {
+    fontSize: 15,
+    lineHeight: 22,
+    fontFamily: "Inter_400Regular",
+    textAlign: "center",
+    marginTop: 6,
+  },
+  heading: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    marginTop: 40,
+    marginBottom: 6,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: 16,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowLabel: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 21,
+    fontFamily: "Inter_400Regular",
+  },
+  rowValue: {
+    fontSize: 17,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: -0.2,
   },
   para: {
     fontSize: 16,
     lineHeight: 25,
     fontFamily: "Inter_400Regular",
-    marginBottom: 14,
+  },
+  closing: {
+    fontSize: 15,
+    lineHeight: 24,
+    fontFamily: "Inter_400Regular",
+    marginTop: 40,
   },
   onboardText: {
     fontSize: 15,
@@ -356,71 +433,11 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 0.2,
   },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: "Inter_400Regular",
-  },
-  aside: {
-    fontSize: 13,
-    lineHeight: 20,
-    fontFamily: "Inter_400Regular",
-    marginTop: 4,
-  },
-  small: {
-    fontSize: 13,
-    lineHeight: 20,
-    fontFamily: "Inter_400Regular",
-    marginTop: 4,
-    marginBottom: 10,
-  },
-  heading: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: -0.2,
-    marginTop: 40,
-    marginBottom: 14,
-  },
-  subhead: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-    marginTop: 8,
-    marginBottom: 10,
-  },
-  lapRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 20,
-    marginTop: 8,
-    marginBottom: 22,
-  },
-  lapText: { flex: 1 },
-  event: {
-    flexDirection: "row",
-    paddingVertical: 9,
-  },
-  eventYear: {
-    width: YEAR_COL,
-    fontSize: 13,
-    lineHeight: 21,
-    fontFamily: "Inter_500Medium",
-  },
-  eventText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 21,
-    fontFamily: "Inter_400Regular",
-  },
-  closing: {
-    fontSize: 16,
-    lineHeight: 25,
-    fontFamily: "Inter_400Regular",
-    marginTop: 36,
-  },
   links: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "center",
-    gap: 24,
+    columnGap: 20,
     marginTop: 30,
   },
   linkBtn: { alignItems: "center", paddingVertical: 10 },
